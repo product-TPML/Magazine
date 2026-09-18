@@ -1,6 +1,8 @@
 # Custom magazine reader UI — plan
 
-Context: build a custom mobile-first reader over the extracted editions in `data/` (see `AGENTS.md` for mandatory UI rules). Static app — no backend; all data is local.
+> This is a local functional prototype intended to validate the Sudha/Mayura reading experience. Production authentication, entitlement, paywall, SEO, publishing automation and content security are V2 concerns.
+
+Context: build a custom mobile-first reader over the extracted editions in `data/` (see `AGENTS.md` for mandatory UI rules). Static app — no backend; all data is local. Prototype deep links: `?p=12&article=123&view=text`.
 
 ## Base UX
 
@@ -32,14 +34,14 @@ Items reflect what you can do in the current view; the same DOM is swapped by vi
 - Persistent floating segmented control; **identical position in page view and text view** (bottom-right, above the nav; ≥44px targets) so it is muscle memory.
 - Text side opens the **primary article hotspot of the current page** (largest area; last-opened article wins within the session).
 - **Absent on pages without an article** (not merely disabled) — Contents remains the way to browse articles.
-- Both sides are **real links** (reader `?p=N` ⇄ static article URL): deep-linkable and crawlable.
+- Both sides are **real links** (`?p=N` ⇄ `?p=N&article=ID&view=text`): deep-linkable; crawlable once the V2 static pages exist.
 - `≥1024px`: the same control sits in the header; the rail mirrors the contextual items.
 
 ### Text view chrome
 
 - **Header (two rows, collapses on scroll):** `←` back to the source page · article title (truncates to one line when collapsed) · `☆` save · `⋮` more (share, open in pages, switch edition). Meta row: byline · section · page no., text size `ಅ−` / `ಅ+`. A thin reading-progress line sits under the header. The edition chip/search from page view are hidden here — one header element, contextual content.
 - **Bottom nav (text view):** Contents · Listen · Saved.
-- **Prev/next article** live in the article footer (and are crawlable links in the static pages), never as nav items.
+- **Prev/next article** live in the article footer (real links; crawlable once the V2 static pages exist), never as nav items.
 
 ## Layout adaptation (same DOM, `min-width` only)
 
@@ -71,17 +73,13 @@ Items reflect what you can do in the current view; the same DOM is swapped by vi
 - Share / download: current page image or `edition.pdf` via Web Share API.
 - Resume + bookmarks stored locally; no account needed.
 
-## SEO (text view must be crawlable)
+## V2 / production considerations
 
-- **Static pages are canonical.** A build step generates real HTML from `data/` (article fragments embedded at build time, no client fetch):
-  - `/{pub}/{date}/` — edition index (cover + TOC linking every article)
-  - `/{pub}/{date}/{slug}-{id}/` — article page (full `.bodytext`, images, byline)
-  - `/` — home listing editions/articles; plus `sitemap.xml` and `robots.txt`
-- **Reader shell is `noindex`** (`/{pub}/{date}/read/`); static pages link into the reader at the matching page (`?p=N`).
-- Per-article head: `<title>` (headline · Sudha/Mayura · date), meta description, canonical, Open Graph/Twitter, `<html lang="kn">`, JSON-LD `NewsArticle` (headline, author, datePublished, publisher, image).
-- Images: explicit width/height, meaningful alt (caption/headline), lazy below the fold — good Core Web Vitals.
-- Slugs: from the headline (Kannada kept, URL-encoded) with a stable `-{articleId}` suffix; id-only fallback.
-- Header search indexes the static corpus (build-time `search-index.json`) so search matches exactly what crawlers see.
+Not implementation targets for the prototype — listed so the phased scope is explicit:
+
+- **Authentication, entitlement, checkout/paywall flows.**
+- **SEO:** static edition/article pages generated from `data/` at build time, per-article metadata + JSON-LD `NewsArticle`, `sitemap.xml`/`robots.txt`; reader shell stays `noindex`; slugs from headline + stable `-{id}` suffix.
+- **Publishing automation, monitoring/rollback, content security.**
 
 ## Data mapping
 
@@ -94,22 +92,50 @@ Items reflect what you can do in the current view; the same DOM is swapped by vi
 | Edition selector | `issues.json`, `cover.jpg` |
 | Search | article HTML fragments + `bylines.json` |
 | Listen (TTS) | article text + device voices (Web Speech API, `kn-IN`) |
-| SEO static pages | all of the above, emitted by the build step |
 
 ## Milestones
 
-- [ ] Scaffold app shell: header, page strip, bottom nav (single HTML + single stylesheet)
-- [ ] Page strip with snap + edge swipe/taps
-- [ ] Pinch zoom (page + article images): pan, double-tap, reset chip, `+ / −`
-- [ ] Prev/next page buttons + next-article link
-- [ ] Contents sheet + Pages grid + scrubber
-- [ ] Text view + contextual header/nav + mode toggle + text size
-- [ ] Listen (Web Speech API): mini player, sentence highlight, graceful unsupported state
-- [ ] Saved: bookmarks + resume
-- [ ] Header search
-- [ ] SEO build: static edition/article pages, JSON-LD, sitemap/robots
-- [ ] Desktop adaptations (spread, rail, side panels)
-- [ ] Verify at 360px and ≥1280px, no horizontal scroll on mobile
+### Prototype Core
+
+- [ ] App shell: header, page strip, bottom nav (single HTML + single stylesheet)
+- [ ] Sudha/Mayura + edition selection
+- [ ] Page strip: swipe, snap, and prev/next controls
+- [ ] Pages thumbnail grid
+- [ ] Article hotspots (tap → text view)
+- [ ] Page ⇄ text toggle
+- [ ] Contents navigation
+- [ ] Mobile layout verified at 360–390px
+- [ ] Basic desktop adaptation (spread, rail, panels)
+- [ ] Lazy-loading for long editions (164-page Mayura)
+- [ ] Local resume position
+
+### Prototype Polish
+
+- [ ] Search
+- [ ] Saved/bookmarks
+- [ ] Text-size controls
+- [ ] Reading progress
+- [ ] Share/download (page image, `edition.pdf`)
+- [ ] Dark/sepia themes
+- [ ] More elaborate desktop panels
+- [ ] Custom pinch/pan zoom
+- [ ] Kannada TTS + sentence highlighting
+- [ ] Edge-swipe navigation (may fight browser/OS back gestures)
+
+### V2 Production
+
+- [ ] Authentication, entitlement, checkout/paywall
+- [ ] SEO static pages, metadata/JSON-LD, sitemap/robots
+- [ ] Publishing automation, monitoring/rollback, content security
+
+## Prototype risks to watch
+
+Observe during testing — these affect what we learn, not the build order:
+
+- Mobile edge swipes can trigger browser/OS back gestures.
+- Page hotspots may accidentally open while the user is swiping.
+- Auto-choosing the largest article hotspot may confuse on multi-article pages.
+- Custom pinch zoom can conflict with horizontal page swiping.
 
 ## Wireframes
 

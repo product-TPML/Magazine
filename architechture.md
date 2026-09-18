@@ -10,7 +10,8 @@ Purpose: extract, archive, and present Sudha/Mayura e-magazine editions (The Pri
   - `index.json`, `bylines.json`, `langs.json`, `issues.json`, `coords.json`, `cover.jpg`, `edition.pdf`
 - `api docs/vartasetu-magazine-web.md` — single source of truth for the platform's web/API surface (endpoints, auth, session renewal, CDN mirror).
 - `AGENTS.md` — mandatory UI rules for agents (mobile-first, single source of styles, minimal diffs).
-- `PLAN.md` — custom reader UI plan (UX, wireframes, milestones).
+- `PLAN.md` — custom reader UI plan (UX, wireframes, phased prototype milestones).
+- `TECHNICAL_IMPLEMENTATION.md` — technical prototype plan (stack, data contracts, state, implementation sequencing, acceptance criteria).
 - Session artifacts (gitignored, credentials): `cookies.txt`, `cookie_header.txt`, `playwright_state.json`.
 
 ## Data flow
