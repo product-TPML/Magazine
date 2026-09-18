@@ -1,0 +1,11 @@
+# large local archive — re-fetch with fetch_edition.ps1
+data/
+
+# tool / session artifacts
+.playwright-mcp/
+.deja/
+
+# session credentials — never commit
+cookies.txt
+cookie_header.txt
+playwright_state.json
