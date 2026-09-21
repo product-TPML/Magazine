@@ -1,289 +1,613 @@
-# Custom magazine reader UI — plan
+# Finalised Sudha–Mayura Reader UI Plan
 
-> This is a local functional prototype intended to validate the Sudha/Mayura reading experience. Production authentication, entitlement, paywall, SEO, publishing automation and content security are V2 concerns.
+## 1. Product principles
 
-Context: build a custom mobile-first reader over the extracted editions in `data/` (see `AGENTS.md` for mandatory UI rules). Static app — no backend; all data is local. Prototype deep links: `?p=12&article=123&view=text`.
+The interface should prioritize three user jobs:
 
-## Base UX
+1. Browse the original magazine pages.
+2. Open and comfortably read a story.
+3. Quickly find another story, page or edition.
 
-- Opens on the **front page (cover)** of the current edition.
-- **Page strip:** one page + ~20% peek of the next page visible side by side; horizontal swipe scrolls the strip.
-- **Edge swipe** (outer ~24px of the screen) changes exactly one page; tapping the left/right edge zones does the same (keyboard `←`/`→` on desktop).
-- **Prev/next buttons:** visible `◀` / `▶` beside the page indicator (44px targets, disabled on first/last page) — the discoverable equivalent of the edge zones; same action at every screen size.
-- **Mode toggle (ಪುಟ ⇄ ಪಠ್ಯ):** floating segmented control, same screen position in both views, switches between the page reader and the text view of the current article. **Absent on pages without an article.**
-- **Header and nav are contextual:** they change between page view and text view (see below) — same DOM, elements swapped by view state, no duplicated markup.
-- **Header (page view):** edition selector — current edition chip (mini cover + date); tapping opens a cover-grid sheet built from `issues.json` + `cover.jpg`. Sudha/Mayura switcher above it.
-- **Search** lives in the page-view header (icon): in-issue search over article titles, bylines, and full text (article HTML is local; index at runtime).
+The magazine and article content must dominate the screen. Navigation should remain minimal and disappear when the user is actively browsing or reading.
 
-## Bottom nav (contextual)
+The mobile and desktop products use the same components, controls and navigation. Desktop adds only the two-page spread.
 
-**Page view — 3 items**
-1. **ವಿಷಯ Contents** — article TOC from `coords.json` + `bylines.json`, grouped by section (headline, byline, page). Tap → jump to page and open the article text. Fallback to page list on issues without articles.
-2. **ಪುಟಗಳು Pages** — thumbnail grid from `thumbs/` with the current page highlighted, plus a scrub slider for long issues (up to 165 pages).
-3. **ಸೇವ್ Saved** — bookmarks (pages/articles) and resume position per edition, stored in `localStorage`.
+---
 
-**Text view — 3 items**
-1. **ವಿಷಯ Contents** — jump to another article.
-2. **ಕೇಳಿ Listen** — play/pause the article being read aloud; mini player above the nav with speed and voice picker, current sentence highlighted. Web Speech API (`lang="kn-IN"`, device voices); disabled with a hint if the device has no Kannada voice. Playback stops when leaving the text view.
-3. **ಸೇವ್ Saved** — same bookmarks/resume store.
+# 2. Magazine page view
 
-Items reflect what you can do in the current view; the same DOM is swapped by view state (no duplicated markup, no override styles).
+This is the product’s main home page. It does not have Back or Close controls.
 
-### Mode toggle (ಪುಟ ⇄ ಪಠ್ಯ)
+## Header
 
-- Persistent floating segmented control; **identical position in page view and text view** (bottom-right, above the nav; ≥44px targets) so it is muscle memory.
-- Text side opens the **primary article hotspot of the current page** (largest area; last-opened article wins within the session).
-- **Absent on pages without an article** (not merely disabled) — Contents remains the way to browse articles.
-- Both sides are **real links** (`?p=N` ⇄ `?p=N&article=ID&view=text`): deep-linkable; crawlable once the V2 static pages exist.
-- `≥1024px`: the same control sits in the header; the rail mirrors the contextual items.
+\`\`\`text
+ಸುಧಾ · 24 ಸೆಪ್ 2026 ▾       Subscribe       ☰
+\`\`\`
 
-### Text view chrome
+### Publication and edition control
 
-- **Header (two rows, collapses on scroll):** `←` back to the source page · article title (truncates to one line when collapsed) · `☆` save · `⋮` more (share, open in pages, switch edition). Meta row: byline · section · page no., text size `ಅ−` / `ಅ+`. A thin reading-progress line sits under the header. The edition chip/search from page view are hidden here — one header element, contextual content.
-- **Bottom nav (text view):** Contents · Listen · Saved.
-- **Prev/next article** live in the article footer (real links; crawlable once the V2 static pages exist), never as nav items.
+* Show the current publication and edition date as one control.
+* Tapping it opens the edition selector.
+* Use a shortened date on narrow screens.
+* Do not show a separate publication logo, edition card or switcher.
 
-## Layout adaptation (same DOM, `min-width` only)
+### Subscribe CTA
 
-- Base: slide = `80vw` + gap → 20% peek; `scroll-snap-type: x mandatory`.
-- `≥1024px`: slide = `50vw` → true 2-page spread.
-- Bottom nav becomes a left rail on desktop (mirroring the contextual items); TOC/Pages sheets become persistent side panels; the mode toggle moves to the header — repositioned via the same rules, no duplicate markup or override stylesheets.
+| User state                   | CTA          |
+| ---------------------------- | ------------ |
+| Signed out                   | Subscribe    |
+| Signed in but not subscribed | Subscribe    |
+| Expired subscription         | Renew        |
+| Active subscriber            | Hide the CTA |
 
-## Gestures
+The CTA should be compact and use the publication accent colour.
 
-- Drag anywhere = native horizontal scroll with snap (may skip pages).
-- Edge swipe / edge taps = exactly ±1 page; `◀`/`▶` buttons mirror this.
-- Article hotspots on a page (from `coords.json`) open the text view for that article.
+### Hamburger
 
-### Pinch zoom (page images)
+* Always visible when the header is visible.
+* Search is inside the hamburger.
+* No separate Search icon.
 
-Prototype status: skipped by request; native browser zoom remains enabled.
+---
 
-- Two-finger pinch zooms the current page, anchored at the pinch midpoint. Range is **1×–4×**, where 1× is the default fit (page fills the viewport).
-- **Zoom-out is clamped at 1×** — the page can never shrink below the default fit; releasing a pinch below 1× snaps back to 1× (no rubber-band shrink).
-- Double-tap toggles ×2 at the tap point; single-finger drag pans when zoomed (the page strip is frozen).
-- While zoomed, edge swipe/taps and `◀`/`▶` are disabled — a `⟲` reset chip (or zooming back to 1×) returns to fit; zoom resets on page change.
-- Native browser page zoom stays enabled (never `user-scalable=no`); visible `+ / −` controls are provided for keyboard/AT users.
-- Desktop: `Ctrl`/`⌘` + wheel and `+ / −` buttons; same reset chip.
-- Article images in the text view get the same pinch/double-tap zoom.
-- Implementation: Pointer Events with a custom transform; native pinch suppressed on the page area (`touch-action: pan-x pinch-zoom` at 1×, takeover on the second pointer).
+## Magazine canvas
 
-## Other features
+* The page occupies the maximum available width and height.
+* Use a dark neutral background behind the magazine.
+* Do not permanently show 20% of the next page.
+* Keep approximately 8–12px outer spacing so the page does not touch the viewport edge.
+* Preserve the page’s original aspect ratio.
+* Centre smaller pages rather than stretching them.
+* Use the actual magazine page image without decorative framing.
 
-- Preload only n±1 pages (`IntersectionObserver`); never decode the whole issue.
-- Dark/sepia reading theme, follows `prefers-color-scheme`.
-- Share / download: current page image or `edition.pdf` via Web Share API.
-- Resume + bookmarks stored locally; no account needed.
+### Page navigation
 
-## V2 / production considerations
+At normal zoom:
 
-Not implementation targets for the prototype — listed so the phased scope is explicit:
+* Swipe horizontally to change page.
+* Keyboard Left/Right works on desktop.
+* The page snaps cleanly into position.
+* A one-time first-use hint can explain horizontal swiping.
+* Do not permanently show previous and next arrows on mobile.
+* Desktop may show subtle previous/next buttons when controls are visible.
 
-- **Authentication, entitlement, checkout/paywall flows.**
-- **SEO:** static edition/article pages generated from `data/` at build time, per-article metadata + JSON-LD `NewsArticle`, `sitemap.xml`/`robots.txt`; reader shell stays `noindex`; slugs from headline + stable `-{id}` suffix.
-- **Publishing automation, monitoring/rollback, content security.**
+---
 
-## Data mapping
+## Article hotspots
 
-| Feature | Source |
-| --- | --- |
-| Page strip, spread | `pages/{id}.png`, `coords.json` (page order) |
-| Pages grid, scrubber | `thumbs/{id}.png` |
-| Contents / TOC | `coords.json` hotspots, `bylines.json`, `index.json` |
-| Text view | `articles/{id}.html`, `media/*.jpg` |
-| Edition selector | `issues.json`, `cover.jpg` |
-| Search | article HTML fragments + `bylines.json` |
-| Listen (TTS) | article text + device voices (Web Speech API, `kn-IN`) |
+The extracted article coordinates remain active over the page.
 
-## Milestones
+* Tapping an article hotspot opens that article.
+* Pointer movement beyond the tap threshold cancels article opening.
+* Swiping or panning must never accidentally open an article.
+* At zoom above \`1×\`, disable direct hotspot activation.
+* Users can still access stories through the bottom article action.
 
-### Prototype Core
+A tap outside a hotspot toggles the page controls.
 
-- [x] App shell: header, page strip, bottom nav (single HTML + single stylesheet) — Status: Done
-- [x] Sudha/Mayura + edition selection — Status: Done
-- [x] Page strip: swipe, snap, and prev/next controls — Status: Done
-- [x] Pages thumbnail grid — Status: Done
-- [x] Article hotspots (tap → text view) — Status: Done
-- [x] Page ⇄ text toggle — Status: Done
-- [x] Contents navigation — Status: Done
-- [x] Mobile layout verified at 360–390px — Status: Done
-- [x] Basic desktop adaptation (spread, rail, panels) — Status: Done
-- [x] Lazy-loading for long editions (164-page Mayura) — Status: Done
-- [x] Local resume position — Status: Done
+---
 
-### Prototype Polish
+## Pinch zoom
 
-- [x] Search — Status: Done; searches article titles, bylines, sections, and loaded article text
-- [x] Saved/bookmarks — Status: Done; saves pages and articles in local storage
-- [x] Text-size controls — Status: Done
-- [x] Reading progress — Status: Done
-- [x] Share/download (page image, `edition.pdf`) — Status: Done; shares files with Web Share when supported and downloads them otherwise
-- [x] Dark/sepia themes — Status: Done; follows the system preference by default and persists the user choice
-- [x] More elaborate desktop panels — Status: Done; persistent rail and side panels at desktop widths
-- [~] Custom pinch/pan zoom — Status: Skipped by request
-- [x] Kannada TTS + sentence highlighting — Status: Done; disabled with a device hint when no Kannada voice exists
-- [x] Edge-swipe navigation (may fight browser/OS back gestures) — Status: Done; edge taps and edge swipes move one page
+Support pinch-to-zoom only.
 
-### V2 Production
+* No double-tap zoom.
+* Range: \`1×–4×\`.
+* Zoom only the page image and hotspot layer.
+* Header, bottom controls and other interface elements remain at normal size.
+* At \`1×\`, one-finger horizontal movement changes pages.
+* Above \`1×\`, one-finger movement pans the current page.
+* Page swiping is disabled while zoomed.
+* Show Reset Zoom whenever scale is above \`1×\`.
+* Changing pages resets zoom to \`1×\`.
+* Native browser accessibility zoom must remain enabled.
 
-- [ ] Authentication, entitlement, checkout/paywall — Status: Deferred to V2
-- [ ] SEO static pages, metadata/JSON-LD, sitemap/robots — Status: Deferred to V2
-- [ ] Publishing automation, monitoring/rollback, content security — Status: Deferred to V2
+---
 
-## Prototype risks to watch
+## Bottom page controls
 
-Observe during testing — these affect what we learn, not the build order:
+\`\`\`text
+Contents             1 / 64             Read article
+\`\`\`
 
-- Mobile edge swipes can trigger browser/OS back gestures.
-- Page hotspots may accidentally open while the user is swiping.
-- Auto-choosing the largest article hotspot may confuse on multi-article pages.
-- Custom pinch zoom can conflict with horizontal page swiping.
+These are the only persistent page actions.
 
-## Wireframes
+### Contents
 
-### Mobile — reader (default)
+Opens the story list for the current edition.
 
-```text
-┌──────────────────────────────────────────────┐
-│ ಸುಧಾ ▾   ಸೆಪ್ಟೆಂ 24, 2026 ▾            ⌕   ⋮ │
-├──────────────────────────────────────────────┤
-│ ┌──────────────────────────┐┌───────┐        │
-│ │                          ││       │        │
-│ │                          ││       │        │
-│ │         PAGE 1           ││ PAGE 2│        │
-│ │        (cover)           ││ ~20%  │        │
-│ │                          ││       │        │
-│ │                          ││       │        │
-│ └──────────────────────────┘└───────┘        │
-│                                 ┌──────────┐ │
-│                                 │ಪುಟ | ಪಠ್ಯ │ │  ← mode toggle
-│                                 └──────────┘ │
-│ ●─────────────────────────────────────       │
-│           ◀       ಪುಟ 1 / 64       ▶         │
-├──────────────────────────────────────────────┤
-│       ವಿಷಯ          ಪುಟಗಳು          ಸೇವ್      │
-└──────────────────────────────────────────────┘
-← edge zones: ±1 page   |   drag: free scroll with snap →
-```
+### Page number
 
-### Mobile — reader (zoomed)
+* Opens the Pages view.
+* Shows the current position.
+* On desktop two-page view, display a range such as \`2–3 / 64\`.
 
-```text
-┌──────────────────────────────────────────────┐
-│ ಸುಧಾ ▾   ಸೆಪ್ಟೆಂ 24, 2026 ▾            ⌕   ⋮ │
-├──────────────────────────────────────────────┤
-│ ┌──────────────────────────────────────────┐ │
-│ │ ┌──────────────────────────────────────┐ │ │
-│ │ │   enlarged page area                 │ │ │
-│ │ │   (single-finger pan; strip frozen)  │ │ │
-│ │ └──────────────────────────────────────┘ │ │
-│ │   2.4×                        ⟲ reset    │ │
-│ └──────────────────────────────────────────┘ │
-│                                 ┌──────────┐ │
-│                                 │ಪುಟ | ಪಠ್ಯ │ │
-│                                 └──────────┘ │
-│           ◀       ಪುಟ 1 / 64       ▶         │
-├──────────────────────────────────────────────┤
-│       ವಿಷಯ          ಪುಟಗಳು          ಸೇವ್      │
-└──────────────────────────────────────────────┘
-```
+### Article action
 
-### Mobile — Contents sheet (bottom sheet)
+| Current page      | Action                                |
+| ----------------- | ------------------------------------- |
+| One article       | Read article                          |
+| Multiple articles | \`3 articles\`                        |
+| No articles       | Hide the action                       |
+| Zoomed            | Reset zoom may temporarily replace it |
 
-```text
-┌──────────────────────────────────────────────┐
-│ ░░░░░░  reader dimmed behind  ░░░░░░░░░░░░░░ │
-├──────────────────────────────────────────────┤
-│ ══════════  handle                      ✕    │
-│ ವಿಷಯ / Contents                              │
-│ ──────────────────────────────────────────── │
-│ ಲೇಖನಗಳು                                      │
-│   ಟೀಚರ್ · ಕಾವ್ಯಾ ಕಡಮೆ · ಪುಟ 40            → │
-│   ಸುಮಾನಿ ಬಸವನ ಪರಾಕ್ರಮ · ... · ಪುಟ 22      → │
-│ ──────────────────────────────────────────── │
-│ ಸ್ಥಿರ ಶೀರ್ಷಿಕೆಗಳು                             │
-│   ಸಂಪಾದಕೀಯ · ಪುಟ 3                        → │
-└──────────────────────────────────────────────┘
-```
+If the page has multiple articles, selecting \`3 articles\` opens a bottom sheet listing the stories on that page.
 
-### Mobile — Pages grid (quick jump)
+---
 
-```text
-┌──────────────────────────────────────────────┐
-│ ░░░░░░  reader dimmed behind  ░░░░░░░░░░░░░░ │
-│ ಪುಟಗಳು / Pages                           ✕   │
-│ ┌───┐  ┌───┐  ┌───┐  ┌───┐  ┌───┐            │
-│ │ 1 │  │ 2 │  │ 3 │  │ 4 │  │ 5 │            │
-│ └───┘  └───┘  └───┘  └───┘  └───┘            │
-│ ┌───┐  ┌───┐  ┏━━━┓  ┌───┐  ┌───┐            │
-│ │ 6 │  │ 7 │  ┃ 8 ┃  │ 9 │  │ 10│  ← current │
-│ └───┘  └───┘  ┗━━━┛  └───┘  └───┘            │
-│          ●────────────────────  ಪುಟ 8 / 64   │
-└──────────────────────────────────────────────┘
-```
+# 3. Article reader view
 
-### Mobile — text view (article)
+The article reader is a separate reading state reached from a hotspot, Contents, Search or the page’s article action.
 
-```text
-┌──────────────────────────────────────────────┐
-│ ←   ಟೀಚರ್                            ☆    ⋮ │
-│ ಕಾವ್ಯಾ ಕಡಮೆ · ಕಥೆ · ಪುಟ 40        ಅ−    ಅ+   │
-├──────────────────────────────────────────────┤
-│ ▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ ← progress
-│  ಯಾವಾಗಲೂ ಕ್ಲಾಸಿನಲ್ಲಿ ಫಸ್ಟ್ ರ್ಯಾಂಕ್ ಬರೋ       │
-│  ಮಕ್ಕಳಿಗೆ ಆ ಖುಷಿಯ ಅರಿವಿರೋದಿಲ್ಲ. ಆ ಸ್ಥಾನವನ್ನ  │
-│  ...                                         │
-│  ┌────────────────────────────────┐          │
-│  │        media/<id>.jpg          │          │
-│  └────────────────────────────────┘          │
-│  ...                                         │
-│  ─────────────────────────────────────       │
-│  ಮುಂದಿನ ಲೇಖನ →  ಸುಮಾನಿ ಬಸವನ ಪರಾಕ್ರಮ          │
-│                                 ┌──────────┐ │
-│                                 │ಪುಟ | ಪಠ್ಯ │ │  ← mode toggle
-│                                 └──────────┘ │
-├──────────────────────────────────────────────┤
-│  ⏵  ಕೇಳಿ · 1.0×                        ⏸    │  ← listen mini player
-├──────────────────────────────────────────────┤
-│       ವಿಷಯ           ಕೇಳಿ           ಸೇವ್     │
-└──────────────────────────────────────────────┘
-```
+## Header
 
-### Mobile — Edition selector sheet
+\`\`\`text
+← ಪುಟ 40          Bookmark          Subscribe          ☰
+\`\`\`
 
-```text
-┌──────────────────────────────────────────────┐
-│ ░░░░░░  reader dimmed behind  ░░░░░░░░░░░░░░ │
-│ ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ / Editions              ✕   │
-│   [ ಸುಧಾ ]    ಮಯೂರ                            │
-│  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐      │
-│  │cover │  │cover │  │cover │  │cover │      │
-│  │ 9/24 │  │ 9/17 │  │ 9/03 │  │ 8/20 │      │
-│  └──────┘  └──────┘  └──────┘  └──────┘      │
-│  ┌──────┐  ┌──────┐  ...                     │
-│  │ 8/13 │  │ 8/06 │                          │
-│  └──────┘  └──────┘                          │
-└──────────────────────────────────────────────┘
-```
+* Do not display the article title in the header.
+* \`← ಪುಟ 40\` returns to the exact source page.
+* Bookmark saves or removes the current article.
+* Subscribe/Renew follows the same user-state rules as the page header.
+* Hamburger uses the same component as the page view.
+* A thin reading-progress line can appear below the header.
 
-### Desktop — reader (same DOM, `min-width` only)
+If Bookmark is not included in the prototype, remove both the icon and Saved Articles from the hamburger.
 
-```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ ಸುಧಾ ▾  ಸೆಪ್ಟೆಂ 24, 2026 ▾     [ಪುಟ | ಪಠ್ಯ]        ⌕    ↗    ⤓    ⋯                 │
-├─────────┬──────────────────────────────────────────────────────────────────────────────┤
-│ ವಿಷಯ    │                                                                              │
-│ ಪುಟಗಳು  │       ┌─────────────────────┐   ┌─────────────────────┐                      │
-│ ಸೇವ್    │       │                     │   │                     │                      │
-│         │       │                     │   │                     │                      │
-│         │       │       PAGE 1        │   │       PAGE 2        │                      │
-│ (rail)  │       │                     │   │                     │                      │
-│         │       │                     │   │                     │                      │
-│         │       └─────────────────────┘   └─────────────────────┘                      │
-│         │                                                                              │
-│         │           ◀        ●─────────────────────  ಪುಟ 1–2 / 64        ▶            │
-└─────────┴──────────────────────────────────────────────────────────────────────────────┘
-Contents / Pages open as a persistent side panel (same markup); the rail mirrors the
-contextual nav (page view: ವಿಷಯ / ಪುಟಗಳು / ಸೇವ್ — text view: ವಿಷಯ / ಕೇಳಿ / ಸೇವ್);
-the mode toggle moves into the header; keyboard ← / → flip pages.
-```
+---
+
+## Article layout
+
+Display content in this order:
+
+1. Free or Premium status, if needed.
+2. Article headline.
+3. Description or introduction, when available.
+4. Byline.
+5. Lead image and caption.
+6. Article body.
+7. Non-sticky previous/next navigation.
+
+### Typography
+
+* Kannada body text should begin around 18px.
+* Line height should be approximately 1.65–1.75.
+* Paragraphs need clear vertical separation.
+* Keep the reading column narrow and centred.
+* Do not place the article inside a card.
+* Images use the full article-column width.
+* Captions appear immediately below their images.
+
+---
+
+## Article bottom controls
+
+\`\`\`text
+ಅ−             ಅ+             Listen             Share
+\`\`\`
+
+These controls are article-specific and remain the same on mobile and desktop.
+
+### Font decrease and increase
+
+* Change article-body typography only.
+* Use four predefined font-size levels.
+* Clamp at the minimum and maximum.
+* Remember the selection locally.
+* Do not resize headers, navigation or other UI.
+
+### Listen
+
+* Starts Kannada text-to-speech.
+* Changes to Pause while playing.
+* After playback begins, show a compact player above the bottom controls.
+* The player contains progress, speed and Stop.
+* Leaving the article stops playback.
+
+### Share
+
+* Use native sharing on supported mobile devices.
+* Fall back to Copy Link.
+* Share the article URL, not the raw article content.
+
+---
+
+## End of article
+
+Previous and next article controls are part of the article body and are never sticky.
+
+\`\`\`text
+← Previous article
+
+View original page · Page 40
+
+Next article →
+\`\`\`
+
+* Previous/next follow the story order in Contents.
+* View Original Page returns to the page containing the article.
+* At the first or last article, omit the unavailable direction.
+
+---
+
+# 4. Header and bottom-control visibility
+
+## Article view
+
+* Scrolling downward hides the header and bottom controls.
+* Scrolling upward reveals them immediately.
+* Tapping the article reveals them.
+* Do not reveal them automatically after five seconds.
+* Near the top of the article, keep the header visible.
+* Opening the hamburger or Listen player keeps the controls visible.
+* Controls remain visible while keyboard focus is inside them.
+
+## Page view
+
+Because the page view does not vertically scroll:
+
+* Controls are visible when the issue first opens.
+* Tapping outside a hotspot toggles the controls.
+* Horizontal page navigation may hide them after the interaction.
+* Pinching does not immediately hide them because Reset Zoom may be needed.
+* Opening any sheet or menu forces the controls visible.
+
+Header and bottom controls hide and reveal together.
+
+---
+
+# 5. Contents view
+
+Contents is a flat list of stories. Do not group by section.
+
+Order stories by:
+
+1. Page order.
+2. Vertical hotspot position.
+3. Horizontal hotspot position.
+
+Each row contains:
+
+* Headline.
+* Byline, when available.
+* Page number.
+* Free or Premium label.
+* Saved indicator, when applicable.
+
+Example:
+
+\`\`\`text
+ಟೀಚರ್
+ಕಾವ್ಯಾ ಕಡಮೆ                    Page 40
+Premium
+\`\`\`
+
+Selecting a story:
+
+1. Records its source page.
+2. Closes Contents.
+3. Opens the article reader.
+4. Makes Back return to the recorded page.
+
+For editions without article data, Contents displays a page list instead.
+
+---
+
+# 6. Pages view
+
+Display a thumbnail grid for the current edition.
+
+Each page contains:
+
+* Page thumbnail.
+* Page number.
+* Number of articles.
+* Free/Premium composition.
+* Current-page highlight.
+
+Examples:
+
+\`\`\`text
+Page 12
+3 articles
+2 Free · 1 Premium
+\`\`\`
+
+\`\`\`text
+Page 28
+1 article
+Premium
+\`\`\`
+
+\`\`\`text
+Page 36
+No articles
+\`\`\`
+
+For pages containing both access types, show the counts rather than labelling the entire page Free or Premium.
+
+### Page scrubber
+
+For long issues:
+
+* Range is \`1...pageCount\`.
+* Show the target page number while dragging.
+* Navigate only when the user releases the scrubber.
+* Scroll the selected thumbnail into view.
+
+Selecting a thumbnail closes Pages and opens that page at \`1×\` zoom.
+
+---
+
+# 7. Stories-on-this-page sheet
+
+When a page contains multiple articles, the bottom control displays the article count.
+
+Selecting it opens a short bottom sheet containing:
+
+* Headline.
+* Byline.
+* Free/Premium label.
+
+Selecting a story opens the article reader.
+
+The list follows the hotspot position on the page so its order visually matches the printed layout.
+
+---
+
+# 8. Search
+
+Search is opened from the hamburger.
+
+Search only within the current edition for the prototype.
+
+Search across:
+
+* Headline.
+* Byline.
+* Article text.
+
+Results use the same row structure as Contents:
+
+* Headline.
+* Byline.
+* Matching excerpt.
+* Free/Premium label.
+* Page number.
+
+Selecting a result opens the article reader and records its source page.
+
+---
+
+# 9. Edition selector
+
+Tapping the publication/date in the page header opens the edition selector.
+
+It contains:
+
+* Sudha and Mayura tabs.
+* Edition cover grid.
+* Date or issue label.
+* Current-edition indicator.
+* Resume information such as \`Continue from page 32\`.
+* Page-only indicator for editions without articles.
+
+Selecting an edition:
+
+1. Saves the current reading position.
+2. Loads the selected issue.
+3. Restores its last page, if available.
+4. Otherwise opens its cover.
+5. Resets zoom.
+6. Closes all open menus and sheets.
+
+The publication switcher should not also appear in the hamburger.
+
+---
+
+# 10. Hamburger menu
+
+Use the same right-side drawer pattern as the existing ePaper product.
+
+## Desktop
+
+* Opens from the right.
+* Uses a constrained drawer width.
+
+## Mobile
+
+* Opens from the right.
+* Occupies most or all of the screen width.
+* Uses the same content and ordering as desktop.
+
+## Menu structure
+
+\`\`\`text
+                                           ×
+
+[ Prajavani Home ]                [ Search ]
+
+------------------------------------------------
+
+○  My Profile
+▢  Saved Articles
+?  FAQs
+\`\`\`
+
+### Prajavani Home
+
+* Links directly to the Prajavani homepage.
+* Opens in the same tab.
+* Saves the current page/article before navigating away.
+* Do not rely on browser history.
+
+Recommended Kannada label:
+
+**ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ**
+
+### Search
+
+Opens search for the current issue.
+
+### My Profile
+
+* Opens the user’s profile.
+* Subscription status and account management belong inside Profile.
+* When signed out, change the label to Sign In.
+
+### Saved Articles
+
+* Opens saved articles.
+* Does not include saved pages unless page saving is explicitly added later.
+
+### FAQs
+
+* Opens frequently asked questions.
+* Include contact/support information inside FAQs.
+* Do not add a separate Get in Touch section.
+
+## Explicitly excluded
+
+* Home—the page view is already the product home.
+* Download issue.
+* Download current page.
+* Reading settings.
+* Choose edition.
+* Publication switcher.
+* Separate contact block.
+* Duplicate Subscribe CTA.
+
+---
+
+# 11. Saved articles
+
+Saving is available only for articles in the initial version.
+
+* Bookmark icon appears in the article header.
+* Saved state changes immediately.
+* Saved Articles is accessible through the hamburger.
+* Store saved article IDs locally for the prototype.
+* Display headline, publication, edition date and page number.
+* If an article is unavailable, keep the saved entry but show an unavailable state.
+
+Page bookmarking is excluded.
+
+---
+
+# 12. Mobile and desktop behaviour
+
+Use the same components, controls and information architecture at every size.
+
+| Feature          | Mobile        | Desktop                |
+| ---------------- | ------------- | ---------------------- |
+| Header           | Same          | Same                   |
+| Hamburger        | Right drawer  | Right drawer            |
+| Page controls    | Bottom        | Bottom                 |
+| Article controls | Bottom        | Bottom                 |
+| Contents         | Overlay/sheet | Same overlay           |
+| Pages            | Overlay/sheet | Same overlay           |
+| Article layout   | Single column | Centred single column  |
+| Magazine         | Single page   | Two-page spread        |
+| Zoom             | Pinch         | Pinch/trackpad gesture |
+| Keyboard arrows  | Optional      | Supported              |
+
+Do not add:
+
+* Desktop navigation rail.
+* Persistent Contents sidebar.
+* Desktop-only toolbar.
+* Separate desktop markup.
+* Separate desktop feature set.
+
+---
+
+# 13. Desktop two-page spread
+
+Two-page mode is the only intentional desktop enhancement.
+
+## Pairing
+
+* Cover appears alone.
+* Then pages 2–3.
+* Then pages 4–5.
+* Continue in issue order.
+* An unpaired final page appears alone.
+
+## Navigation
+
+* One horizontal action moves to the next spread.
+* Page indicator displays \`2–3 / 64\`.
+* Selecting a page from Pages opens the spread containing it.
+* Article hotspots remain mapped to their respective page.
+* Pinch/trackpad zoom applies to the selected page, not both pages simultaneously.
+
+Enable two-page mode only when both pages can render at a useful width. Use available reader width rather than device detection.
+
+---
+
+# 14. Resume behaviour
+
+Save locally:
+
+* Current publication.
+* Current edition.
+* Current page.
+* Last-opened article.
+* Article font size.
+* Saved articles.
+
+When reopening the product:
+
+* Open the most recently used edition.
+* Restore its page.
+* Do not automatically reopen an article.
+* Display a subtle \`Continue from page X\` message.
+
+---
+
+# 15. Final screen contracts
+
+## Magazine page home
+
+\`\`\`text
+Header:
+Publication + edition | Subscribe/Renew | Hamburger
+
+Canvas:
+Single page on mobile
+Two-page spread on desktop
+Pinch-to-zoom page only
+
+Bottom:
+Contents | Page number | Read article(s)
+\`\`\`
+
+## Article reader
+
+\`\`\`text
+Header:
+Back to source page | Bookmark | Subscribe/Renew | Hamburger
+
+Body:
+Headline | Byline | Image | Article text
+
+Bottom:
+Font − | Font + | Listen/Pause | Share
+
+Article footer:
+Previous article | Original page | Next article
+\`\`\`
+
+## Hamburger
+
+\`\`\`text
+Top:
+Prajavani Home | Search
+
+List:
+My Profile/Sign In
+Saved Articles
+FAQs
+\`\`\`
+
+This is the final mobile-first structure: the printed magazine remains the home experience, text view is optimized specifically for reading, and desktop uses the same product with only the two-page spread added.
