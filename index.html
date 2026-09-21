@@ -12,9 +12,11 @@
     <div class="app-shell">
       <header class="app-header" id="app-header">
         <div class="page-header header-row">
-          <button class="edition-control" id="edition-button" type="button" aria-label="Choose publication and edition">
+          <button class="publication-control" id="publication-button" type="button" aria-label="Choose publication">
             <strong id="edition-publication">ಸುಧಾ</strong>
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          <button class="edition-control" id="edition-button" type="button" aria-label="Choose edition">
             <span id="edition-label">Edition</span>
             <span aria-hidden="true">▾</span>
           </button>
@@ -36,7 +38,9 @@
       <main>
         <section class="page-view" aria-label="Page reader">
           <div class="page-canvas" id="page-canvas" tabindex="0" aria-label="Magazine page">
-            <div class="page-spread" id="page-spread"></div>
+            <div class="page-zoom-stage" id="page-zoom-stage">
+              <div class="page-spread" id="page-spread"></div>
+            </div>
             <button class="canvas-nav canvas-prev" id="previous-page" type="button" aria-label="Previous page">◀</button>
             <button class="canvas-nav canvas-next" id="next-page" type="button" aria-label="Next page">▶</button>
             <div class="zoom-controls" aria-label="Page zoom controls">

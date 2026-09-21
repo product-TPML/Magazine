@@ -22,6 +22,7 @@ const state = {
 const $ = (selector) => document.querySelector(selector);
 const pageCanvas = $('#page-canvas');
 const pageSpread = $('#page-spread');
+const pageZoomStage = $('#page-zoom-stage');
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
 
@@ -150,7 +151,7 @@ function renderHeader() {
 
 function setControlsVisible(visible) {
   document.body.classList.toggle('chrome-hidden', !visible && !state.panel);
-  $('#app-header').classList.toggle('chrome-hidden', !visible && !state.panel && state.view === 'text');
+  $('#app-header').classList.toggle('chrome-hidden', !visible && !state.panel);
   $('.page-view').classList.toggle('chrome-hidden', !visible && state.view === 'page');
   $('#article-controls').classList.toggle('chrome-hidden', !visible && state.view === 'text');
 }
@@ -181,7 +182,7 @@ function renderArticleControls() {
 
 function renderZoom() {
   const transform = 'translate3d(' + state.zoom.x + 'px, ' + state.zoom.y + 'px, 0) scale(' + state.zoom.scale + ')';
-  pageSpread.querySelectorAll('.page-zoom').forEach((node) => { node.style.transform = node.closest('.page-slot')?.dataset.page === String(state.page) ? transform : 'translate3d(0, 0, 0) scale(1)'; });
+  pageZoomStage.style.transform = transform;
   $('#zoom-reset').hidden = state.zoom.scale <= 1.01;
   $('#page-article-action').hidden = !articlesForPage(state.page).length && state.zoom.scale <= 1.01;
   $('#page-article-action').querySelector('span:last-child').textContent = state.zoom.scale > 1.01 ? 'Reset zoom' : articlesForPage(state.page).length === 1 ? 'Read article' : articlesForPage(state.page).length + ' articles';
@@ -319,6 +320,7 @@ function articleMarkup(html, article) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   doc.querySelectorAll('script, style, iframe, form, [style*="display:none"], .adPlaceholder').forEach((node) => node.remove());
   doc.querySelectorAll('*').forEach((node) => {
+    if (node.getAttribute('style')?.includes('background')) node.classList.add('article-recipe');
     node.removeAttribute('style');
     [...node.attributes].forEach((attribute) => {
       if (attribute.name.toLowerCase().startsWith('on')) node.removeAttribute(attribute.name);
@@ -339,7 +341,9 @@ function articleMarkup(html, article) {
   const extractedTitle = doc.querySelector('h1 p, h1')?.textContent.trim();
   root.querySelector('h1')?.remove();
   root.querySelector('.byline')?.remove();
-  root.querySelector('p > i')?.closest('p')?.remove();
+  root.querySelectorAll('p').forEach((paragraph) => {
+    if (paragraph.querySelector('i')) paragraph.remove();
+  });
   root.querySelectorAll('p').forEach((paragraph) => {
     if (!paragraph.textContent.trim() && !paragraph.querySelector('img')) paragraph.remove();
   });
@@ -372,23 +376,31 @@ function articleMarkup(html, article) {
     }
     return figure;
   };
-  const body = root.querySelector('.bodytext');
-  const paragraphs = body ? [...body.children].filter((element) => element.tagName === 'P') : [];
+  const paragraphs = [...root.querySelectorAll('p:not([class])')];
   const hero = pictures.shift();
   if (hero) {
     const figure = makeFigure(hero, 'article-figure article-hero');
-    if (body) root.insertBefore(figure, body);
+    const first = root.firstElementChild;
+    if (first) root.insertBefore(figure, first);
     else root.append(figure);
   }
-  if (body && paragraphs.length) {
-    const interval = Math.max(2, Math.floor((paragraphs.length - 1) / (pictures.length + 1)));
-    pictures.forEach((picture, index) => {
-      const position = Math.min(1 + index * interval, paragraphs.length - 1);
+  if (paragraphs.length && pictures.length) {
+    const inlineCount = Math.min(pictures.length, Math.floor(paragraphs.length / 4), 4);
+    const interval = Math.max(3, Math.floor(paragraphs.length / (inlineCount + 1)));
+    pictures.slice(0, inlineCount).forEach((picture, index) => {
+      const position = Math.min(1 + (index + 1) * interval, paragraphs.length - 1);
       paragraphs[position].before(makeFigure(picture, 'article-figure article-float', index % 2 ? 'left' : 'right'));
     });
+    pictures.slice(inlineCount).forEach((picture) => root.append(makeFigure(picture, 'article-figure article-float')));
   } else {
     pictures.forEach((picture) => root.append(makeFigure(picture, 'article-figure article-float')));
   }
+  root.querySelectorAll('p').forEach((paragraph) => {
+    if (!/^\s*l\s+/i.test(paragraph.textContent)) return;
+    paragraph.classList.add('article-bullet');
+    const firstText = [...paragraph.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
+    if (firstText) firstText.nodeValue = firstText.nodeValue.replace(/^\s*l\s+/i, '');
+  });
   const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
   const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">← Previous article</a>' : '<span></span>';
@@ -620,10 +632,11 @@ function renderPanel() {
   const inert = Boolean(state.panel);
   document.querySelectorAll('#app-header, main, #page-controls, #article-controls, #listen-player').forEach((element) => { element.inert = inert; });
   if (!state.panel) return;
-  const titles = { menu: 'Menu', contents: 'Contents', pages: 'Pages', stories: 'Stories on this page', saved: 'Saved Articles', search: 'Search', editions: 'Editions', profile: 'My Profile', faqs: 'FAQs' };
+  const titles = { menu: 'Menu', contents: 'Contents', pages: 'Pages', stories: 'Stories on this page', saved: 'Saved Articles', search: 'Search', publication: 'Publication', editions: 'Editions', profile: 'My Profile', faqs: 'FAQs' };
   $('#panel-title').textContent = titles[state.panel] || 'Reader';
   const body = $('#panel-body');
   if (state.panel === 'menu') body.innerHTML = menuMarkup();
+  if (state.panel === 'publication') body.innerHTML = publicationMarkup();
   if (state.panel === 'contents') body.innerHTML = contentsMarkup();
   if (state.panel === 'pages') body.innerHTML = pagesMarkup();
   if (state.panel === 'stories') body.innerHTML = storiesMarkup();
@@ -731,7 +744,6 @@ function runSearch(query) {
 function editionsMarkup() {
   const selected = state.editionPublication || publication(state.issue.key);
   const issues = allIssues().filter((issue) => issue.publication === selected);
-  const tabs = '<div class="edition-tabs"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" data-edition-publication="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" data-edition-publication="MY">Mayura</button></div>';
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
@@ -739,7 +751,12 @@ function editionsMarkup() {
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
     return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
-  return tabs + '<div class="edition-grid">' + cards + '</div>';
+  return '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
+}
+
+function publicationMarkup() {
+  const selected = state.editionPublication || publication(state.issue.key);
+  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" data-edition-publication="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" data-edition-publication="MY">Mayura</button></div>';
 }
 
 function renderArticleMetaFromHtml(id, html) {
@@ -856,7 +873,7 @@ function returnToPage() {
 
 function setupPageGestures() {
   pageCanvas.addEventListener('pointerdown', (event) => {
-    if (state.view !== 'page' || event.target.closest('.zoom-controls, .swipe-hint')) return;
+    if (state.view !== 'page' || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav')) return;
     state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     state.gesture.startX = event.clientX;
     state.gesture.startY = event.clientY;
@@ -920,7 +937,8 @@ function setupPageGestures() {
   pageCanvas.addEventListener('wheel', (event) => {
     if (!(event.ctrlKey || event.metaKey || innerWidth >= 1024)) return;
     event.preventDefault();
-    setZoom(state.zoom.scale + (event.deltaY < 0 ? .25 : -.25), event.offsetX, event.offsetY);
+    const bounds = pageCanvas.getBoundingClientRect();
+    setZoom(state.zoom.scale + (event.deltaY < 0 ? .25 : -.25), event.clientX - bounds.left, event.clientY - bounds.top);
   }, { passive: false });
 }
 
@@ -937,6 +955,7 @@ $('#page-article-action').addEventListener('click', (event) => {
   if (articles.length === 1) openArticle(articles[0].id);
   else if (articles.length > 1) openPanel('stories', event.currentTarget);
 });
+$('#publication-button').addEventListener('click', (event) => openPanel('publication', event.currentTarget));
 $('#edition-button').addEventListener('click', (event) => openPanel('editions', event.currentTarget));
 $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
@@ -959,7 +978,11 @@ $('#panel-host').addEventListener('click', (event) => {
   if (event.target.matches('[data-close-panel]')) { closePanel(); return; }
   if (event.target.closest('[data-home-link]')) { savePosition(); return; }
   const tab = event.target.closest('[data-edition-publication]');
-  if (tab) { state.editionPublication = tab.dataset.editionPublication; renderPanel(); return; }
+  if (tab) {
+    const latest = allIssues().filter((issue) => issue.publication === tab.dataset.editionPublication).sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+    if (latest) switchEdition(latest.key);
+    return;
+  }
   const edition = event.target.closest('[data-edition-link]');
   if (edition) { switchEdition(edition.dataset.editionLink); return; }
   const action = event.target.closest('[data-action]')?.dataset.action;
@@ -1095,6 +1118,10 @@ window.addEventListener('popstate', () => loadIssue(currentIssueFromUrl() || sta
 window.addEventListener('resize', () => { if (state.issue) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); } if (state.panel) renderPanel(); });
 if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', loadVoices);
 
+document.querySelectorAll('.canvas-nav').forEach((button) => {
+  const path = button.id === 'previous-page' ? 'M14.5 5.5 8.5 12l6 6.5' : 'M9.5 5.5 15.5 12l-6 6.5';
+  button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${path}" /></svg>`;
+});
 applyTheme();
 setupPageGestures();
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
