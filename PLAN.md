@@ -57,6 +57,8 @@ Items reflect what you can do in the current view; the same DOM is swapped by vi
 
 ### Pinch zoom (page images)
 
+Prototype status: skipped by request; native browser zoom remains enabled.
+
 - Two-finger pinch zooms the current page, anchored at the pinch midpoint. Range is **1×–4×**, where 1× is the default fit (page fills the viewport).
 - **Zoom-out is clamped at 1×** — the page can never shrink below the default fit; releasing a pinch below 1× snaps back to 1× (no rubber-band shrink).
 - Double-tap toggles ×2 at the tap point; single-finger drag pans when zoomed (the page strip is frozen).
@@ -97,36 +99,36 @@ Not implementation targets for the prototype — listed so the phased scope is e
 
 ### Prototype Core
 
-- [ ] App shell: header, page strip, bottom nav (single HTML + single stylesheet)
-- [ ] Sudha/Mayura + edition selection
-- [ ] Page strip: swipe, snap, and prev/next controls
-- [ ] Pages thumbnail grid
-- [ ] Article hotspots (tap → text view)
-- [ ] Page ⇄ text toggle
-- [ ] Contents navigation
-- [ ] Mobile layout verified at 360–390px
-- [ ] Basic desktop adaptation (spread, rail, panels)
-- [ ] Lazy-loading for long editions (164-page Mayura)
-- [ ] Local resume position
+- [x] App shell: header, page strip, bottom nav (single HTML + single stylesheet) — Status: Done
+- [x] Sudha/Mayura + edition selection — Status: Done
+- [x] Page strip: swipe, snap, and prev/next controls — Status: Done
+- [x] Pages thumbnail grid — Status: Done
+- [x] Article hotspots (tap → text view) — Status: Done
+- [x] Page ⇄ text toggle — Status: Done
+- [x] Contents navigation — Status: Done
+- [x] Mobile layout verified at 360–390px — Status: Done
+- [x] Basic desktop adaptation (spread, rail, panels) — Status: Done
+- [x] Lazy-loading for long editions (164-page Mayura) — Status: Done
+- [x] Local resume position — Status: Done
 
 ### Prototype Polish
 
-- [ ] Search
-- [ ] Saved/bookmarks
-- [ ] Text-size controls
-- [ ] Reading progress
-- [ ] Share/download (page image, `edition.pdf`)
-- [ ] Dark/sepia themes
-- [ ] More elaborate desktop panels
-- [ ] Custom pinch/pan zoom
-- [ ] Kannada TTS + sentence highlighting
-- [ ] Edge-swipe navigation (may fight browser/OS back gestures)
+- [x] Search — Status: Done; searches article titles, bylines, sections, and loaded article text
+- [x] Saved/bookmarks — Status: Done; saves pages and articles in local storage
+- [x] Text-size controls — Status: Done
+- [x] Reading progress — Status: Done
+- [x] Share/download (page image, `edition.pdf`) — Status: Done; shares files with Web Share when supported and downloads them otherwise
+- [x] Dark/sepia themes — Status: Done; follows the system preference by default and persists the user choice
+- [x] More elaborate desktop panels — Status: Done; persistent rail and side panels at desktop widths
+- [~] Custom pinch/pan zoom — Status: Skipped by request
+- [x] Kannada TTS + sentence highlighting — Status: Done; disabled with a device hint when no Kannada voice exists
+- [x] Edge-swipe navigation (may fight browser/OS back gestures) — Status: Done; edge taps and edge swipes move one page
 
 ### V2 Production
 
-- [ ] Authentication, entitlement, checkout/paywall
-- [ ] SEO static pages, metadata/JSON-LD, sitemap/robots
-- [ ] Publishing automation, monitoring/rollback, content security
+- [ ] Authentication, entitlement, checkout/paywall — Status: Deferred to V2
+- [ ] SEO static pages, metadata/JSON-LD, sitemap/robots — Status: Deferred to V2
+- [ ] Publishing automation, monitoring/rollback, content security — Status: Deferred to V2
 
 ## Prototype risks to watch
 
