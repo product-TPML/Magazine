@@ -12,53 +12,45 @@
     <div class="app-shell">
       <header class="app-header" id="app-header">
         <div class="page-header header-row">
-          <label class="brand-switcher">
-            <span class="sr-only">Publication</span>
-            <select id="publication-select" class="brand-select" aria-label="Choose publication">
-              <option value="SU">Sudha</option>
-              <option value="MY">Mayura</option>
-            </select>
-          </label>
-          <button class="edition-chip" id="edition-button" type="button" aria-label="Choose edition">
-            <img id="edition-cover" alt="">
+          <button class="edition-control" id="edition-button" type="button" aria-label="Choose publication and edition">
+            <strong id="edition-publication">ಸುಧಾ</strong>
+            <span aria-hidden="true">·</span>
             <span id="edition-label">Edition</span>
             <span aria-hidden="true">▾</span>
           </button>
-          <div class="header-actions">
-            <button class="icon-button" id="search-button" type="button" aria-label="Search">⌕</button>
-            <button class="icon-button" id="more-button" type="button" aria-label="More options">⋯</button>
-          </div>
+          <button class="subscribe-button" id="subscribe-button" type="button">Subscribe</button>
+          <button class="icon-button" id="menu-button" type="button" aria-label="Open menu">☰</button>
         </div>
+
         <div class="text-header" hidden>
           <div class="header-row">
-            <button class="icon-button" id="back-button" type="button" aria-label="Back to page">←</button>
-            <div class="article-header-title">
-              <strong id="article-title">Article</strong>
-              <span id="article-meta"></span>
-            </div>
+            <button class="back-button" id="back-button" type="button" aria-label="Back to source page">← <span id="back-page-label">ಪುಟ 1</span></button>
             <button class="icon-button" id="save-button" type="button" aria-label="Save article">☆</button>
-            <button class="icon-button" id="text-more-button" type="button" aria-label="More options">⋯</button>
+            <button class="subscribe-button" id="text-subscribe-button" type="button">Subscribe</button>
+            <button class="icon-button" id="text-menu-button" type="button" aria-label="Open menu">☰</button>
           </div>
-          <div class="text-tools">
-            <span id="text-page-meta"></span>
-            <button class="text-size-button" id="text-smaller" type="button" aria-label="Decrease text size">A−</button>
-            <button class="text-size-button" id="text-larger" type="button" aria-label="Increase text size">A+</button>
-          </div>
-          <div class="reading-progress" aria-hidden="true"><span id="progress-bar"></span></div>
         </div>
-        <a class="mode-toggle" id="mode-toggle" href="?p=1" aria-label="Switch view">
-          <span class="mode-page">Page</span><span class="mode-divider">↔</span><span class="mode-text">Text</span>
-        </a>
       </header>
+      <div class="reading-progress" id="reading-progress" hidden aria-hidden="true"><span id="progress-bar"></span></div>
 
       <main>
         <section class="page-view" aria-label="Page reader">
-          <div class="page-strip" id="page-strip" tabindex="0" aria-label="Magazine pages"></div>
-          <div class="page-controls">
-            <button class="round-button" id="previous-page" type="button" aria-label="Previous page">◀</button>
-            <span id="page-indicator">Page 1 / 1</span>
-            <button class="round-button" id="next-page" type="button" aria-label="Next page">▶</button>
+          <div class="page-canvas" id="page-canvas" tabindex="0" aria-label="Magazine page">
+            <div class="page-spread" id="page-spread"></div>
+            <button class="canvas-nav canvas-prev" id="previous-page" type="button" aria-label="Previous page">◀</button>
+            <button class="canvas-nav canvas-next" id="next-page" type="button" aria-label="Next page">▶</button>
+            <div class="zoom-controls" aria-label="Page zoom controls">
+              <button class="zoom-button" id="zoom-out" type="button" aria-label="Zoom out">−</button>
+            <button class="zoom-button zoom-reset" id="zoom-reset" type="button" aria-label="Reset zoom" hidden>↺</button>
+            <button class="zoom-button" id="zoom-in" type="button" aria-label="Zoom in">+</button>
           </div>
+          </div>
+          <button class="swipe-hint" id="swipe-hint" type="button" hidden>Swipe horizontally to turn pages</button>
+          <nav class="page-controls" id="page-controls" aria-label="Page actions">
+            <button class="page-action" id="page-contents" type="button"><span class="control-icon" aria-hidden="true">☷</span><span>Contents</span></button>
+            <button class="page-action page-number" id="page-number" type="button"><span class="control-icon" aria-hidden="true">▦</span><span>Page 1 / 1</span></button>
+            <button class="page-action" id="page-article-action" type="button" hidden><span class="control-icon" aria-hidden="true">↗</span><span>Read article</span></button>
+          </nav>
         </section>
 
         <article class="text-view" hidden>
@@ -73,6 +65,7 @@
       <section class="listen-player" id="listen-player" hidden aria-label="Listen controls">
         <button class="listen-play" id="listen-play" type="button" aria-label="Play article">▶</button>
         <span class="listen-status" id="listen-status">Listen</span>
+        <progress id="listen-progress" value="0" max="1" aria-label="Speech progress"></progress>
         <label class="listen-control">Speed
           <select id="listen-rate" aria-label="Speech speed">
             <option value="0.8">0.8×</option>
@@ -81,12 +74,15 @@
             <option value="1.5">1.5×</option>
           </select>
         </label>
-        <label class="listen-control voice-control">Voice
-          <select id="listen-voice" aria-label="Kannada voice"></select>
-        </label>
+        <button class="listen-stop" id="listen-stop" type="button">Stop</button>
       </section>
 
-      <nav class="context-nav" id="context-nav" aria-label="Reader navigation"></nav>
+      <nav class="article-controls" id="article-controls" aria-label="Article actions" hidden>
+        <button class="article-action" id="article-font-smaller" type="button"><span class="control-icon" aria-hidden="true">ಅ−</span><span>Smaller</span></button>
+        <button class="article-action" id="article-font-larger" type="button"><span class="control-icon" aria-hidden="true">ಅ+</span><span>Larger</span></button>
+        <button class="article-action" id="article-listen" type="button"><span class="control-icon" aria-hidden="true">▶</span><span>Listen</span></button>
+        <button class="article-action" id="article-share" type="button"><span class="control-icon" aria-hidden="true">↗</span><span>Share</span></button>
+      </nav>
 
       <section class="panel-host" id="panel-host" hidden>
         <div class="panel-backdrop" data-close-panel></div>
