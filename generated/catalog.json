@@ -6,23 +6,23 @@
       "code": "SU",
       "title": "Sudha",
       "issues": [
-        { "key": "SU-2026-09-24", "date": "2026-09-24", "label": "24 September 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-09-17", "date": "2026-09-17", "label": "17 September 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-09-03", "date": "2026-09-03", "label": "3 September 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-08-20", "date": "2026-08-20", "label": "20 August 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-08-13", "date": "2026-08-13", "label": "13 August 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-08-06", "date": "2026-08-06", "label": "6 August 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-07-16", "date": "2026-07-16", "label": "16 July 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-07-09", "date": "2026-07-09", "label": "9 July 2026", "cover": "cover.jpg" },
-        { "key": "SU-2026-01-01", "date": "2026-01-01", "label": "1 January 2026", "cover": "cover.jpg" }
+        { "key": "SU-2026-09-24", "date": "2026-09-24", "label": "24 September 2026", "cover": "cover.jpg", "available": true },
+        { "key": "SU-2026-09-17", "date": "2026-09-17", "label": "17 September 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-09-03", "date": "2026-09-03", "label": "3 September 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-08-20", "date": "2026-08-20", "label": "20 August 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-08-13", "date": "2026-08-13", "label": "13 August 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-08-06", "date": "2026-08-06", "label": "6 August 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-07-16", "date": "2026-07-16", "label": "16 July 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-07-09", "date": "2026-07-09", "label": "9 July 2026", "cover": "cover.jpg", "available": false },
+        { "key": "SU-2026-01-01", "date": "2026-01-01", "label": "1 January 2026", "cover": "cover.jpg", "available": false }
       ]
     },
     {
       "code": "MY",
       "title": "Mayura",
       "issues": [
-        { "key": "MY-2026-09-01", "date": "2026-09-01", "label": "September 2026", "cover": "cover.jpg" },
-        { "key": "MY-2026-07-01", "date": "2026-07-01", "label": "July 2026", "cover": "cover.jpg" }
+        { "key": "MY-2026-09-01", "date": "2026-09-01", "label": "September 2026", "cover": "cover.jpg", "available": true },
+        { "key": "MY-2026-07-01", "date": "2026-07-01", "label": "July 2026", "cover": "cover.jpg", "available": false }
       ]
     }
   ]

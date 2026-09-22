@@ -747,9 +747,10 @@ function editionsMarkup() {
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
-    const currentInfo = current ? 'Current edition' : 'Continue from page ' + resume;
+    const available = issue.available !== false;
+    const currentInfo = current ? 'Current edition' : available ? 'Continue from page ' + resume : 'Cover only';
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
-    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
+    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
   return '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
 }

@@ -1,5 +1,14 @@
-# large local archive — re-fetch with fetch_edition.ps1
-data/
+# Keep only two full editions, without generated PDFs, plus the other covers.
+data/*
+!data/*/
+data/*/**
+!data/*/cover.jpg
+!data/MY-2026-09-01/**
+!data/SU-2026-09-24/**
+data/MY-2026-09-01/edition.pdf
+data/MY-2026-09-01/edition.html
+data/SU-2026-09-24/edition.pdf
+data/SU-2026-09-24/edition.html
 
 # tool / session artifacts
 .playwright-mcp/
