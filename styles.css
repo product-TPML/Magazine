@@ -13,7 +13,7 @@
   --accent: #d8ee84;
   --accent-ink: #18200f;
   --line: rgba(242, 245, 237, .15);
-  --header-height: 4rem;
+  --header-height: 3.7rem;
   --bottom-height: 3.6rem;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --font-body: "Prajavani Text", "Noto Sans Kannada", ui-sans-serif, system-ui, sans-serif;

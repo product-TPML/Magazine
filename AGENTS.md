@@ -26,6 +26,8 @@ Context: this repo holds extracted Sudha/Mayura e-magazine editions (`data/`), t
 
 Render at **360px** and **≥1280px** in a real browser before calling it done; no horizontal scroll on mobile.
 
+Use the **Playwright MCP** for browser-based UI checks and verification.
+
 ## Content layout (what the UI renders)
 
 `data/{PUB}-{YYYY-MM-DD}/` where `PUB` is `MY` (Mayura) or `SU` (Sudha):
