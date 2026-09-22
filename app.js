@@ -20,6 +20,22 @@ const state = {
 };
 
 const $ = (selector) => document.querySelector(selector);
+function icon(name) {
+  const paths = {
+    bookmark: '<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z" />',
+    play: '<path d="m8 5 11 7-11 7V5Z" />',
+    pause: '<path d="M8 5v14M16 5v14" />',
+    back: '<path d="m15 5-7 7 7 7M8 12h12" />',
+    forward: '<path d="m9 5 7 7-7 7" />',
+    share: '<path d="M14 5h5v5M19 5l-9 9M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />',
+    home: '<path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9Z" /><path d="M9 20v-6h6v6" />',
+    search: '<circle cx="10.8" cy="10.8" r="5.8" /><path d="m15.2 15.2 4.3 4.3" />',
+    profile: '<circle cx="12" cy="8" r="3.2" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" />',
+    saved: '<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z" />',
+    faq: '<circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 1 1 4.3 2c-1.1.8-1.8 1.2-1.8 2.6M12 17h.01" />'
+  };
+  return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">' + (paths[name] || '') + '</svg>';
+}
 const appBase = new URL('.', document.currentScript.src);
 const pageCanvas = $('#page-canvas');
 const pageSpread = $('#page-spread');
@@ -146,7 +162,8 @@ function renderHeader() {
   $('#subscribe-button').hidden = false;
   $('#text-subscribe-button').hidden = false;
   $('#back-page-label').textContent = 'ಪುಟ ' + (state.page + 1);
-  $('#save-button').textContent = state.saved[state.articleId] ? '★' : '☆';
+  $('#save-button').innerHTML = icon('bookmark');
+  $('#save-button').classList.toggle('is-active', Boolean(state.saved[state.articleId]));
   $('#save-button').setAttribute('aria-label', state.saved[state.articleId] ? 'Remove saved article' : 'Save article');
   document.documentElement.style.setProperty('--article-size', [1.125, 1.25, 1.4, 1.55][state.textSize] + 'rem');
 }
@@ -178,7 +195,7 @@ function renderPageControls() {
 }
 
 function renderArticleControls() {
-  $('#article-listen').querySelector('.control-icon').textContent = state.speech.status === 'playing' ? 'Ⅱ' : '▶';
+  $('#article-listen').querySelector('.control-icon').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'play');
   $('#article-listen').querySelector('span:last-child').textContent = state.speech.status === 'playing' ? 'Pause' : 'Listen';
 }
 
@@ -405,8 +422,8 @@ function articleMarkup(html, article) {
   });
   const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
   const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
-  const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">← Previous article</a>' : '<span></span>';
-  const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article →</a>' : '<span></span>';
+  const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
+  const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
   const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
   return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + root.innerHTML + footer;
 }
@@ -494,7 +511,7 @@ function renderListenPlayer() {
   $('#listen-player').hidden = state.view !== 'text' || state.speech.status === 'idle';
   const supported = 'speechSynthesis' in window && state.speech.voices.length > 0;
   $('#listen-play').disabled = !supported;
-  $('#listen-play').textContent = state.speech.status === 'playing' ? 'Ⅱ' : '▶';
+  $('#listen-play').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'play');
   $('#listen-play').setAttribute('aria-label', state.speech.status === 'playing' ? 'Pause article' : 'Play article');
   $('#listen-status').textContent = supported ? (state.speech.status === 'paused' ? 'Paused' : 'Reading aloud') : 'No Kannada voice available on this device';
   $('#listen-progress').value = state.speech.sentences.length ? state.speech.index / state.speech.sentences.length : 0;
@@ -557,7 +574,7 @@ function renderArticleFooterCards() {
     const target = state.issue.articles[String(id)];
     const previous = String(id) === String(article.previous);
     link.className = 'article-nav article-nav-' + (previous ? 'previous' : 'next');
-    link.innerHTML = '<span class="article-nav-direction">' + (previous ? '← Previous article' : 'Next article →') + '</span><strong>' + escapeHtml(target?.title || 'Article') + '</strong>' + (target?.byline ? '<small>' + escapeHtml(target.byline) + '</small>' : '');
+    link.innerHTML = '<span class="article-nav-direction">' + (previous ? icon('back') + 'Previous article' : 'Next article' + icon('forward')) + '</span><strong>' + escapeHtml(target?.title || 'Article') + '</strong>' + (target?.byline ? '<small>' + escapeHtml(target.byline) + '</small>' : '');
   });
   document.querySelectorAll('#article-content .article-footer').forEach((footer) => {
     const next = footer.querySelector('.article-nav-next');
@@ -724,7 +741,7 @@ function savedMarkup() {
 }
 
 function menuMarkup() {
-  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span><strong>FAQs</strong><small>Support and contact information</small></span></button>';
+  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button>';
 }
 
 function searchMarkup() {
