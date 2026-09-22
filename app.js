@@ -748,9 +748,10 @@ function editionsMarkup() {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
     const available = issue.available !== false;
-    const currentInfo = current ? 'Current edition' : available ? 'Continue from page ' + resume : 'Cover only';
+    const currentInfo = current ? 'Current edition' : available ? 'Continue from page ' + resume : 'Locked for non-subscribed users';
+    const lockIcon = available ? '' : '<svg class="edition-lock" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="7" width="10" height="8" rx="1.5"></rect><path d="M5.5 7V4.75a2.5 2.5 0 0 1 5 0V7"></path></svg>';
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
-    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
+    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
   return '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
 }

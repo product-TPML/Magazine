@@ -340,6 +340,8 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .edition-card img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: .35rem; background: var(--bg); }
 .edition-card strong, .edition-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edition-card span { color: var(--muted); font-size: .78rem; }
+.edition-card:disabled span { overflow: visible; text-overflow: clip; white-space: normal; }
+.edition-card .edition-lock { width: .72rem; height: .72rem; margin-right: .25rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; vertical-align: -.12rem; }
 .edition-card small { color: var(--accent); font-size: .72rem; }
 .page-scrub { display: grid; gap: .35rem; padding: .8rem .45rem .25rem; color: var(--muted); font-size: .8rem; }
 .page-scrub output { color: var(--text); font-variant-numeric: tabular-nums; }
