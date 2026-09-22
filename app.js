@@ -16,7 +16,7 @@ const state = {
   theme: savedTheme === 'sepia' || savedTheme === 'dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'sepia'),
   zoom: { scale: 1, x: 0, y: 0 },
   speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null },
-  gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, pinch: null, movedUntil: 0 },
+  gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velocityX: 0, lastTime: 0, pinch: null, movedUntil: 0, swipe: null },
   account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free'
 };
 
@@ -43,6 +43,7 @@ const pageSpread = $('#page-spread');
 const pageZoomStage = $('#page-zoom-stage');
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
+const preloadedPageImages = new Set();
 
 function safeJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; }
@@ -87,6 +88,17 @@ function shortIssueDate(key) {
 function imagePath(page, thumb = false) {
   const file = (thumb ? page.imgThumbFile : page.imgFile).split('/').pop();
   return issuePath((thumb ? 'thumbs/' : 'pages/') + file);
+}
+
+function preloadNearbyPages(index) {
+  for (let pageIndex = Math.max(0, index - 3); pageIndex <= Math.min(state.issue.pages.length - 1, index + 3); pageIndex += 1) {
+    const src = imagePath(state.issue.pages[pageIndex]);
+    if (preloadedPageImages.has(src)) continue;
+    preloadedPageImages.add(src);
+    const image = new Image();
+    image.decoding = 'async';
+    image.src = src;
+  }
 }
 
 function parsePercent(value) { return Number.parseFloat(String(value || 0)) / 100; }
@@ -303,6 +315,7 @@ function renderPageCanvas() {
   }));
   fitPageZoom();
   resetZoom();
+  preloadNearbyPages(state.page);
 }
 
 function animatePageChange(direction) {
@@ -1066,6 +1079,56 @@ function returnToPage() {
 }
 
 function setupPageGestures() {
+  const clearSwipePreview = () => {
+    if (!state.gesture.swipe) return;
+    pageSpread.classList.remove('page-dragging', 'page-settling');
+    pageSpread.querySelector('.page-swipe-preview')?.remove();
+    const current = pageSpread.querySelector('.page-slot');
+    if (current) current.style.transform = '';
+    state.gesture.swipe = null;
+  };
+  const settleSwipe = (commit) => {
+    const swipe = state.gesture.swipe;
+    if (!swipe) return false;
+    if (commit) { clearSwipePreview(); setPage(swipe.page); return true; }
+    pageSpread.classList.remove('page-dragging');
+    pageSpread.classList.add('page-settling');
+    const current = pageSpread.querySelector('.page-slot');
+    const preview = pageSpread.querySelector('.page-swipe-preview');
+    if (current) current.style.transform = 'translate3d(0, 0, 0)';
+    if (preview) preview.style.transform = 'translate3d(' + (swipe.direction * pageCanvas.clientWidth) + 'px, 0, 0)';
+    const finish = () => { pageSpread.removeEventListener('transitionend', finish); clearSwipePreview(); };
+    if (prefersReducedMotion.matches) finish();
+    else pageSpread.addEventListener('transitionend', finish, { once: true });
+    return false;
+  };
+  const beginSwipe = (direction) => {
+    if (useSpread() || state.zoom.scale > 1.01 || state.gesture.swipe) return;
+    const page = direction < 0 ? nextPageIndex() : previousPageIndex();
+    if (page < 0 || page >= state.issue.pages.length) return;
+    const current = pageSpread.querySelector('.page-slot');
+    if (!current) return;
+    const preview = current.cloneNode(true);
+    preview.classList.add('page-swipe-preview');
+    preview.querySelectorAll('.hotspot').forEach((hotspot) => hotspot.remove());
+    const image = preview.querySelector('img');
+    image.alt = 'Page ' + (page + 1);
+    image.src = imagePath(state.issue.pages[page]);
+    pageSpread.append(preview);
+    state.gesture.swipe = { direction, page };
+    pageSpread.classList.add('page-dragging');
+    preview.style.transform = 'translate3d(' + (-direction * pageCanvas.clientWidth) + 'px, 0, 0)';
+  };
+  const updateSwipe = (distance) => {
+    const swipe = state.gesture.swipe;
+    if (!swipe) return;
+    const width = pageCanvas.clientWidth;
+    const travel = Math.max(-width, Math.min(width, distance));
+    const current = pageSpread.querySelector('.page-slot:not(.page-swipe-preview)');
+    const preview = pageSpread.querySelector('.page-swipe-preview');
+    if (current) current.style.transform = 'translate3d(' + travel + 'px, 0, 0)';
+    if (preview) preview.style.transform = 'translate3d(' + (travel - swipe.direction * width) + 'px, 0, 0)';
+  };
   pageCanvas.addEventListener('pointerdown', (event) => {
     if (state.view !== 'page' || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav')) return;
     state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -1073,10 +1136,13 @@ function setupPageGestures() {
     state.gesture.startY = event.clientY;
     state.gesture.lastX = event.clientX;
     state.gesture.lastY = event.clientY;
+    state.gesture.velocityX = 0;
+    state.gesture.lastTime = event.timeStamp || performance.now();
     state.gesture.moved = false;
     state.gesture.hotspot = event.target.closest('.hotspot');
     pageCanvas.setPointerCapture(event.pointerId);
     if (state.gesture.pointers.size === 2) {
+      clearSwipePreview();
       const points = [...state.gesture.pointers.values()];
       state.gesture.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y), scale: state.zoom.scale, center: { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 } };
     }
@@ -1087,8 +1153,11 @@ function setupPageGestures() {
     state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     const dx = event.clientX - state.gesture.lastX;
     const dy = event.clientY - state.gesture.lastY;
+    const now = event.timeStamp || performance.now();
     state.gesture.lastX = event.clientX;
     state.gesture.lastY = event.clientY;
+    state.gesture.velocityX = dx / Math.max(1, now - state.gesture.lastTime);
+    state.gesture.lastTime = now;
     if (state.gesture.pointers.size === 2 && state.gesture.pinch) {
       const points = [...state.gesture.pointers.values()];
       const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
@@ -1103,7 +1172,15 @@ function setupPageGestures() {
       state.zoom.y += dy;
       state.gesture.moved = true;
       renderZoom();
-    } else if (Math.hypot(event.clientX - state.gesture.startX, event.clientY - state.gesture.startY) > 8) state.gesture.moved = true;
+    } else {
+      const distance = event.clientX - state.gesture.startX;
+      const vertical = event.clientY - state.gesture.startY;
+      if (Math.hypot(distance, vertical) > 8) state.gesture.moved = true;
+      if (Math.abs(distance) > 8 && Math.abs(distance) > Math.abs(vertical) * 1.15) {
+        if (!state.gesture.swipe) beginSwipe(distance < 0 ? -1 : 1);
+        if (state.gesture.swipe) updateSwipe(distance);
+      }
+    }
   });
   const end = (event) => {
     if (!state.gesture.pointers.has(event.pointerId)) return;
@@ -1120,7 +1197,10 @@ function setupPageGestures() {
       return;
     }
     state.gesture.movedUntil = state.gesture.moved ? performance.now() + 180 : 0;
-    if (state.zoom.scale <= 1.01 && Math.abs(delta) > 50) {
+    if (state.zoom.scale <= 1.01 && state.gesture.swipe) {
+      const threshold = Math.max(50, pageCanvas.clientWidth * .2);
+      if (settleSwipe(Math.abs(delta) > threshold || Math.abs(state.gesture.velocityX) > .7)) return;
+    } else if (state.zoom.scale <= 1.01 && Math.abs(delta) > 50) {
       setPage(state.page + (delta < 0 ? (useSpread() ? (state.page === 0 ? 1 : 2) : 1) : -(useSpread() ? (state.page === 1 ? 1 : 2) : 1)));
       return;
     }
