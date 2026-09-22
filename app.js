@@ -20,6 +20,7 @@ const state = {
 };
 
 const $ = (selector) => document.querySelector(selector);
+const appBase = new URL('.', document.currentScript.src);
 const pageCanvas = $('#page-canvas');
 const pageSpread = $('#page-spread');
 const pageZoomStage = $('#page-zoom-stage');
@@ -43,14 +44,15 @@ function issueFromPath(pathname = location.pathname) {
 
 function publication(key) { return key && key.startsWith('MY') ? 'MY' : 'SU'; }
 function publicationLabel(code) { return code === 'MY' ? 'ಮಯೂರ' : 'ಸುಧಾ'; }
-function issuePath(file) { return '/data/' + state.issue.key + '/' + file; }
+function appPath(path) { return new URL(path, appBase).pathname; }
+function issuePath(file) { return appPath('data/' + state.issue.key + '/' + file); }
 function readerUrl(key, page, view = 'page', articleId = null) {
   const params = new URLSearchParams({ issue: key, p: String(page) });
   if (view === 'text' && articleId) {
     params.set('view', 'text');
     params.set('article', String(articleId));
   }
-  return '/?' + params;
+  return appBase.pathname + '?' + params;
 }
 
 function issueDate(key) {
@@ -751,7 +753,7 @@ function editionsMarkup() {
     const currentInfo = current ? 'Current edition' : available ? 'Continue from page ' + resume : 'Locked for non-subscribed users';
     const lockIcon = available ? '' : '<svg class="edition-lock" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="7" width="10" height="8" rx="1.5"></rect><path d="M5.5 7V4.75a2.5 2.5 0 0 1 5 0V7"></path></svg>';
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
-    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="/data/' + issue.key + '/' + escapeHtml(issue.cover) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
+    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
   return '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
 }
@@ -796,7 +798,7 @@ function normalizeIssue(key, coords, bylines) {
 
 async function loadCatalog() {
   if (state.catalog) return;
-  const response = await fetch('/generated/catalog.json');
+  const response = await fetch(appPath('generated/catalog.json'));
   if (!response.ok) throw new Error('Could not load the edition catalog');
   state.catalog = await response.json();
 }
@@ -806,7 +808,7 @@ async function loadIssue(key) {
   await loadCatalog();
   key ||= state.catalog.publications[0].issues[0].key;
   state.issueKey = key;
-  const responses = await Promise.all([fetch('/data/' + key + '/coords.json'), fetch('/data/' + key + '/bylines.json').catch(() => null)]);
+  const responses = await Promise.all([fetch(appPath('data/' + key + '/coords.json')), fetch(appPath('data/' + key + '/bylines.json')).catch(() => null)]);
   if (!responses[0].ok) throw new Error('Could not load ' + key);
   state.issue = normalizeIssue(key, await responses[0].json(), responses[1]?.ok ? await responses[1].json() : {});
   state.editionPublication = publication(key);
