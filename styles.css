@@ -391,7 +391,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   .page-spread.is-spread .page-slot:last-child .page-art { justify-items: start; }
   .page-controls, .article-controls { right: 0; left: 0; }
   .page-controls, .article-controls { padding-block: .15rem; }
-  .page-action, .article-action { padding-block: .1rem; }
+  .page-action, .article-action { padding-block: .1rem 0; }
   .article-scroll { padding-bottom: calc(var(--bottom-height) + 4rem); }
   .article-footer { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .article-footer .article-nav-previous { grid-column: 1; grid-row: 1; }
