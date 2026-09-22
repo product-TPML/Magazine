@@ -16,7 +16,8 @@ const state = {
   theme: savedTheme === 'sepia' || savedTheme === 'dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'sepia'),
   zoom: { scale: 1, x: 0, y: 0 },
   speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null },
-  gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, pinch: null, movedUntil: 0 }
+  gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, pinch: null, movedUntil: 0 },
+  account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free'
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -116,6 +117,27 @@ function articleAccess(article) {
   return article?.plainText && words < 200 ? 'Free' : 'Premium';
 }
 function accessClass(article) { return articleAccess(article).toLowerCase(); }
+function isSubscriber() { return state.account === 'subscriber'; }
+function isPaidArticle(article) { return articleAccess(article) === 'Premium'; }
+function needsPreview(article) { return !isSubscriber() && isPaidArticle(article); }
+function getAccountState() { return isSubscriber() ? 'subscriber' : 'free'; }
+function setAccountState(value) {
+  state.account = value === 'subscriber' ? 'subscriber' : 'free';
+  localStorage.setItem('reader-account', state.account);
+  stopSpeech();
+  renderAccountUI();
+  if (state.panel === 'profile') renderPanel();
+  if (state.view === 'text' && state.articleId) openArticle(state.articleId, { push: false });
+  else { renderHeader(); if (state.panel) renderPanel(); }
+}
+function renderAccountUI() {
+  document.body.dataset.account = state.account;
+  const selects = [$('#account-state'), $('#account-state-profile')].filter(Boolean);
+  selects.forEach((select) => { select.value = state.account; });
+  renderHeader();
+}
+function savedKey(id) { return state.issue ? state.issue.key + ':' + String(id) : String(id); }
+function isSaved(id) { return Boolean(state.issue && state.saved[savedKey(id)]); }
 
 function accessComposition(page) {
   const articles = articlesForPage(page.index);
@@ -157,15 +179,22 @@ function displayPageLabel() {
 
 function renderHeader() {
   const summary = issueSummary(state.issue.key);
+  const subscriber = isSubscriber();
   $('#edition-publication').textContent = publicationLabel(publication(state.issue.key));
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
-  $('#subscribe-button').hidden = false;
-  $('#text-subscribe-button').hidden = false;
+  $('#subscribe-button').hidden = subscriber;
+  $('#text-subscribe-button').hidden = subscriber;
   $('#back-page-label').textContent = 'ಪುಟ ' + (state.page + 1);
+  const saved = state.articleId ? isSaved(state.articleId) : false;
   $('#save-button').innerHTML = icon('bookmark');
-  $('#save-button').classList.toggle('is-active', Boolean(state.saved[state.articleId]));
-  $('#save-button').setAttribute('aria-label', state.saved[state.articleId] ? 'Remove saved article' : 'Save article');
+  $('#save-button').classList.toggle('is-active', saved);
+  $('#save-button').setAttribute('aria-label', saved ? 'Remove saved article' : 'Save article');
   document.documentElement.style.setProperty('--article-size', [1.125, 1.25, 1.4, 1.55][state.textSize] + 'rem');
+  const accountSelect = $('#account-state');
+  if (accountSelect && accountSelect.value !== state.account) accountSelect.value = state.account;
+  const profileSelect = $('#account-state-profile');
+  if (profileSelect && profileSelect.value !== state.account) profileSelect.value = state.account;
+  document.body.dataset.account = state.account;
 }
 
 function setControlsVisible(visible) {
@@ -318,11 +347,19 @@ async function openArticle(articleId, { push = true } = {}) {
   renderViewState();
   renderHeader();
   $('#article-content').innerHTML = '<p class="loading">Loading article…</p>';
+  renderArticleAccess(null, false);
   $('#article-scroll').scrollTop = 0;
   try {
     const response = await fetch(issuePath('articles/' + article.id + '.html'));
     if (!response.ok) throw new Error('Article unavailable');
-    $('#article-content').innerHTML = articleMarkup(await response.text(), article);
+    const html = await response.text();
+    // ponytail: normalize word-count access classification once full metadata is available
+    if (!article.plainText) {
+      try { Object.assign(article, renderArticleMetaFromHtml(article.id, html)); } catch { /* keep fallback */ }
+    }
+    const preview = needsPreview(article);
+    $('#article-content').innerHTML = preview ? articlePreviewMarkup(html, article) : articleMarkup(html, article);
+    renderArticleAccess(article, preview);
     prepareSpeech();
     bindImageZoom();
     renderArticleFooterCards();
@@ -333,6 +370,87 @@ async function openArticle(articleId, { push = true } = {}) {
   renderHeader();
   renderArticleControls();
   renderListenPlayer();
+}
+
+function renderArticleAccess(article, isPreview) {
+  const host = $('#article-access');
+  if (!host) return;
+  if (!article) { host.hidden = true; return; }
+  host.hidden = false;
+  const status = $('#article-access-status');
+  if (status) {
+    if (isSubscriber()) {
+      status.textContent = '';
+      status.hidden = true;
+    } else {
+      status.hidden = false;
+      status.textContent = isPreview ? 'Premium preview · Subscribe for full access' : articleAccess(article) + ' article';
+      status.className = 'access-status access-' + accessClass(article);
+    }
+  }
+  const boundary = $('#article-preview-boundary');
+  if (boundary) boundary.hidden = !isPreview;
+  const cta = $('#article-paywall-cta');
+  if (cta) cta.hidden = !isPreview;
+  const select = $('#account-state');
+  if (select && select.value !== state.account) select.value = state.account;
+}
+
+function sanitizeArticleRoot(html, article) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('script, style, iframe, form, [style*="display:none"], .adPlaceholder').forEach((node) => node.remove());
+  doc.querySelectorAll('*').forEach((node) => {
+    if (node.getAttribute('style')?.includes('background')) node.classList.add('article-recipe');
+    node.removeAttribute('style');
+    [...node.attributes].forEach((attribute) => {
+      if (attribute.name.toLowerCase().startsWith('on')) node.removeAttribute(attribute.name);
+    });
+  });
+  doc.querySelectorAll('img').forEach((image) => {
+    const filename = image.getAttribute('src')?.split('/').pop();
+    if (filename) image.src = issuePath('media/' + filename);
+    image.removeAttribute('style');
+    image.loading = 'lazy';
+    image.classList.add('zoomable');
+  });
+  doc.querySelectorAll('a').forEach((link) => {
+    const href = link.getAttribute('href') || '';
+    if (href && !/^(https?:|mailto:|#)/i.test(href)) link.removeAttribute('href');
+  });
+  return doc;
+}
+
+function articlePreviewMarkup(html, article) {
+  // ponytail: build preview from sanitized text + lead figure only; never render full root and hide it
+  const doc = sanitizeArticleRoot(html, article);
+  const root = doc.querySelector('.articleDetail') || doc.body;
+  const extractedTitle = doc.querySelector('h1 p, h1')?.textContent.trim();
+  const pictures = [...root.querySelectorAll('.pictures > .picture')];
+  const hero = pictures[0] || null;
+  // ponytail: count bodytext only when present; unclassed paragraphs are fallback, never captions/bylines/siblings
+  const body = root.querySelector('.bodytext');
+  const scope = body || root;
+  const paras = [...scope.querySelectorAll(body ? 'p' : 'p:not([class])')]
+    .filter((p) => !p.closest('.pictures') && !p.classList.contains('byline') && !p.classList.contains('caption'))
+    .map((p) => p.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const words = paras.join(' ').split(/\s+/).filter(Boolean).slice(0, 100);
+  const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
+  const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
+  let figure = '';
+  if (hero) {
+    const image = hero.querySelector('img');
+    const caption = hero.querySelector('.caption');
+    if (image) {
+      image.tabIndex = 0;
+      image.setAttribute('role', 'button');
+      image.setAttribute('aria-label', 'Open article image');
+      figure = '<figure class="article-figure article-hero">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
+    }
+  }
+  const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
+  const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
+  const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
+  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p>' + escapeHtml(words.join(' ')) + '</p>' + footer;
 }
 
 function articleMarkup(html, article) {
@@ -517,6 +635,13 @@ function renderListenPlayer() {
   $('#listen-progress').value = state.speech.sentences.length ? state.speech.index / state.speech.sentences.length : 0;
 }
 
+function clampImageZoom(zoom, image) {
+  const limitX = Math.max(0, (image.clientWidth * (zoom.scale - 1)) / 2);
+  const limitY = Math.max(0, (image.clientHeight * (zoom.scale - 1)) / 2);
+  zoom.x = Math.max(-limitX, Math.min(limitX, zoom.x));
+  zoom.y = Math.max(-limitY, Math.min(limitY, zoom.y));
+}
+
 function bindImageZoom() {
   document.querySelectorAll('#article-content img.zoomable').forEach((image) => {
     const figure = image.closest('.article-float');
@@ -530,28 +655,53 @@ function bindImageZoom() {
       if (image.complete) classify();
       else image.addEventListener('load', classify, { once: true });
     }
-    const zoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
-    const apply = () => { image.style.transform = 'translate3d(' + zoom.x + 'px, ' + zoom.y + 'px, 0) scale(' + zoom.scale + ')'; image.classList.toggle('is-image-zoomed', zoom.scale > 1); };
+    const zoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null, moved: false, startX: 0, startY: 0, movedUntil: 0 };
+    const apply = () => { image.style.transform = 'translate3d(' + zoom.x + 'px, ' + zoom.y + 'px, 0) scale(' + zoom.scale + ')'; image.classList.toggle('is-image-zoomed', zoom.scale > 1); image.style.touchAction = zoom.scale > 1 ? 'none' : 'pan-y'; };
+    apply();
     image.addEventListener('pointerdown', (event) => {
       zoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      image.setPointerCapture(event.pointerId);
+      zoom.moved = false;
+      zoom.startX = event.clientX;
+      zoom.startY = event.clientY;
+      if (zoom.pointers.size === 1 && zoom.scale <= 1) {
+        try { if (image.hasPointerCapture(event.pointerId)) image.releasePointerCapture(event.pointerId); } catch { /* no capture held */ }
+        return;
+      }
       if (zoom.pointers.size === 2) {
         const points = [...zoom.pointers.values()];
-        zoom.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y), scale: zoom.scale };
+        zoom.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) || 1, scale: zoom.scale };
       }
     });
     image.addEventListener('pointermove', (event) => {
       if (!zoom.pointers.has(event.pointerId)) return;
       zoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (Math.hypot(event.clientX - zoom.startX, event.clientY - zoom.startY) > 8) zoom.moved = true;
       if (zoom.pointers.size === 2 && zoom.pinch) {
+        event.preventDefault();
         const points = [...zoom.pointers.values()];
         zoom.scale = Math.max(1, Math.min(4, zoom.pinch.scale * Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) / zoom.pinch.distance));
+        clampImageZoom(zoom, image);
         apply();
-      } else if (zoom.scale > 1) { zoom.x += event.movementX; zoom.y += event.movementY; apply(); }
+      } else if (zoom.pointers.size === 1 && zoom.scale > 1) {
+        event.preventDefault();
+        zoom.x += event.movementX || 0;
+        zoom.y += event.movementY || 0;
+        clampImageZoom(zoom, image);
+        apply();
+      }
     });
-    const end = (event) => { zoom.pointers.delete(event.pointerId); if (zoom.pointers.size < 2) zoom.pinch = null; };
+    const end = (event) => {
+      zoom.pointers.delete(event.pointerId);
+      if (zoom.pointers.size < 2) zoom.pinch = null;
+      try { if (image.hasPointerCapture(event.pointerId)) image.releasePointerCapture(event.pointerId); } catch { /* no capture held */ }
+      if (zoom.moved) zoom.movedUntil = performance.now() + 300;
+      if (!zoom.pointers.size) { zoom.moved = false; }
+    };
     image.addEventListener('pointerup', end);
     image.addEventListener('pointercancel', end);
+    image.addEventListener('pointerleave', () => { zoom.pointers.clear(); zoom.pinch = null; });
+    image.addEventListener('blur', () => { zoom.pointers.clear(); zoom.pinch = null; });
+    image._imageZoom = zoom;
   });
 }
 
@@ -662,7 +812,7 @@ function renderPanel() {
   if (state.panel === 'saved') body.innerHTML = savedMarkup();
   if (state.panel === 'search') body.innerHTML = searchMarkup();
   if (state.panel === 'editions') body.innerHTML = editionsMarkup();
-  if (state.panel === 'profile') body.innerHTML = '<div class="panel-section"><h3>My Profile</h3><p class="panel-row">Sign in to manage subscription and account details.</p></div>';
+  if (state.panel === 'profile') body.innerHTML = profileMarkup();
   if (state.panel === 'faqs') body.innerHTML = '<div class="panel-section"><h3>FAQs</h3><p class="panel-row">For subscription and reader support, contact Prajavani support through the Prajavani homepage.</p></div>';
   renderArticleRows();
   if (state.panel === 'pages') requestAnimationFrame(() => body.querySelector('.is-current')?.scrollIntoView({ block: 'nearest' }));
@@ -695,7 +845,7 @@ function openPanel(panel, trigger = document.activeElement) {
   state.panelReturnFocus = trigger;
   setControlsVisible(true);
   renderPanel();
-  requestAnimationFrame(() => $('#panel-body')?.querySelector('button, a[href], input')?.focus());
+  requestAnimationFrame(() => $('#panel-body')?.querySelector('button, a[href], input, select')?.focus());
 }
 
 function closePanel() {
@@ -707,7 +857,7 @@ function closePanel() {
 }
 
 function articleRow(article, excerpt = '') {
-  const saved = state.saved[article.id] ? ' · ★' : '';
+  const saved = isSaved(article.id) ? ' · ★' : '';
   return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || 'Article ' + article.id) + '</strong><small>' + escapeHtml(article.byline || 'Byline unavailable') + ' · Page ' + (article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + articleAccess(article) + '</span></small></span></button>';
 }
 
@@ -733,8 +883,12 @@ function storiesMarkup() {
 function savedMarkup() {
   const entries = Object.entries(state.saved);
   if (!entries.length) return '<p class="panel-row">No saved articles yet.</p>';
-  return entries.map(([id, saved]) => {
-    const article = state.issue.articles[id];
+  return entries.map(([key, saved]) => {
+    // ponytail: edition-scoped composite keys; legacy global IDs stay unavailable, never reattached
+    const separator = key.indexOf(':');
+    const entryIssue = separator > 0 ? key.slice(0, separator) : null;
+    const id = separator > 0 ? key.slice(separator + 1) : key;
+    const article = entryIssue === state.issue.key ? state.issue.articles[id] : null;
     if (!article) return '<div class="panel-row"><span><strong>' + escapeHtml(saved.title || 'Article ' + id) + '</strong><small>' + escapeHtml(saved.publication || 'Saved article') + ' · Unavailable in this edition</small></span></div>';
     return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || saved.title || 'Article ' + id) + '</strong><small>' + escapeHtml(saved.publication || publicationLabel(publication(state.issue.key))) + ' · ' + escapeHtml(saved.edition || issueDate(state.issue.key)) + ' · Page ' + (saved.page || article.pageIndex + 1) + '</small><small><span class="status-pill access-' + accessClass(article) + '">' + articleAccess(article) + '</span></small></span></button>';
   }).join('');
@@ -749,20 +903,34 @@ function searchMarkup() {
 }
 
 function searchExcerpt(article, query) {
+  // ponytail: never leak paid body text to free readers via search snippets
+  if (needsPreview(article)) {
+    const haystack = (article.title || '');
+    const index = haystack.toLowerCase().indexOf(query.toLowerCase());
+    if (index >= 0) return '…' + haystack.slice(Math.max(0, index - 45), index + query.length + 75) + '…';
+    return 'Premium article · Subscribe to read the full text.';
+  }
   const text = article.plainText || article.title || '';
   const index = text.toLowerCase().indexOf(query.toLowerCase());
   return index < 0 ? text.slice(0, 120) : '…' + text.slice(Math.max(0, index - 45), index + query.length + 75) + '…';
 }
 
+function searchableText(article) {
+  if (!needsPreview(article)) return (article.title + ' ' + article.byline + ' ' + (article.plainText || ''));
+  const previewWords = String(article.plainText || '').trim().split(/\s+/).filter(Boolean).slice(0, 100).join(' ');
+  return (article.title + ' ' + article.byline + ' ' + previewWords);
+}
+
 function runSearch(query) {
   if (!query) { $('#search-results').innerHTML = ''; return; }
-  const result = articleIds().map((id) => state.issue.articles[id]).filter((article) => (article.title + ' ' + article.byline + ' ' + (article.plainText || '')).toLowerCase().includes(query.toLowerCase()));
+  const result = articleIds().map((id) => state.issue.articles[id]).filter((article) => searchableText(article).toLowerCase().includes(query.toLowerCase()));
   $('#search-results').innerHTML = result.length ? result.map((article) => articleRow(article, searchExcerpt(article, query))).join('') : '<p class="panel-row">No matches.</p>';
 }
 
 function editionsMarkup() {
   const selected = state.editionPublication || publication(state.issue.key);
   const issues = allIssues().filter((issue) => issue.publication === selected);
+  const tabs = '<div class="edition-tabs" role="tablist" aria-label="Publication"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (selected === 'SU') + '" data-edition-publication="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (selected === 'MY') + '" data-edition-publication="MY">Mayura</button></div>';
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
@@ -772,7 +940,11 @@ function editionsMarkup() {
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
     return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
-  return '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
+  return tabs + '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
+}
+
+function profileMarkup() {
+  return '<div class="panel-section"><h3>My Profile</h3><p class="panel-row">Sign in to manage subscription and account details.</p><label class="account-state-control" for="account-state-profile">Reader mode (prototype)<select id="account-state-profile" name="account-state-profile"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>Free reader</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>Subscriber</option></select></label></div>';
 }
 
 function publicationMarkup() {
@@ -851,8 +1023,9 @@ async function loadIssue(key) {
 
 function toggleSaved() {
   if (!state.articleId) return;
-  if (state.saved[state.articleId]) delete state.saved[state.articleId];
-  else state.saved[state.articleId] = { title: currentArticle()?.title, publication: publicationLabel(publication(state.issue.key)), edition: issueDate(state.issue.key), page: state.page + 1 };
+  const key = savedKey(state.articleId);
+  if (state.saved[key]) delete state.saved[key];
+  else state.saved[key] = { title: currentArticle()?.title, publication: publicationLabel(publication(state.issue.key)), edition: issueDate(state.issue.key), page: state.page + 1, issue: state.issue.key, article: String(state.articleId) };
   localStorage.setItem('reader-saved', JSON.stringify(state.saved));
   renderHeader();
 }
@@ -976,7 +1149,6 @@ $('#page-article-action').addEventListener('click', (event) => {
   if (articles.length === 1) openArticle(articles[0].id);
   else if (articles.length > 1) openPanel('stories', event.currentTarget);
 });
-$('#publication-button').addEventListener('click', (event) => openPanel('publication', event.currentTarget));
 $('#edition-button').addEventListener('click', (event) => openPanel('editions', event.currentTarget));
 $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
@@ -984,6 +1156,12 @@ $('#subscribe-button').addEventListener('click', (event) => openPanel('profile',
 $('#text-subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 $('#back-button').addEventListener('click', returnToPage);
 $('#save-button').addEventListener('click', toggleSaved);
+document.addEventListener('change', (event) => {
+  if (event.target.id === 'account-state' || event.target.id === 'account-state-profile') setAccountState(event.target.value);
+});
+document.addEventListener('click', (event) => {
+  if (event.target.closest('#article-subscribe-button')) openPanel('profile', event.target.closest('#article-subscribe-button'));
+});
 $('#article-font-smaller').addEventListener('click', () => { state.textSize = Math.max(0, state.textSize - 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
 $('#article-font-larger').addEventListener('click', () => { state.textSize = Math.min(3, state.textSize + 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
 $('#article-listen').addEventListener('click', toggleSpeech);
@@ -1000,8 +1178,8 @@ $('#panel-host').addEventListener('click', (event) => {
   if (event.target.closest('[data-home-link]')) { savePosition(); return; }
   const tab = event.target.closest('[data-edition-publication]');
   if (tab) {
-    const latest = allIssues().filter((issue) => issue.publication === tab.dataset.editionPublication).sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
-    if (latest) switchEdition(latest.key);
+    state.editionPublication = tab.dataset.editionPublication;
+    renderPanel();
     return;
   }
   const edition = event.target.closest('[data-edition-link]');
@@ -1031,6 +1209,7 @@ $('#article-content').addEventListener('click', (event) => {
   const image = event.target.closest('.article-content img');
   if (image) {
     event.preventDefault();
+    if (image._imageZoom && performance.now() < image._imageZoom.movedUntil) return;
     openLightbox([...document.querySelectorAll('#article-content .article-figure img')].indexOf(image));
     return;
   }
@@ -1144,6 +1323,7 @@ document.querySelectorAll('.canvas-nav').forEach((button) => {
   button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${path}" /></svg>`;
 });
 applyTheme();
+document.body.dataset.account = state.account;
 setupPageGestures();
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
 loadIssue(state.issueKey).catch((error) => { $('main').innerHTML = '<p class="panel-row" role="alert">' + escapeHtml(error.message) + '</p>'; console.error(error); });

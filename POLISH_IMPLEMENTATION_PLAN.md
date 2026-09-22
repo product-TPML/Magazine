@@ -8,9 +8,9 @@ This document is an implementation plan only. No application code is changed in 
 
 ## Current implementation boundary
 
-The first implementation pass is **visual and interaction polish only**. It may change spacing, icon presentation, drawer styling, image gesture handling, loading presentation, and other presentation details without changing the reader's content, account, entitlement, routing, or persistence behavior.
+The visual polish pass and the approved reader-access implementation are both in scope. The current prototype may change spacing, icon presentation, drawer styling, image gesture handling, account state, article previews, saved-article identity, header controls, and related rendering while preserving the static-data architecture and existing URL/resume model.
 
-The entitlement model and 100-word paid preview described below are a future proposal. They require explicit user approval before any implementation. If a proposed polish fix would alter functionality, stop and ask for approval rather than silently including it.
+Article access metadata is not present in the extracted manifests, so the prototype uses the existing word-count fallback (`under 200 words = Free`) until authoritative editorial access metadata is supplied. This fallback is implementation scaffolding, not a subscription entitlement source of truth.
 
 ## Product decisions
 
