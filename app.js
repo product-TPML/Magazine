@@ -947,7 +947,7 @@ function runSearch(query) {
 function editionsMarkup() {
   const selected = state.editionPublication || publication(state.issue.key);
   const issues = allIssues().filter((issue) => issue.publication === selected);
-  const tabs = '<div class="edition-tabs" role="tablist" aria-label="Publication"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (selected === 'SU') + '" data-edition-publication="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (selected === 'MY') + '" data-edition-publication="MY">Mayura</button></div>';
+  const tabs = '<div class="edition-tabs" role="tablist" aria-label="Publication"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" role="tab" aria-label="Sudha" aria-selected="' + (selected === 'SU') + '" data-edition-publication="SU"><img src="' + appPath('Assets/Sudha.svg') + '" alt="Sudha"></button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" role="tab" aria-label="Mayura" aria-selected="' + (selected === 'MY') + '" data-edition-publication="MY"><img src="' + appPath('Assets/Mayura.svg') + '" alt="Mayura"></button></div>';
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
@@ -966,7 +966,7 @@ function profileMarkup() {
 
 function publicationMarkup() {
   const selected = state.editionPublication || publication(state.issue.key);
-  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" data-publication-switch="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" data-publication-switch="MY">Mayura</button></div>';
+  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" aria-label="Sudha" aria-pressed="' + (selected === 'SU') + '" data-publication-switch="SU"><img src="' + appPath('Assets/Sudha.svg') + '" alt="Sudha"></button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" aria-label="Mayura" aria-pressed="' + (selected === 'MY') + '" data-publication-switch="MY"><img src="' + appPath('Assets/Mayura.svg') + '" alt="Mayura"></button></div>';
 }
 
 function renderArticleMetaFromHtml(id, html) {
