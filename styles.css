@@ -66,6 +66,10 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .app-header.chrome-hidden { transform: translateY(-100%); }
 .header-row { display: flex; align-items: center; gap: .35rem; width: 100%; min-height: 2.75rem; }
 .edition-summary { display: flex; align-items: center; min-width: 0; flex: 1 1 auto; gap: .15rem; }
+.publication-logo { display: block; flex: 0 0 auto; width: clamp(2.5rem, 11vw, 4rem); height: 2rem; object-fit: contain; }
+.publication-control { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .25rem; min-width: 44px; min-height: 44px; padding: .2rem .35rem; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: .65rem; }
+.publication-control:hover { background: var(--surface-raised); }
+.publication-control .icon { flex: 0 0 auto; width: .9rem; height: .9rem; color: var(--muted); }
 .edition-control {
   display: inline-flex;
   align-items: center;
@@ -247,7 +251,6 @@ body[data-account="subscriber"] .article-content .access-status,
 body[data-account="subscriber"] .status-pill,
 body[data-account="subscriber"] .access-composition { display: none !important; }
 .edition-combined { gap: .45rem; }
-.edition-combined strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edition-combined #edition-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edition-separator { color: var(--muted); }
 .article-content figure { margin: 0; }

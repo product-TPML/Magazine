@@ -12,10 +12,12 @@
     <div class="app-shell">
       <header class="app-header" id="app-header">
         <div class="page-header header-row">
-          <div class="edition-summary" role="group" aria-label="Publication and edition">
-            <button class="edition-control edition-combined" id="edition-button" type="button" aria-label="Choose edition">
-              <strong id="edition-publication">ಸುಧಾ</strong>
-              <span class="edition-separator" aria-hidden="true">·</span>
+          <button class="publication-control" id="publication-button" type="button" aria-label="Choose Sudha publication">
+            <img class="publication-logo" id="edition-logo" src="Assets/Sudha.svg" alt="Sudha" width="96" height="32">
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m7 9 5 5 5-5" /></svg>
+          </button>
+          <div class="edition-summary">
+            <button class="edition-control" id="edition-button" type="button" aria-label="Choose edition">
               <span id="edition-label">Edition</span>
               <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m7 9 5 5 5-5" /></svg>
             </button>
@@ -136,6 +138,6 @@
         </div>
       </section>
     </div>
-    <script src="app.js?v=d1f01c8" defer></script>
+    <script src="app.js?v=logo-selector" defer></script>
   </body>
 </html>

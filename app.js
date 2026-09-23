@@ -192,7 +192,11 @@ function displayPageLabel() {
 function renderHeader() {
   const summary = issueSummary(state.issue.key);
   const subscriber = isSubscriber();
-  $('#edition-publication').textContent = publicationLabel(publication(state.issue.key));
+  const publicationCode = state.editionPublication || publication(state.issue.key);
+  const publicationName = publicationCode === 'MY' ? 'Mayura' : 'Sudha';
+  $('#edition-logo').src = 'Assets/' + publicationName + '.svg';
+  $('#edition-logo').alt = publicationName;
+  $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;
   $('#text-subscribe-button').hidden = subscriber;
@@ -962,7 +966,7 @@ function profileMarkup() {
 
 function publicationMarkup() {
   const selected = state.editionPublication || publication(state.issue.key);
-  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" data-edition-publication="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" data-edition-publication="MY">Mayura</button></div>';
+  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" data-publication-switch="SU">Sudha</button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" data-publication-switch="MY">Mayura</button></div>';
 }
 
 function renderArticleMetaFromHtml(id, html) {
@@ -1230,6 +1234,7 @@ $('#page-article-action').addEventListener('click', (event) => {
   else if (articles.length > 1) openPanel('stories', event.currentTarget);
 });
 $('#edition-button').addEventListener('click', (event) => openPanel('editions', event.currentTarget));
+$('#publication-button').addEventListener('click', (event) => openPanel('publication', event.currentTarget));
 $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 $('#subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
@@ -1256,9 +1261,18 @@ $('#panel-host').addEventListener('change', (event) => { if (event.target.id ===
 $('#panel-host').addEventListener('click', (event) => {
   if (event.target.matches('[data-close-panel]')) { closePanel(); return; }
   if (event.target.closest('[data-home-link]')) { savePosition(); return; }
+  const publicationSwitch = event.target.closest('[data-publication-switch]');
+  if (publicationSwitch) {
+    const code = publicationSwitch.dataset.publicationSwitch;
+    const issue = allIssues().find((item) => item.publication === code && item.available !== false);
+    if (issue && issue.key !== state.issue.key) switchEdition(issue.key);
+    else closePanel();
+    return;
+  }
   const tab = event.target.closest('[data-edition-publication]');
   if (tab) {
     state.editionPublication = tab.dataset.editionPublication;
+    renderHeader();
     renderPanel();
     return;
   }
