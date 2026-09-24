@@ -100,6 +100,8 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   font-size: .8rem;
   font-weight: 800;
 }
+.subscribe-badge { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; }
+.premium-icon, .subscribe-desktop-label { display: none; }
 .view-mode-toggle { display: none; }
 .icon-button, .back-button, .text-size-button {
   min-width: 44px;
@@ -324,13 +326,19 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 }
 
 @media (min-width: 1024px) {
-  .view-mode-toggle { display: inline-flex; align-items: center; gap: .15rem; padding: .15rem; background: var(--surface); border: 1px solid var(--line); border-radius: .7rem; }
-  .view-mode-option { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 44px; min-height: 44px; padding: .35rem .55rem; color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: .5rem; font-size: .8rem; font-weight: 600; white-space: nowrap; }
-  .view-mode-option[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); }
+  .view-mode-toggle { display: inline-flex; align-items: center; gap: .15rem; padding: 0; background: transparent; border: 0; }
+  .view-mode-option { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 44px; min-height: 44px; padding: 0 .55rem; color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: .5rem; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+  .view-mode-option[aria-pressed="true"] { color: var(--accent-ink); }
+  .view-mode-option[aria-pressed="true"]::before { position: absolute; z-index: -1; top: 50%; left: 0; width: 100%; height: 34px; border-radius: .4rem; background: var(--accent); content: ""; transform: translateY(-50%); }
   .view-mode-option:hover:not([aria-pressed="true"]) { color: var(--text); background: var(--surface-raised); }
   .layout-icon { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .zoom-controls { display: flex; }
   .lightbox-nav { display: block; }
+  .page-header .subscribe-button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0; color: #4a1f00; background: transparent; border: 0; border-radius: 4px; box-shadow: none; }
+  .page-header .subscribe-badge { height: 34px; gap: .4rem; padding: 0 .7rem; background: linear-gradient(180deg, #ffd761 0%, #f9c840 100%); border: 1px solid #d29a10; border-radius: 4px; box-shadow: 0 2px 0 #b77d08; }
+  .page-header .premium-icon { display: block; flex: 0 0 auto; width: 1.25rem; height: 1.25rem; background-color: currentColor; -webkit-mask: url("Assets/premium-icon.svg") center / contain no-repeat; mask: url("Assets/premium-icon.svg") center / contain no-repeat; }
+  .page-header .subscribe-mobile-label { display: none; }
+  .page-header .subscribe-desktop-label { display: inline; }
 }
 
 .listen-player { position: fixed; right: 0; bottom: calc(var(--bottom-height) + var(--safe-bottom)); left: 0; z-index: 15; display: flex; align-items: center; gap: .55rem; min-height: 3.25rem; padding: .45rem max(.75rem, env(safe-area-inset-right)) .45rem max(.75rem, env(safe-area-inset-left)); background: color-mix(in srgb, var(--surface) 96%, transparent); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); box-shadow: 0 -.5rem 1.5rem rgba(0, 0, 0, .12); backdrop-filter: blur(18px); }
