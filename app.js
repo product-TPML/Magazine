@@ -42,6 +42,7 @@ const appBase = new URL('.', document.currentScript.src);
 const pageCanvas = $('#page-canvas');
 const pageSpread = $('#page-spread');
 const pageZoomStage = $('#page-zoom-stage');
+let renderedPageZoom = { scale: 1, x: 0, y: 0 };
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
 const preloadedPageImages = new Set();
@@ -234,9 +235,10 @@ function renderViewState() {
 
 function renderPageControls() {
   const articles = articlesForPage(state.page);
+  const zoomActive = state.zoom.scale > 1.01 || Math.abs(state.zoom.x) > .5 || Math.abs(state.zoom.y) > .5;
   $('#page-number').querySelector('span:last-child').textContent = displayPageLabel();
-  $('#page-article-action').hidden = !articles.length && state.zoom.scale <= 1.01;
-  $('#page-article-action').querySelector('span:last-child').textContent = state.zoom.scale > 1.01 ? 'Reset zoom' : articles.length === 1 ? 'Read article' : articles.length + ' articles';
+  $('#page-article-action').hidden = !articles.length && !zoomActive;
+  $('#page-article-action').querySelector('span:last-child').textContent = zoomActive ? 'Reset zoom' : articles.length === 1 ? 'Read article' : articles.length + ' articles';
   $('#previous-page').disabled = state.page === 0;
   $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
   const viewToggle = $('#view-mode-toggle');
@@ -252,11 +254,48 @@ function renderArticleControls() {
 }
 
 function renderZoom() {
+  state.zoom.scale = Math.min(state.zoom.scale, maxPageZoom());
+  clampPageZoom();
   const transform = 'translate3d(' + state.zoom.x + 'px, ' + state.zoom.y + 'px, 0) scale(' + state.zoom.scale + ')';
   pageZoomStage.style.transform = transform;
-  $('#zoom-reset').hidden = state.zoom.scale <= 1.01;
-  $('#page-article-action').hidden = !articlesForPage(state.page).length && state.zoom.scale <= 1.01;
-  $('#page-article-action').querySelector('span:last-child').textContent = state.zoom.scale > 1.01 ? 'Reset zoom' : articlesForPage(state.page).length === 1 ? 'Read article' : articlesForPage(state.page).length + ' articles';
+  renderedPageZoom = { ...state.zoom };
+  const active = state.zoom.scale > 1.01 || Math.abs(state.zoom.x) > .5 || Math.abs(state.zoom.y) > .5;
+  $('#zoom-reset').hidden = !active;
+  $('#zoom-in').disabled = state.zoom.scale >= maxPageZoom() - .001;
+  $('#page-article-action').hidden = !articlesForPage(state.page).length && !active;
+  $('#page-article-action').querySelector('span:last-child').textContent = active ? 'Reset zoom' : articlesForPage(state.page).length === 1 ? 'Read article' : articlesForPage(state.page).length + ' articles';
+}
+
+function maxPageZoom() {
+  const images = [...pageSpread.querySelectorAll('.page-zoom img')];
+  if (!images.length) return 1;
+  return Math.min(4, ...images.map((image) => {
+    if (!image.naturalWidth || !image.naturalHeight || !image.clientWidth || !image.clientHeight) return 1;
+    return Math.max(1, Math.min(image.naturalWidth / image.clientWidth, image.naturalHeight / image.clientHeight));
+  }));
+}
+
+function clampPageZoom() {
+  if (state.zoom.scale <= 1.01) {
+    state.zoom.x = 0;
+    state.zoom.y = 0;
+    return;
+  }
+  const canvas = pageCanvas.getBoundingClientRect();
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const content = [...pageSpread.querySelectorAll('.page-zoom')].map((element) => element.getBoundingClientRect());
+  if (!content.length || !canvas.width || !canvas.height) return;
+  const bounds = content.reduce((result, rect) => ({
+    left: Math.min(result.left, centerX + (rect.left - canvas.left - centerX - renderedPageZoom.x) / renderedPageZoom.scale),
+    top: Math.min(result.top, centerY + (rect.top - canvas.top - centerY - renderedPageZoom.y) / renderedPageZoom.scale),
+    right: Math.max(result.right, centerX + (rect.right - canvas.left - centerX - renderedPageZoom.x) / renderedPageZoom.scale),
+    bottom: Math.max(result.bottom, centerY + (rect.bottom - canvas.top - centerY - renderedPageZoom.y) / renderedPageZoom.scale)
+  }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+  const visibleX = Math.min(64, canvas.width, (bounds.right - bounds.left) * state.zoom.scale);
+  const visibleY = Math.min(64, canvas.height, (bounds.bottom - bounds.top) * state.zoom.scale);
+  state.zoom.x = Math.max(visibleX - centerX - (bounds.right - centerX) * state.zoom.scale, Math.min(canvas.width - visibleX - centerX - (bounds.left - centerX) * state.zoom.scale, state.zoom.x));
+  state.zoom.y = Math.max(visibleY - centerY - (bounds.bottom - centerY) * state.zoom.scale, Math.min(canvas.height - visibleY - centerY - (bounds.top - centerY) * state.zoom.scale, state.zoom.y));
 }
 
 function fitPageZoom() {
@@ -280,7 +319,7 @@ function resetZoom() {
 
 function setZoom(scale, anchorX = pageCanvas.clientWidth / 2, anchorY = pageCanvas.clientHeight / 2) {
   const previous = state.zoom.scale;
-  state.zoom.scale = Math.max(1, Math.min(4, scale));
+  state.zoom.scale = Math.max(1, Math.min(maxPageZoom(), scale));
   const ratio = state.zoom.scale / previous;
   state.zoom.x = (state.zoom.x - (anchorX - pageCanvas.clientWidth / 2)) * ratio + (anchorX - pageCanvas.clientWidth / 2);
   state.zoom.y = (state.zoom.y - (anchorY - pageCanvas.clientHeight / 2)) * ratio + (anchorY - pageCanvas.clientHeight / 2);
@@ -303,6 +342,7 @@ function renderPageCanvas() {
     const image = document.createElement('img');
     image.alt = 'Page ' + (index + 1);
     image.loading = index === state.page || index === state.page + 1 ? 'eager' : 'lazy';
+    image.addEventListener('load', () => { if (image.isConnected) renderZoom(); });
     image.src = imagePath(page);
     const placeholder = document.createElement('span');
     placeholder.className = 'page-placeholder';
@@ -1183,7 +1223,8 @@ function setupPageGestures() {
     if (state.gesture.pointers.size === 2) {
       clearSwipePreview();
       const points = [...state.gesture.pointers.values()];
-      state.gesture.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y), scale: state.zoom.scale, center: { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 } };
+      const bounds = pageCanvas.getBoundingClientRect();
+      state.gesture.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) || 1, scale: state.zoom.scale, x: state.zoom.x, y: state.zoom.y, center: { x: (points[0].x + points[1].x) / 2 - bounds.left, y: (points[0].y + points[1].y) / 2 - bounds.top } };
     }
   });
   pageCanvas.addEventListener('pointermove', (event) => {
@@ -1200,11 +1241,14 @@ function setupPageGestures() {
     if (state.gesture.pointers.size === 2 && state.gesture.pinch) {
       const points = [...state.gesture.pointers.values()];
       const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-      const center = { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 };
-      setZoom(state.gesture.pinch.scale * distance / state.gesture.pinch.distance, center.x, center.y);
-      state.zoom.x += center.x - state.gesture.pinch.center.x;
-      state.zoom.y += center.y - state.gesture.pinch.center.y;
-      state.gesture.pinch.center = center;
+      const bounds = pageCanvas.getBoundingClientRect();
+      const center = { x: (points[0].x + points[1].x) / 2 - bounds.left, y: (points[0].y + points[1].y) / 2 - bounds.top };
+      const pinch = state.gesture.pinch;
+      state.zoom.scale = Math.max(1, Math.min(maxPageZoom(), pinch.scale * distance / pinch.distance));
+      const ratio = state.zoom.scale / pinch.scale;
+      state.zoom.x = (pinch.x - (pinch.center.x - bounds.width / 2)) * ratio + (pinch.center.x - bounds.width / 2) + center.x - pinch.center.x;
+      state.zoom.y = (pinch.y - (pinch.center.y - bounds.height / 2)) * ratio + (pinch.center.y - bounds.height / 2) + center.y - pinch.center.y;
+      renderZoom();
       state.gesture.moved = true;
     } else if (state.zoom.scale > 1) {
       state.zoom.x += dx;
@@ -1247,9 +1291,23 @@ function setupPageGestures() {
     if (!state.gesture.moved && !event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) setControlsVisible(document.body.classList.contains('chrome-hidden'));
   };
   pageCanvas.addEventListener('pointerup', end);
-  pageCanvas.addEventListener('pointercancel', end);
+  const cancel = (event) => {
+    if (!state.gesture.pointers.has(event.pointerId)) return;
+    state.gesture.pointers.clear();
+    state.gesture.pinch = null;
+    state.gesture.hotspot = null;
+    state.gesture.moved = true;
+    state.gesture.movedUntil = performance.now() + 180;
+    if (state.gesture.swipe) clearSwipePreview();
+    pageSpread.classList.remove('page-dragging', 'page-settling');
+    pageSpread.querySelector('.page-swipe-preview')?.remove();
+    const current = pageSpread.querySelector('.page-slot');
+    if (current) current.style.transform = '';
+  };
+  pageCanvas.addEventListener('pointercancel', cancel);
+  pageCanvas.addEventListener('lostpointercapture', cancel);
   pageCanvas.addEventListener('wheel', (event) => {
-    if (!(event.ctrlKey || event.metaKey || innerWidth >= 1024)) return;
+    if (!(event.ctrlKey || event.metaKey)) return;
     event.preventDefault();
     const bounds = pageCanvas.getBoundingClientRect();
     setZoom(state.zoom.scale + (event.deltaY < 0 ? .25 : -.25), event.clientX - bounds.left, event.clientY - bounds.top);
