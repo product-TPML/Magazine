@@ -243,9 +243,8 @@ function renderPageControls() {
   $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
   const viewToggle = $('#view-mode-toggle');
   viewToggle.hidden = state.view !== 'page' || innerWidth < 1024 || state.issue.pages.length < 2;
-  viewToggle.textContent = useSpread() ? 'Single page' : 'Two-page spread';
-  viewToggle.setAttribute('aria-label', useSpread() ? 'Switch to single-page view' : 'Switch to two-page spread');
-  viewToggle.setAttribute('aria-pressed', String(!useSpread()));
+  viewToggle.querySelector('[data-view-mode="single"]').setAttribute('aria-pressed', String(state.singlePageMode));
+  viewToggle.querySelector('[data-view-mode="double"]').setAttribute('aria-pressed', String(!state.singlePageMode));
 }
 
 function renderArticleControls() {
@@ -1318,9 +1317,11 @@ function previousPageIndex() { return !useSpread() ? state.page - 1 : state.page
 function nextPageIndex() { return !useSpread() ? state.page + 1 : state.page === 0 ? 1 : state.page + 2; }
 
 $('#previous-page').addEventListener('click', () => setPage(previousPageIndex()));
-$('#view-mode-toggle').addEventListener('click', () => {
+$('#view-mode-toggle').addEventListener('click', (event) => {
+  const option = event.target.closest('[data-view-mode]');
+  if (!option) return;
   const currentPage = state.page;
-  state.singlePageMode = !state.singlePageMode;
+  state.singlePageMode = option.dataset.viewMode === 'single';
   localStorage.setItem('reader-single-page', String(state.singlePageMode));
   state.page = state.singlePageMode ? currentPage : spreadStart(currentPage);
   renderPageCanvas();
