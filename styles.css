@@ -100,6 +100,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   font-size: .8rem;
   font-weight: 800;
 }
+.view-mode-toggle { display: none; }
 .icon-button, .back-button, .text-size-button {
   min-width: 44px;
   min-height: 44px;
@@ -322,6 +323,8 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 }
 
 @media (min-width: 1024px) {
+  .view-mode-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: .45rem .7rem; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: .65rem; font-size: .82rem; font-weight: 600; white-space: nowrap; }
+  .view-mode-toggle:hover { background: var(--surface-raised); }
   .lightbox-nav { display: block; }
 }
 

@@ -12,6 +12,7 @@ const state = {
   lightbox: { open: false, index: 0, images: [], returnFocus: null },
   editionPublication: null,
   textSize: Math.max(0, Math.min(3, Number(localStorage.getItem('reader-text-size') || 0))),
+  singlePageMode: localStorage.getItem('reader-single-page') === 'true',
   saved: safeJson('reader-saved', {}),
   theme: savedTheme === 'sepia' || savedTheme === 'dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'sepia'),
   zoom: { scale: 1, x: 0, y: 0 },
@@ -178,7 +179,7 @@ function updateUrl(push = false) {
   history[push ? 'pushState' : 'replaceState']({}, '', url);
 }
 
-function useSpread() { return Boolean(state.issue && pageCanvas.clientWidth >= 900 && state.issue.pages.length > 1); }
+function useSpread() { return Boolean(state.issue && !state.singlePageMode && pageCanvas.clientWidth >= 900 && state.issue.pages.length > 1); }
 function spreadStart(index = state.page) { return !useSpread() || index === 0 ? index : 1 + Math.floor((index - 1) / 2) * 2; }
 function spreadIndices(index = state.page) {
   const start = spreadStart(index);
@@ -225,6 +226,7 @@ function renderViewState() {
   $('.text-view').hidden = state.view !== 'text';
   $('#article-controls').hidden = state.view !== 'text';
   $('#reading-progress').hidden = state.view !== 'text';
+  $('#view-mode-toggle').hidden = state.view !== 'page' || innerWidth < 1024 || !state.issue || state.issue.pages.length < 2;
   $('.page-header').hidden = state.view === 'text';
   $('.text-header').hidden = state.view !== 'text';
   setControlsVisible(true);
@@ -237,6 +239,11 @@ function renderPageControls() {
   $('#page-article-action').querySelector('span:last-child').textContent = state.zoom.scale > 1.01 ? 'Reset zoom' : articles.length === 1 ? 'Read article' : articles.length + ' articles';
   $('#previous-page').disabled = state.page === 0;
   $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
+  const viewToggle = $('#view-mode-toggle');
+  viewToggle.hidden = state.view !== 'page' || innerWidth < 1024 || state.issue.pages.length < 2;
+  viewToggle.textContent = useSpread() ? 'Single page' : 'Two-page spread';
+  viewToggle.setAttribute('aria-label', useSpread() ? 'Switch to single-page view' : 'Switch to two-page spread');
+  viewToggle.setAttribute('aria-pressed', String(!useSpread()));
 }
 
 function renderArticleControls() {
@@ -311,6 +318,18 @@ function renderPageCanvas() {
       button.style.height = parsePercent(hotspot.height) * 100 + '%';
       button.dataset.article = hotspot.id;
       button.setAttribute('aria-label', 'Read: ' + (state.issue.articles[String(hotspot.id)]?.title || 'article ' + hotspot.id));
+      zoom.append(button);
+    });
+    state.issue.tocMappings.filter((mapping) => mapping.tocPage === index + 1).forEach((mapping) => {
+      const button = document.createElement('button');
+      button.className = 'hotspot hotspot-toc';
+      button.type = 'button';
+      button.style.top = mapping.y + '%';
+      button.style.left = mapping.x + '%';
+      button.style.width = mapping.width + '%';
+      button.style.height = mapping.height + '%';
+      button.dataset.tocTarget = mapping.targetPage;
+      button.setAttribute('aria-label', 'Go to page ' + mapping.targetPage);
       zoom.append(button);
     });
     art.append(zoom);
@@ -988,7 +1007,7 @@ async function loadArticleMeta(ids = articleIds()) {
   }));
 }
 
-function normalizeIssue(key, coords, bylines) {
+function normalizeIssue(key, coords, bylines, tocMappings = []) {
   const articles = {};
   const pages = (coords.pages || []).map((page, index) => ({ ...page, index, articles: page.articles || [] }));
   pages.forEach((page) => page.articles.forEach((hotspot) => {
@@ -999,7 +1018,18 @@ function normalizeIssue(key, coords, bylines) {
   }));
   const ordered = Object.values(articles).sort(articleOrder);
   ordered.forEach((article, index) => { article.previous = ordered[index - 1]?.id; article.next = ordered[index + 1]?.id; });
-  return { key, pages, articles, bylines, lastOpened: {} };
+  return { key, pages, articles, bylines, tocMappings, lastOpened: {} };
+}
+
+function validTocMappings(data, key, pageCount) {
+  if (data?.issue !== key || !Array.isArray(data.mappings)) return [];
+  return data.mappings.filter((mapping) => {
+    const { tocPage, targetPage, x, y, width, height } = mapping || {};
+    return Number.isInteger(tocPage) && tocPage >= 1 && tocPage <= pageCount
+      && Number.isInteger(targetPage) && targetPage >= 1 && targetPage <= pageCount
+      && [x, y, width, height].every((value) => Number.isFinite(value) && value >= 0 && value <= 100)
+      && width > 0 && height > 0 && x + width <= 100 && y + height <= 100;
+  });
 }
 
 async function loadCatalog() {
@@ -1014,9 +1044,14 @@ async function loadIssue(key) {
   await loadCatalog();
   key ||= state.catalog.publications[0].issues[0].key;
   state.issueKey = key;
-  const responses = await Promise.all([fetch(appPath('data/' + key + '/coords.json')), fetch(appPath('data/' + key + '/bylines.json')).catch(() => null)]);
+  const responses = await Promise.all([fetch(appPath('data/' + key + '/coords.json')), fetch(appPath('data/' + key + '/bylines.json')).catch(() => null), key === 'SU-2026-09-24' ? fetch(appPath('data/' + key + '/toc-mappings-SU-2026-09-24.json')).catch(() => null) : null]);
   if (!responses[0].ok) throw new Error('Could not load ' + key);
-  state.issue = normalizeIssue(key, await responses[0].json(), responses[1]?.ok ? await responses[1].json() : {});
+  const coords = await responses[0].json();
+  let tocMappings = [];
+  try {
+    if (responses[2]?.ok) tocMappings = validTocMappings(await responses[2].json(), key, coords.pages?.length || 0);
+  } catch { /* mappings are optional and must not block the edition */ }
+  state.issue = normalizeIssue(key, coords, responses[1]?.ok ? await responses[1].json() : {}, tocMappings);
   state.editionPublication = publication(key);
   const params = new URLSearchParams(location.search);
   const requested = params.has('p') ? readPageNumber(params.get('p')) - 1 : Number(localStorage.getItem('reader-resume:' + key) || 0);
@@ -1197,7 +1232,8 @@ function setupPageGestures() {
     if (wasPinching || state.gesture.pointers.size) return;
     if (!state.gesture.moved && hotspot && state.zoom.scale <= 1.01) {
       state.gesture.movedUntil = performance.now() + 180;
-      openArticle(hotspot.dataset.article);
+      if (hotspot.dataset.tocTarget) setPage(Number(hotspot.dataset.tocTarget) - 1, { push: true });
+      else openArticle(hotspot.dataset.article);
       return;
     }
     state.gesture.movedUntil = state.gesture.moved ? performance.now() + 180 : 0;
@@ -1224,6 +1260,14 @@ function previousPageIndex() { return !useSpread() ? state.page - 1 : state.page
 function nextPageIndex() { return !useSpread() ? state.page + 1 : state.page === 0 ? 1 : state.page + 2; }
 
 $('#previous-page').addEventListener('click', () => setPage(previousPageIndex()));
+$('#view-mode-toggle').addEventListener('click', () => {
+  const currentPage = state.page;
+  state.singlePageMode = !state.singlePageMode;
+  localStorage.setItem('reader-single-page', String(state.singlePageMode));
+  state.page = state.singlePageMode ? currentPage : spreadStart(currentPage);
+  renderPageCanvas();
+  renderPageControls();
+});
 $('#next-page').addEventListener('click', () => setPage(nextPageIndex()));
 $('#page-contents').addEventListener('click', (event) => openPanel('contents', event.currentTarget));
 $('#page-number').addEventListener('click', (event) => openPanel('pages', event.currentTarget));
@@ -1321,7 +1365,9 @@ $('#article-content').addEventListener('keydown', (event) => {
 });
 pageSpread.addEventListener('click', (event) => {
   const hotspot = event.target.closest('.hotspot');
-  if (hotspot && state.zoom.scale <= 1.01 && performance.now() > state.gesture.movedUntil) openArticle(hotspot.dataset.article);
+  if (!hotspot || state.zoom.scale > 1.01 || performance.now() <= state.gesture.movedUntil) return;
+  if (hotspot.dataset.tocTarget) setPage(Number(hotspot.dataset.tocTarget) - 1, { push: true });
+  else openArticle(hotspot.dataset.article);
 });
 $('#lightbox-close').addEventListener('click', () => closeLightbox());
 $('#lightbox-prev').addEventListener('click', () => moveLightbox(-1));
