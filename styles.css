@@ -388,7 +388,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 }
 .page-controls { display: flex; }
 .page-controls > .page-action { flex: 1 1 0; min-width: 0; }
-.page-layout-toggle[aria-pressed="true"] { color: var(--link); font-weight: 700; }
+.page-layout-toggle[data-mode="swipe"] .layout-vertical, .page-layout-toggle[data-mode="vertical"] .layout-swipe { display: none; }
 .page-action, .article-action { display: grid; place-items: center; gap: .15rem; min-width: 44px; min-height: 44px; padding: .1rem .25rem; color: var(--text); background: transparent; border: 0; border-radius: .55rem; font-size: .72rem; transition: color .16s ease, background-color .16s ease, transform .16s ease; }
 .page-action:hover, .article-action:hover { background: var(--surface-raised); }
 .page-action:active, .article-action:active, .icon-button:active, .zoom-button:active { transform: scale(.95); }

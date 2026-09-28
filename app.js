@@ -261,7 +261,10 @@ function renderPageControls() {
   viewToggle.querySelectorAll('[data-view-mode]').forEach((option) => option.setAttribute('aria-pressed', String(option.dataset.viewMode === state.layout)));
   const layoutToggle = $('#page-layout-toggle');
   layoutToggle.hidden = state.issue.pages.length < 2;
-  layoutToggle.setAttribute('aria-pressed', String(useScroll()));
+  const mode = useScroll() ? 'vertical' : 'swipe';
+  layoutToggle.dataset.mode = mode;
+  $('#page-layout-label').textContent = mode === 'vertical' ? 'Vertical' : 'Swipe';
+  layoutToggle.setAttribute('aria-label', mode === 'vertical' ? 'Page layout: Vertical. Switch to swipe' : 'Page layout: Swipe. Switch to vertical');
 }
 
 function renderArticleControls() {
