@@ -5,68 +5,50 @@
 :root {
   color-scheme: dark;
   --brand-sudha: #e61920;
-  --brand-mayura-cream: #f4ead8;
-  --brand-mayura-teal: #00695c;
-  --sudha-dark-bg: #25090c;
-  --sudha-dark-canvas: #170609;
-  --sudha-dark-surface: #351014;
-  --sudha-dark-raised: #4b171d;
-  --sudha-dark-text: #fff0ef;
-  --sudha-dark-muted: #e2babc;
-  --sudha-dark-line: rgba(255, 240, 239, .17);
-  --sudha-dark-accent: #ff7a82;
-  --sudha-dark-accent-ink: #3b0b10;
-  --sudha-dark-free-fill: #5a1c23;
-  --sudha-dark-free-ink: #ffe8e9;
-  --sudha-dark-premium-fill: #682329;
-  --sudha-dark-premium-ink: #ffe8e9;
-  --sudha-light-bg: #fff0f0;
-  --sudha-light-canvas: #f8e6e7;
-  --sudha-light-surface: #fffafa;
-  --sudha-light-raised: #ffe2e3;
-  --sudha-light-text: #391114;
-  --sudha-light-muted: #74373d;
-  --sudha-light-line: rgba(89, 16, 22, .2);
-  --sudha-light-accent: #b6101b;
-  --sudha-light-accent-ink: #fff;
-  --sudha-light-free-fill: #f2d7d9;
-  --sudha-light-free-ink: #64141a;
-  --sudha-light-premium-fill: #f2d3d5;
-  --sudha-light-premium-ink: #65131a;
-  --mayura-dark-bg: #201b13;
-  --mayura-dark-canvas: #19140e;
-  --mayura-dark-surface: #2e271d;
-  --mayura-dark-raised: #403628;
-  --mayura-dark-text: #f4ead8;
-  --mayura-dark-muted: #c5b89e;
-  --mayura-dark-line: rgba(244, 234, 216, .17);
-  --mayura-dark-accent: #5fc4ab;
-  --mayura-dark-accent-ink: #0c2b23;
-  --mayura-dark-free-fill: #1e584a;
-  --mayura-dark-free-ink: #e5fff6;
-  --mayura-dark-premium-fill: #29564a;
-  --mayura-dark-premium-ink: #e7fff6;
-  --mayura-light-bg: var(--brand-mayura-cream);
-  --mayura-light-canvas: #ece1cd;
-  --mayura-light-surface: #fffaf0;
-  --mayura-light-raised: #e7dbc3;
-  --mayura-light-text: #352e23;
-  --mayura-light-muted: #6e6351;
-  --mayura-light-line: rgba(53, 46, 35, .2);
-  --mayura-light-accent: var(--brand-mayura-teal);
-  --mayura-light-accent-ink: #fff;
-  --mayura-light-free-fill: #d2eee4;
-  --mayura-light-free-ink: #124e41;
-  --mayura-light-premium-fill: #d4e9df;
-  --mayura-light-premium-ink: #144c3d;
+  --sudha-dark-bg: #21191a;
+  --sudha-dark-canvas: #1a1415;
+  --sudha-dark-surface: #2b2222;
+  --sudha-dark-raised: #372c2b;
+  --sudha-dark-text: #f7efe6;
+  --sudha-dark-muted: #cdbdb2;
+  --sudha-dark-line: rgba(247, 239, 230, .14);
+  --sudha-dark-action: #e78282;
+  --sudha-dark-action-ink: #2a0e10;
+  --sudha-light-bg: #faf7f0;
+  --sudha-light-canvas: #f2ece1;
+  --sudha-light-surface: #fffdf8;
+  --sudha-light-raised: #f3ebdd;
+  --sudha-light-text: #29211f;
+  --sudha-light-muted: #6b5a55;
+  --sudha-light-line: rgba(41, 33, 31, .16);
+  --sudha-light-action: #a5232a;
+  --sudha-light-action-ink: #fff;
+  --mayura-dark-bg: #171c1d;
+  --mayura-dark-canvas: #121617;
+  --mayura-dark-surface: #232a2a;
+  --mayura-dark-raised: #2e3636;
+  --mayura-dark-text: #f2f3ee;
+  --mayura-dark-muted: #b3bcba;
+  --mayura-dark-line: rgba(242, 243, 238, .14);
+  --mayura-dark-action: #86c9bf;
+  --mayura-dark-action-ink: #0e2524;
+  --mayura-light-bg: #f5f3ee;
+  --mayura-light-canvas: #ece9e2;
+  --mayura-light-surface: #fffefb;
+  --mayura-light-raised: #edeae3;
+  --mayura-light-text: #263032;
+  --mayura-light-muted: #5c6668;
+  --mayura-light-line: rgba(38, 48, 50, .16);
+  --mayura-light-action: #176b69;
+  --mayura-light-action-ink: #fff;
   --bg: var(--mayura-dark-bg);
   --canvas: var(--mayura-dark-canvas);
   --surface: var(--mayura-dark-surface);
   --surface-raised: var(--mayura-dark-raised);
   --text: var(--mayura-dark-text);
   --muted: var(--mayura-dark-muted);
-  --action: var(--mayura-dark-accent);
-  --action-ink: var(--mayura-dark-accent-ink);
+  --action: var(--mayura-dark-action);
+  --action-ink: var(--mayura-dark-action-ink);
   --line: var(--mayura-dark-line);
   --header-background: var(--surface);
   --header-foreground: var(--text);
@@ -77,8 +59,8 @@
   --subscription-ink: #4a1f00;
   --subscription-border: #d29a10;
   --subscription-shadow: #b77d08;
-  --premium-ink: var(--mayura-dark-premium-ink);
-  --premium-fill: var(--mayura-dark-premium-fill);
+  --premium-fill: #3a2f1a;
+  --premium-ink: #f0d9a6;
   --premium-marker: #d8ad60;
   --on-scrim: #fff;
   --scrim: rgba(0, 0, 0, .62);
@@ -107,11 +89,11 @@
   --surface-raised: var(--mayura-light-raised);
   --text: var(--mayura-light-text);
   --muted: var(--mayura-light-muted);
-  --action: var(--mayura-light-accent);
-  --action-ink: var(--mayura-light-accent-ink);
+  --action: var(--mayura-light-action);
+  --action-ink: var(--mayura-light-action-ink);
   --line: var(--mayura-light-line);
-  --premium-ink: var(--mayura-light-premium-ink);
-  --premium-fill: var(--mayura-light-premium-fill);
+  --premium-fill: #f5e9cc;
+  --premium-ink: #60410b;
   --premium-marker: #8a6212;
 }
 
@@ -122,8 +104,8 @@ body[data-publication="SU"] {
   --surface-raised: var(--sudha-dark-raised);
   --text: var(--sudha-dark-text);
   --muted: var(--sudha-dark-muted);
-  --action: var(--sudha-dark-accent);
-  --action-ink: var(--sudha-dark-accent-ink);
+  --action: var(--sudha-dark-action);
+  --action-ink: var(--sudha-dark-action-ink);
   --line: var(--sudha-dark-line);
   --header-background: var(--brand-sudha);
   --header-foreground: #fff;
@@ -133,8 +115,6 @@ body[data-publication="SU"] {
   --header-focus: #fff;
   --header-toggle-fill: #fff;
   --header-toggle-ink: var(--brand-sudha);
-  --premium-ink: var(--sudha-dark-premium-ink);
-  --premium-fill: var(--sudha-dark-premium-fill);
 }
 
 body[data-publication="MY"] {
@@ -144,8 +124,8 @@ body[data-publication="MY"] {
   --surface-raised: var(--mayura-dark-raised);
   --text: var(--mayura-dark-text);
   --muted: var(--mayura-dark-muted);
-  --action: var(--mayura-dark-accent);
-  --action-ink: var(--mayura-dark-accent-ink);
+  --action: var(--mayura-dark-action);
+  --action-ink: var(--mayura-dark-action-ink);
   --line: var(--mayura-dark-line);
   --header-background: var(--mayura-dark-surface);
   --header-foreground: var(--mayura-dark-text);
@@ -155,8 +135,6 @@ body[data-publication="MY"] {
   --header-focus: var(--focus);
   --header-toggle-fill: var(--action);
   --header-toggle-ink: var(--action-ink);
-  --premium-ink: var(--mayura-dark-premium-ink);
-  --premium-fill: var(--mayura-dark-premium-fill);
 }
 
 :root[data-theme="light"] body[data-publication="SU"] {
@@ -166,11 +144,9 @@ body[data-publication="MY"] {
   --surface-raised: var(--sudha-light-raised);
   --text: var(--sudha-light-text);
   --muted: var(--sudha-light-muted);
-  --action: var(--sudha-light-accent);
-  --action-ink: var(--sudha-light-accent-ink);
+  --action: var(--sudha-light-action);
+  --action-ink: var(--sudha-light-action-ink);
   --line: var(--sudha-light-line);
-  --premium-ink: var(--sudha-light-premium-ink);
-  --premium-fill: var(--sudha-light-premium-fill);
 }
 
 :root[data-theme="light"] body[data-publication="MY"] {
@@ -180,8 +156,8 @@ body[data-publication="MY"] {
   --surface-raised: var(--mayura-light-raised);
   --text: var(--mayura-light-text);
   --muted: var(--mayura-light-muted);
-  --action: var(--mayura-light-accent);
-  --action-ink: var(--mayura-light-accent-ink);
+  --action: var(--mayura-light-action);
+  --action-ink: var(--mayura-light-action-ink);
   --line: var(--mayura-light-line);
   --header-background: var(--mayura-light-surface);
   --header-foreground: var(--mayura-light-text);
@@ -191,8 +167,6 @@ body[data-publication="MY"] {
   --header-focus: var(--focus);
   --header-toggle-fill: var(--action);
   --header-toggle-ink: var(--action-ink);
-  --premium-ink: var(--mayura-light-premium-ink);
-  --premium-fill: var(--mayura-light-premium-fill);
 }
 
 /* Roles derived from the active publication palette. */
