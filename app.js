@@ -11,7 +11,7 @@ const state = {
   panelReturnFocus: null,
   lightbox: { open: false, index: 0, images: [], returnFocus: null },
   textSize: Math.max(0, Math.min(3, Number(localStorage.getItem('reader-text-size') || 0))),
-  singlePageMode: localStorage.getItem('reader-single-page') === 'true',
+  layout: initialLayout(),
   saved: safeJson('reader-saved', {}),
   theme: savedTheme === 'dark' ? 'dark' : (savedTheme === 'light' || savedTheme === 'sepia' ? 'light' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')),
   zoom: { scale: 1, x: 0, y: 0 },
@@ -44,9 +44,16 @@ const pageCanvas = $('#page-canvas');
 const pageSpread = $('#page-spread');
 const pageZoomStage = $('#page-zoom-stage');
 let renderedPageZoom = { scale: 1, x: 0, y: 0 };
+let scrollSyncFrame = 0;
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
 const preloadedPageImages = new Set();
+
+function initialLayout() {
+  const saved = localStorage.getItem('reader-page-layout');
+  if (saved === 'single' || saved === 'double' || saved === 'scroll') return saved;
+  return localStorage.getItem('reader-single-page') === 'true' ? 'single' : 'double';
+}
 
 function safeJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; }
@@ -181,7 +188,9 @@ function updateUrl(push = false) {
   history[push ? 'pushState' : 'replaceState']({}, '', url);
 }
 
-function useSpread() { return Boolean(state.issue && !state.singlePageMode && pageCanvas.clientWidth >= 900 && state.issue.pages.length > 1); }
+function useSpread() { return Boolean(state.issue && state.layout === 'double' && pageCanvas.clientWidth >= 900 && state.issue.pages.length > 1); }
+function useScroll() { return Boolean(state.issue && state.layout === 'scroll' && state.issue.pages.length > 1); }
+function useSnap() { return useScroll() && innerWidth < 1024; }
 function spreadStart(index = state.page) { return !useSpread() || index === 0 ? index : 1 + Math.floor((index - 1) / 2) * 2; }
 function spreadIndices(index = state.page) {
   const start = spreadStart(index);
@@ -225,6 +234,7 @@ function setControlsVisible(visible) {
   $('#app-header').classList.toggle('chrome-hidden', !visible && !state.panel);
   $('.page-view').classList.toggle('chrome-hidden', !visible && state.view === 'page');
   $('#article-controls').classList.toggle('chrome-hidden', !visible && state.view === 'text');
+  if (useSnap() && state.view === 'page' && pageSpread.dataset.scrollIssue) requestAnimationFrame(() => { fitPageZoom(); scrollToPage(state.page); });
 }
 
 function renderViewState() {
@@ -248,8 +258,10 @@ function renderPageControls() {
   $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
   const viewToggle = $('#view-mode-toggle');
   viewToggle.hidden = state.view !== 'page' || innerWidth < 1024 || state.issue.pages.length < 2;
-  viewToggle.querySelector('[data-view-mode="single"]').setAttribute('aria-pressed', String(state.singlePageMode));
-  viewToggle.querySelector('[data-view-mode="double"]').setAttribute('aria-pressed', String(!state.singlePageMode));
+  viewToggle.querySelectorAll('[data-view-mode]').forEach((option) => option.setAttribute('aria-pressed', String(option.dataset.viewMode === state.layout)));
+  const layoutToggle = $('#page-layout-toggle');
+  layoutToggle.hidden = state.issue.pages.length < 2;
+  layoutToggle.setAttribute('aria-pressed', String(useScroll()));
 }
 
 function renderArticleControls() {
@@ -330,63 +342,119 @@ function setZoom(scale, anchorX = pageCanvas.clientWidth / 2, anchorY = pageCanv
   renderZoom();
 }
 
+function buildPageSlot(index) {
+  const page = state.issue.pages[index];
+  const slot = document.createElement('div');
+  slot.className = 'page-slot';
+  slot.dataset.page = index;
+  const art = document.createElement('div');
+  art.className = 'page-art';
+  art.style.setProperty('--page-ratio', (page.width || 3) + ' / ' + (page.height || 4));
+  const zoom = document.createElement('div');
+  zoom.className = 'page-zoom';
+  const image = document.createElement('img');
+  image.alt = 'Page ' + (index + 1);
+  image.loading = Math.abs(index - state.page) <= 1 ? 'eager' : 'lazy';
+  image.addEventListener('load', () => { if (image.isConnected && !useScroll()) renderZoom(); });
+  image.src = imagePath(page);
+  const placeholder = document.createElement('span');
+  placeholder.className = 'page-placeholder';
+  placeholder.textContent = 'Page ' + (index + 1);
+  zoom.append(image, placeholder);
+  page.articles.forEach((hotspot) => {
+    const button = document.createElement('button');
+    button.className = 'hotspot';
+    button.type = 'button';
+    button.style.top = parsePercent(hotspot.top) * 100 + '%';
+    button.style.left = parsePercent(hotspot.left) * 100 + '%';
+    button.style.width = parsePercent(hotspot.width) * 100 + '%';
+    button.style.height = parsePercent(hotspot.height) * 100 + '%';
+    button.dataset.article = hotspot.id;
+    button.setAttribute('aria-label', 'Read: ' + (state.issue.articles[String(hotspot.id)]?.title || 'article ' + hotspot.id));
+    zoom.append(button);
+  });
+  state.issue.tocMappings.filter((mapping) => mapping.tocPage === index + 1).forEach((mapping) => {
+    const button = document.createElement('button');
+    button.className = 'hotspot hotspot-toc';
+    button.type = 'button';
+    button.style.top = mapping.y + '%';
+    button.style.left = mapping.x + '%';
+    button.style.width = mapping.width + '%';
+    button.style.height = mapping.height + '%';
+    button.dataset.tocTarget = mapping.targetPage;
+    button.setAttribute('aria-label', 'Go to page ' + mapping.targetPage);
+    zoom.append(button);
+  });
+  art.append(zoom);
+  slot.append(art);
+  return slot;
+}
+
 function renderPageCanvas() {
+  if (useScroll()) { renderScrollCanvas(); return; }
+  pageCanvas.classList.remove('is-scroll', 'is-snap');
+  delete pageSpread.dataset.scrollIssue;
+  pageCanvas.scrollTop = 0;
   const indices = spreadIndices();
   pageSpread.classList.toggle('is-spread', indices.length > 1);
-  pageSpread.replaceChildren(...indices.map((index) => {
-    const page = state.issue.pages[index];
-    const slot = document.createElement('div');
-    slot.className = 'page-slot';
-    slot.dataset.page = index;
-    const art = document.createElement('div');
-    art.className = 'page-art';
-    art.style.setProperty('--page-ratio', (page.width || 3) + ' / ' + (page.height || 4));
-    const zoom = document.createElement('div');
-    zoom.className = 'page-zoom';
-    const image = document.createElement('img');
-    image.alt = 'Page ' + (index + 1);
-    image.loading = index === state.page || index === state.page + 1 ? 'eager' : 'lazy';
-    image.addEventListener('load', () => { if (image.isConnected) renderZoom(); });
-    image.src = imagePath(page);
-    const placeholder = document.createElement('span');
-    placeholder.className = 'page-placeholder';
-    placeholder.textContent = 'Page ' + (index + 1);
-    zoom.append(image, placeholder);
-    page.articles.forEach((hotspot) => {
-      const button = document.createElement('button');
-      button.className = 'hotspot';
-      button.type = 'button';
-      button.style.top = parsePercent(hotspot.top) * 100 + '%';
-      button.style.left = parsePercent(hotspot.left) * 100 + '%';
-      button.style.width = parsePercent(hotspot.width) * 100 + '%';
-      button.style.height = parsePercent(hotspot.height) * 100 + '%';
-      button.dataset.article = hotspot.id;
-      button.setAttribute('aria-label', 'Read: ' + (state.issue.articles[String(hotspot.id)]?.title || 'article ' + hotspot.id));
-      zoom.append(button);
-    });
-    state.issue.tocMappings.filter((mapping) => mapping.tocPage === index + 1).forEach((mapping) => {
-      const button = document.createElement('button');
-      button.className = 'hotspot hotspot-toc';
-      button.type = 'button';
-      button.style.top = mapping.y + '%';
-      button.style.left = mapping.x + '%';
-      button.style.width = mapping.width + '%';
-      button.style.height = mapping.height + '%';
-      button.dataset.tocTarget = mapping.targetPage;
-      button.setAttribute('aria-label', 'Go to page ' + mapping.targetPage);
-      zoom.append(button);
-    });
-    art.append(zoom);
-    slot.append(art);
-    return slot;
-  }));
+  pageSpread.replaceChildren(...indices.map((index) => buildPageSlot(index)));
   fitPageZoom();
   resetZoom();
   preloadNearbyPages(state.page);
 }
 
+function renderScrollCanvas() {
+  const snap = useSnap();
+  const key = state.issue.key + (snap ? ':snap' : ':flow');
+  if (pageSpread.dataset.scrollIssue !== key) {
+    pageCanvas.classList.add('is-scroll');
+    pageCanvas.classList.toggle('is-snap', snap);
+    pageSpread.classList.remove('is-spread');
+    pageSpread.replaceChildren(...state.issue.pages.map((page, index) => buildPageSlot(index)));
+    pageSpread.dataset.scrollIssue = key;
+    resetZoom();
+  }
+  if (snap) fitPageZoom();
+  scrollToPage(state.page);
+  preloadNearbyPages(state.page);
+}
+
+function scrollToPage(index) {
+  const slot = pageSpread.querySelector('.page-slot[data-page="' + index + '"]');
+  if (slot) pageCanvas.scrollTo({ top: slot.offsetTop - (useSnap() ? 0 : 8), behavior: 'instant' });
+}
+
+// In scroll layouts the current page is the one crossing 40% down the canvas.
+function syncScrollPage() {
+  scrollSyncFrame = 0;
+  if (!useScroll() || state.view !== 'page' || !pageSpread.dataset.scrollIssue) return;
+  const line = pageCanvas.scrollTop + pageCanvas.clientHeight * .4;
+  let page = 0;
+  for (const slot of pageSpread.children) {
+    if (slot.offsetTop > line) break;
+    page = Number(slot.dataset.page);
+  }
+  if (page === state.page) return;
+  state.page = page;
+  savePosition();
+  updateUrl(false);
+  renderPageControls();
+  preloadNearbyPages(page);
+}
+pageCanvas.addEventListener('scroll', () => { if (!scrollSyncFrame) scrollSyncFrame = requestAnimationFrame(syncScrollPage); }, { passive: true });
+
+function setLayout(layout) {
+  if (state.layout === layout) return;
+  state.layout = layout;
+  localStorage.setItem('reader-page-layout', layout);
+  state.page = spreadStart(state.page);
+  renderPageCanvas();
+  renderPageControls();
+  pageCanvas.focus({ preventScroll: true });
+}
+
 function animatePageChange(direction) {
-  if (!direction || prefersReducedMotion.matches) return;
+  if (!direction || prefersReducedMotion.matches || useScroll()) return;
   pageSpread.classList.remove('page-transition-next', 'page-transition-previous');
   void pageSpread.offsetWidth;
   pageSpread.classList.add('page-transition-' + direction);
@@ -1211,7 +1279,7 @@ function setupPageGestures() {
     if (preview) preview.style.transform = 'translate3d(' + (travel - swipe.direction * width) + 'px, 0, 0)';
   };
   pageCanvas.addEventListener('pointerdown', (event) => {
-    if (state.view !== 'page' || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav')) return;
+    if (state.view !== 'page' || useScroll() || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav')) return;
     state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     state.gesture.startX = event.clientX;
     state.gesture.startY = event.clientY;
@@ -1308,8 +1376,12 @@ function setupPageGestures() {
   };
   pageCanvas.addEventListener('pointercancel', cancel);
   pageCanvas.addEventListener('lostpointercapture', cancel);
+  pageCanvas.addEventListener('click', (event) => {
+    if (!useScroll() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) return;
+    setControlsVisible(document.body.classList.contains('chrome-hidden'));
+  });
   pageCanvas.addEventListener('wheel', (event) => {
-    if (!(event.ctrlKey || event.metaKey)) return;
+    if (useScroll() || !(event.ctrlKey || event.metaKey)) return;
     event.preventDefault();
     const bounds = pageCanvas.getBoundingClientRect();
     setZoom(state.zoom.scale + (event.deltaY < 0 ? .25 : -.25), event.clientX - bounds.left, event.clientY - bounds.top);
@@ -1322,14 +1394,9 @@ function nextPageIndex() { return !useSpread() ? state.page + 1 : state.page ===
 $('#previous-page').addEventListener('click', () => setPage(previousPageIndex()));
 $('#view-mode-toggle').addEventListener('click', (event) => {
   const option = event.target.closest('[data-view-mode]');
-  if (!option) return;
-  const currentPage = state.page;
-  state.singlePageMode = option.dataset.viewMode === 'single';
-  localStorage.setItem('reader-single-page', String(state.singlePageMode));
-  state.page = state.singlePageMode ? currentPage : spreadStart(currentPage);
-  renderPageCanvas();
-  renderPageControls();
+  if (option) setLayout(option.dataset.viewMode);
 });
+$('#page-layout-toggle').addEventListener('click', () => setLayout(useScroll() ? 'single' : 'scroll'));
 $('#next-page').addEventListener('click', () => setPage(nextPageIndex()));
 $('#page-contents').addEventListener('click', (event) => openPanel('contents', event.currentTarget));
 $('#page-number').addEventListener('click', (event) => openPanel('pages', event.currentTarget));
@@ -1513,12 +1580,16 @@ window.addEventListener('keydown', (event) => {
   if (state.view === 'page' && event.key === 'ArrowRight') setPage(nextPageIndex());
   if (state.view === 'page' && event.key === 'Home') setPage(0);
   if (state.view === 'page' && event.key === 'End') setPage(state.issue.pages.length - 1);
-  if (state.view === 'page' && (event.key === '+' || event.key === '=')) setZoom(state.zoom.scale + .5);
-  if (state.view === 'page' && event.key === '-') setZoom(state.zoom.scale - .5);
+  if (state.view === 'page' && !useScroll() && (event.key === '+' || event.key === '=')) setZoom(state.zoom.scale + .5);
+  if (state.view === 'page' && !useScroll() && event.key === '-') setZoom(state.zoom.scale - .5);
   if (event.key === 'Escape' && state.panel) closePanel();
 });
 window.addEventListener('popstate', () => loadIssue(currentIssueFromUrl() || state.issueKey).catch(console.error));
-window.addEventListener('resize', () => { if (state.issue) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); } if (state.panel) renderPanel(); });
+window.addEventListener('resize', () => {
+  const continuousScroll = useScroll() && !useSnap() && pageSpread.dataset.scrollIssue === state.issue?.key + ':flow';
+  if (state.issue && !continuousScroll) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); }
+  if (state.panel) renderPanel();
+});
 if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', loadVoices);
 
 document.querySelectorAll('.canvas-nav').forEach((button) => {

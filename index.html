@@ -23,8 +23,9 @@
             </button>
           </div>
           <div class="view-mode-toggle" id="view-mode-toggle" role="group" aria-label="Page layout" hidden>
-            <button class="view-mode-option" type="button" data-view-mode="single" aria-pressed="false" aria-label="Single page view"><svg class="layout-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M9 7h6M9 10h6"/></svg><span>Single</span></button>
-            <button class="view-mode-option" type="button" data-view-mode="double" aria-pressed="true" aria-label="Two-page spread view"><svg class="layout-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="2.5" y="4" width="9" height="16" rx="1"/><rect x="12.5" y="4" width="9" height="16" rx="1"/><path d="M5 8h4M15 8h4"/></svg><span>Double</span></button>
+            <button class="view-mode-option" type="button" data-view-mode="single" aria-pressed="false" aria-label="Single page view" title="Single page"><svg class="layout-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M9 7h6M9 10h6"/></svg></button>
+            <button class="view-mode-option" type="button" data-view-mode="double" aria-pressed="true" aria-label="Two-page spread view" title="Two-page spread"><svg class="layout-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="2.5" y="4" width="9" height="16" rx="1"/><rect x="12.5" y="4" width="9" height="16" rx="1"/><path d="M5 8h4M15 8h4"/></svg></button>
+            <button class="view-mode-option" type="button" data-view-mode="scroll" aria-pressed="false" aria-label="Continuous scroll view" title="Continuous scroll"><svg class="layout-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="8" rx="1"/><rect x="5" y="13.5" width="14" height="8" rx="1"/><path d="M8 6h8M8 17h8"/></svg></button>
           </div>
           <button class="subscribe-button" id="subscribe-button" type="button"><span class="subscribe-badge"><span class="premium-icon" aria-hidden="true"></span><span class="subscribe-mobile-label">Subscribe</span><span class="subscribe-desktop-label" lang="kn">ಚಂದಾದಾರರಾಗಿ</span></span></button>
           <button class="icon-button" id="menu-button" type="button" aria-label="Open menu"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
@@ -61,6 +62,7 @@
           <nav class="page-controls" id="page-controls" aria-label="Page actions">
             <button class="page-action" id="page-contents" type="button"><span class="control-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14M8 6v12" /></svg></span><span>Contents</span></button>
             <button class="page-action page-number" id="page-number" type="button"><span class="control-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg></span><span>Page 1 / 1</span></button>
+            <button class="page-action page-layout-toggle" id="page-layout-toggle" type="button" aria-pressed="false" aria-label="Vertical page scroll" title="Vertical page scroll"><span class="control-icon" aria-hidden="true"><svg class="icon layout-vertical" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1" /><path d="m9 4.5 3-2.5 3 2.5M9 19.5l3 2.5 3-2.5" /></svg><svg class="icon layout-horizontal" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1" /><path d="M4.5 9 2 12l2.5 3M19.5 9l2.5 3-2.5 3" /></svg></span></button>
             <button class="page-action" id="page-article-action" type="button" hidden><span class="control-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M4.5 6.5h11M4.5 10.5h11M4.5 14.5h7M16 12l3.5 3.5L16 19" /></svg></span><span>Read article</span></button>
           </nav>
         </section>
