@@ -10,11 +10,10 @@ const state = {
   panel: null,
   panelReturnFocus: null,
   lightbox: { open: false, index: 0, images: [], returnFocus: null },
-  editionPublication: null,
   textSize: Math.max(0, Math.min(3, Number(localStorage.getItem('reader-text-size') || 0))),
   singlePageMode: localStorage.getItem('reader-single-page') === 'true',
   saved: safeJson('reader-saved', {}),
-  theme: savedTheme === 'sepia' || savedTheme === 'dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'sepia'),
+  theme: savedTheme === 'dark' ? 'dark' : (savedTheme === 'light' || savedTheme === 'sepia' ? 'light' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')),
   zoom: { scale: 1, x: 0, y: 0 },
   speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null },
   gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velocityX: 0, lastTime: 0, pinch: null, movedUntil: 0, swipe: null },
@@ -34,7 +33,9 @@ function icon(name) {
     search: '<circle cx="10.8" cy="10.8" r="5.8" /><path d="m15.2 15.2 4.3 4.3" />',
     profile: '<circle cx="12" cy="8" r="3.2" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" />',
     saved: '<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z" />',
-    faq: '<circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 1 1 4.3 2c-1.1.8-1.8 1.2-1.8 2.6M12 17h.01" />'
+    faq: '<circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 1 1 4.3 2c-1.1.8-1.8 1.2-1.8 2.6M12 17h.01" />',
+    sun: '<circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />',
+    moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />'
   };
   return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">' + (paths[name] || '') + '</svg>';
 }
@@ -164,7 +165,7 @@ function accessComposition(page) {
 }
 
 function applyTheme() {
-  document.documentElement.dataset.theme = state.theme === 'sepia' ? 'sepia' : '';
+  document.documentElement.dataset.theme = state.theme;
   localStorage.setItem('reader-theme', state.theme);
 }
 
@@ -194,11 +195,12 @@ function displayPageLabel() {
 function renderHeader() {
   const summary = issueSummary(state.issue.key);
   const subscriber = isSubscriber();
-  const publicationCode = state.editionPublication || publication(state.issue.key);
+  const publicationCode = publication(state.issue.key);
   const publicationName = publicationCode === 'MY' ? 'Mayura' : 'Sudha';
   $('#edition-logo').src = publicationCode === 'MY' ? 'Assets/MAYURA-MAST.svg' : 'Assets/Sudha_Mast_GOLD-New Nandi.svg';
   $('#edition-logo').alt = publicationName;
   document.body.dataset.publication = publicationCode;
+  document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
   $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;
@@ -971,7 +973,8 @@ function savedMarkup() {
 }
 
 function menuMarkup() {
-  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button>';
+  const dark = state.theme === 'dark';
+  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>Dark mode</strong><small>Use dark colors</small></span><span class="theme-switch" aria-hidden="true"></span></button>';
 }
 
 function searchMarkup() {
@@ -1004,9 +1007,7 @@ function runSearch(query) {
 }
 
 function editionsMarkup() {
-  const selected = state.editionPublication || publication(state.issue.key);
-  const issues = allIssues().filter((issue) => issue.publication === selected);
-  const tabs = '<div class="edition-tabs" role="tablist" aria-label="Publication"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" role="tab" aria-label="Sudha" aria-selected="' + (selected === 'SU') + '" data-edition-publication="SU"><img src="' + appPath('Assets/Sudha_Mast_GOLD-New Nandi.svg') + '" alt="Sudha"></button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" role="tab" aria-label="Mayura" aria-selected="' + (selected === 'MY') + '" data-edition-publication="MY"><img src="' + appPath('Assets/MAYURA-MAST.svg') + '" alt="Mayura"></button></div>';
+  const issues = allIssues();
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
@@ -1016,7 +1017,7 @@ function editionsMarkup() {
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
     return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
-  return tabs + '<p class="panel-note">Choose an edition of ' + escapeHtml(publicationLabel(selected)) + '.</p><div class="edition-grid">' + cards + '</div>';
+  return '<p class="panel-note">Choose an edition.</p><div class="edition-grid">' + cards + '</div>';
 }
 
 function profileMarkup() {
@@ -1024,7 +1025,7 @@ function profileMarkup() {
 }
 
 function publicationMarkup() {
-  const selected = state.editionPublication || publication(state.issue.key);
+  const selected = publication(state.issue.key);
   return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" aria-label="Sudha" aria-pressed="' + (selected === 'SU') + '" data-publication-switch="SU"><img src="' + appPath('Assets/Sudha_Mast_GOLD-New Nandi.svg') + '" alt="Sudha"></button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" aria-label="Mayura" aria-pressed="' + (selected === 'MY') + '" data-publication-switch="MY"><img src="' + appPath('Assets/MAYURA-MAST.svg') + '" alt="Mayura"></button></div>';
 }
 
@@ -1092,7 +1093,6 @@ async function loadIssue(key) {
     if (responses[2]?.ok) tocMappings = validTocMappings(await responses[2].json(), key, coords.pages?.length || 0);
   } catch { /* mappings are optional and must not block the edition */ }
   state.issue = normalizeIssue(key, coords, responses[1]?.ok ? await responses[1].json() : {}, tocMappings);
-  state.editionPublication = publication(key);
   const params = new URLSearchParams(location.search);
   const requested = params.has('p') ? readPageNumber(params.get('p')) - 1 : Number(localStorage.getItem('reader-resume:' + key) || 0);
   state.page = Math.max(0, Math.min(requested, state.issue.pages.length - 1));
@@ -1373,16 +1373,17 @@ $('#panel-host').addEventListener('click', (event) => {
     else closePanel();
     return;
   }
-  const tab = event.target.closest('[data-edition-publication]');
-  if (tab) {
-    state.editionPublication = tab.dataset.editionPublication;
-    renderHeader();
-    renderPanel();
-    return;
-  }
   const edition = event.target.closest('[data-edition-link]');
   if (edition) { switchEdition(edition.dataset.editionLink); return; }
   const action = event.target.closest('[data-action]')?.dataset.action;
+  if (action === 'theme') {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    renderHeader();
+    renderPanel();
+    $('#panel-host [data-action="theme"]')?.focus();
+    return;
+  }
   if (action === 'search') { openPanel('search', event.target.closest('[data-action]')); return; }
   if (action === 'profile') { openPanel('profile', event.target.closest('[data-action]')); return; }
   if (action === 'saved') { openPanel('saved', event.target.closest('[data-action]')); return; }
