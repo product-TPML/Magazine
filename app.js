@@ -48,6 +48,9 @@ let scrollSyncFrame = 0;
 const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
 const preloadedPageImages = new Set();
+// Layout math uses --header-height; keep it equal to the header's rendered height.
+const appHeader = $('#app-header');
+new ResizeObserver(() => { if (appHeader.offsetHeight) document.documentElement.style.setProperty('--header-height', appHeader.offsetHeight + 'px'); }).observe(appHeader);
 
 function initialLayout() {
   const saved = localStorage.getItem('reader-page-layout');
@@ -1380,7 +1383,7 @@ function setupPageGestures() {
   pageCanvas.addEventListener('pointercancel', cancel);
   pageCanvas.addEventListener('lostpointercapture', cancel);
   pageCanvas.addEventListener('click', (event) => {
-    if (!useScroll() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) return;
+    if (!useSnap() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) return;
     setControlsVisible(document.body.classList.contains('chrome-hidden'));
   });
   pageCanvas.addEventListener('wheel', (event) => {
