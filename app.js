@@ -199,6 +199,8 @@ function renderHeader() {
   const publicationName = publicationCode === 'MY' ? 'Mayura' : 'Sudha';
   $('#edition-logo').src = publicationCode === 'MY' ? 'Assets/MAYURA-MAST.svg' : 'Assets/Sudha_Mast_GOLD-New Nandi.svg';
   $('#edition-logo').alt = publicationName;
+  $('#text-edition-logo').src = $('#edition-logo').src;
+  $('#text-edition-logo').alt = publicationName + ' magazine';
   document.body.dataset.publication = publicationCode;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
   $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
