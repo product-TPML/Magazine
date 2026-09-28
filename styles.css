@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --brand-sudha: #e61920;
+  --brand-sudha: #6e1318;
   --sudha-dark-bg: #21191a;
   --sudha-dark-canvas: #1a1415;
   --sudha-dark-surface: #2b2222;
@@ -110,8 +110,8 @@ body[data-publication="SU"] {
   --header-background: var(--brand-sudha);
   --header-foreground: #fff;
   --header-muted: #fff;
-  --header-border: rgba(255, 255, 255, .3);
-  --header-hover: rgba(255, 255, 255, .16);
+  --header-border: rgba(240, 201, 37, .28);
+  --header-hover: rgba(255, 255, 255, .1);
   --header-focus: #fff;
   --header-toggle-fill: #fff;
   --header-toggle-ink: var(--brand-sudha);
