@@ -439,6 +439,24 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 .paywall-login button { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 .25rem; color: #fff; background: none; border: 0; font-weight: 600; }
 .article-content .paywall-login img { width: 14px; height: 14px; }
 @media (min-width: 768px) { .paywall { padding: 24px 28px 28px; } .paywall-cta { align-self: center; max-width: 26rem; } }
+/* Premium pages in the page view: blurred thumbnail with a compact paywall card */
+.page-slot.is-locked .page-zoom { overflow: hidden; }
+.page-slot.is-locked .page-zoom > img { filter: blur(6px) saturate(.9); transform: scale(1.06); }
+.locked-page { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; padding: 4%; background: color-mix(in srgb, var(--bg) 25%, transparent); }
+.locked-page-card { display: flex; flex-direction: column; width: min(92%, 22rem); max-height: 100%; padding: 16px; overflow: auto; color: #fff; background: linear-gradient(132deg, var(--paywall-from) 37.64%, var(--paywall-to) 91.6%); border-radius: 9px; box-shadow: 0 0 8px rgba(0, 0, 0, .25); text-align: left; user-select: text; }
+.locked-chip { display: inline-flex; align-self: flex-start; align-items: center; gap: .3rem; margin-bottom: 10px; padding: .2rem .55rem; color: #60410b; background: #f5e9cc; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.locked-chip .icon { width: .95rem; height: .95rem; }
+.locked-title { margin: 0 0 8px; color: #ffd34d; font-family: var(--font-body); font-size: 18px; font-weight: 600; line-height: 28px; }
+.locked-lede { margin: 0 0 14px; color: #fff; font-size: 14px; line-height: 20px; }
+.locked-page-card .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; margin: 6px 0 0; color: #fff; font-size: 15px; }
+.locked-page-card .paywall-login img { width: 14px; height: 14px; }
+.locked-free { display: grid; gap: .1rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .2); font-size: 14px; }
+.locked-free > span { color: rgba(255, 255, 255, .8); }
+.locked-free-article { min-height: 44px; padding: 0; color: #fff; background: none; border: 0; text-align: left; text-decoration: underline; text-underline-offset: .18em; }
+.page-thumb.is-locked img { filter: saturate(.7) brightness(.92); }
+.page-lock-badge { position: absolute; top: .25rem; right: .25rem; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; color: #60410b; background: #f5e9cc; border-radius: 50%; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+.page-lock-badge .icon, .page-locked-label .icon { width: .85rem; height: .85rem; }
+.page-locked-label { display: inline-flex; align-items: center; gap: .25rem; color: var(--premium-ink); font-weight: 700; }
 .account-state-control { display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 44px; margin-bottom: 1rem; color: var(--muted); font-size: .78rem; }
 .account-state-control select { min-height: 44px; max-width: 12rem; padding: .5rem .7rem; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: .5rem; }
 .panel-row.account-state-control { justify-content: flex-start; margin: 0; color: var(--text); font-size: inherit; }

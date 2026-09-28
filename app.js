@@ -35,6 +35,7 @@ function icon(name) {
     saved: '<path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z" />',
     faq: '<circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.6 2.6 0 1 1 4.3 2c-1.1.8-1.8 1.2-1.8 2.6M12 17h.01" />',
     sun: '<circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />',
     moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />'
   };
   return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">' + (paths[name] || '') + '</svg>';
@@ -103,8 +104,14 @@ function imagePath(page, thumb = false) {
   return issuePath((thumb ? 'thumbs/' : 'pages/') + file);
 }
 
+// Free readers can't open pages that carry a Premium article; those pages only ever load the thumbnail.
+function isPageLocked(index) { return !isSubscriber() && articlesForPage(index).some(isPaidArticle); }
+function lockedPages() { return state.issue.pages.map((page, index) => index).filter(isPageLocked); }
+function pageImageSrc(index) { return imagePath(state.issue.pages[index], isPageLocked(index)); }
+
 function preloadNearbyPages(index) {
   for (let pageIndex = Math.max(0, index - 3); pageIndex <= Math.min(state.issue.pages.length - 1, index + 3); pageIndex += 1) {
+    if (isPageLocked(pageIndex)) continue;
     const src = imagePath(state.issue.pages[pageIndex]);
     if (preloadedPageImages.has(src)) continue;
     preloadedPageImages.add(src);
@@ -153,7 +160,7 @@ function setAccountState(value) {
   renderAccountUI();
   if (state.panel === 'profile' || state.panel === 'menu') renderPanel();
   if (state.view === 'text' && state.articleId) openArticle(state.articleId, { push: false });
-  else { renderHeader(); if (state.panel) renderPanel(); }
+  else { renderPageCanvas(); renderPageControls(); renderHeader(); if (state.panel) renderPanel(); }
 }
 function renderAccountUI() {
   document.body.dataset.account = state.account;
@@ -287,7 +294,7 @@ function renderZoom() {
 }
 
 function maxPageZoom() {
-  const images = [...pageSpread.querySelectorAll('.page-zoom img')];
+  const images = [...pageSpread.querySelectorAll('.page-slot:not(.is-locked) .page-zoom img')];
   if (!images.length) return 1;
   return Math.min(4, ...images.map((image) => {
     if (!image.naturalWidth || !image.naturalHeight || !image.clientWidth || !image.clientHeight) return 1;
@@ -360,11 +367,19 @@ function buildPageSlot(index) {
   image.alt = 'Page ' + (index + 1);
   image.loading = Math.abs(index - state.page) <= 1 ? 'eager' : 'lazy';
   image.addEventListener('load', () => { if (image.isConnected && !useScroll()) renderZoom(); });
-  image.src = imagePath(page);
+  const locked = isPageLocked(index);
+  slot.classList.toggle('is-locked', locked);
+  image.src = pageImageSrc(index);
   const placeholder = document.createElement('span');
   placeholder.className = 'page-placeholder';
   placeholder.textContent = 'Page ' + (index + 1);
   zoom.append(image, placeholder);
+  if (locked) {
+    zoom.insertAdjacentHTML('beforeend', lockedPageMarkup(index));
+    art.append(zoom);
+    slot.append(art);
+    return slot;
+  }
   page.articles.forEach((hotspot) => {
     const button = document.createElement('button');
     button.className = 'hotspot';
@@ -409,7 +424,7 @@ function renderPageCanvas() {
 
 function renderScrollCanvas() {
   const snap = useSnap();
-  const key = state.issue.key + (snap ? ':snap' : ':flow');
+  const key = state.issue.key + (snap ? ':snap' : ':flow') + ':' + lockedPages().join(',');
   if (pageSpread.dataset.scrollIssue !== key) {
     pageCanvas.classList.add('is-scroll');
     pageCanvas.classList.toggle('is-snap', snap);
@@ -579,11 +594,20 @@ function articlePreviewMarkup(html, article) {
   return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p class="paywall-preview">' + escapeHtml(words.join(' ')) + '…</p>' + paywallMarkup() + footer;
 }
 
-function paywallMarkup() {
-  const benefit = (file, text) => '<li><img src="' + appPath('Assets/' + file) + '" alt=""><span>' + text + '</span></li>';
-  const copy = publication(state.issue.key) === 'MY'
+function paywallCopy() {
+  return publication(state.issue.key) === 'MY'
     ? { title: 'ಮಯೂರ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ತಿಂಗಳು ಕಥೆ, ಕವನ, ಪ್ರಬಂಧಗಳ ಪೂರ್ಣ ಸಂಚಿಕೆ ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಮಯೂರ ಮಾಸಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' }
     : { title: 'ಸುಧಾ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ವಾರ ಕಥೆ, ಧಾರಾವಾಹಿ, ಲೇಖನಗಳ ಪೂರ್ಣ ಓದು ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಸುಧಾ ವಾರಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' };
+}
+
+function paywallActionsMarkup() {
+  return '<button class="paywall-cta" type="button"><span class="premium-icon" aria-hidden="true"></span><span>ಈಗ ಚಂದಾದಾರರಾಗಿ</span></button>'
+    + '<p class="paywall-login">ಈಗಾಗಲೇ ಸದಸ್ಯರೇ? <button class="paywall-login-button" type="button"><span>ಲಾಗಿನ್ ಮಾಡಿ</span><img src="' + appPath('Assets/icon-login-arrow.svg') + '" alt=""></button></p>';
+}
+
+function paywallMarkup() {
+  const benefit = (file, text) => '<li><img src="' + appPath('Assets/' + file) + '" alt=""><span>' + text + '</span></li>';
+  const copy = paywallCopy();
   return '<section class="paywall" aria-label="Subscribe to continue reading">'
     + '<img class="paywall-watermark" src="' + appPath('Assets/pv-nandi-watermark.svg') + '" alt="" aria-hidden="true">'
     + '<h2 class="paywall-title">' + copy.title + '</h2>'
@@ -593,9 +617,22 @@ function paywallMarkup() {
     + benefit('icon-epaper.svg', 'ಹಿಂದಿನ ಎಲ್ಲಾ ಸಂಚಿಕೆಗಳ ಇ-ಆವೃತ್ತಿ')
     + benefit('icon-ad-lite.svg', 'ಜಾಹೀರಾತು - ಲೈಟ್ ಅನುಭವ')
     + '</ul>'
-    + '<button class="paywall-cta" id="article-subscribe-button" type="button"><span class="premium-icon" aria-hidden="true"></span><span>ಈಗ ಚಂದಾದಾರರಾಗಿ</span></button>'
-    + '<p class="paywall-login">ಈಗಾಗಲೇ ಸದಸ್ಯರೇ? <button id="paywall-login" type="button"><span>ಲಾಗಿನ್ ಮಾಡಿ</span><img src="' + appPath('Assets/icon-login-arrow.svg') + '" alt=""></button></p>'
+    + paywallActionsMarkup()
     + '</section>';
+}
+
+function lockedPageMarkup(index) {
+  const copy = paywallCopy();
+  const free = articlesForPage(index).filter((article) => !isPaidArticle(article));
+  const freeList = free.length
+    ? '<div class="locked-free"><span>ಉಚಿತವಾಗಿ ಓದಿ:</span>' + free.map((article) => '<button class="locked-free-article" type="button" data-article="' + article.id + '">' + escapeHtml(article.title || 'Article ' + article.id) + '</button>').join('') + '</div>'
+    : '';
+  return '<div class="locked-page"><section class="locked-page-card" aria-label="Page ' + (index + 1) + ' is for subscribers">'
+    + '<span class="locked-chip">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ ಪುಟ</span>'
+    + '<h2 class="locked-title">' + copy.title + '</h2>'
+    + '<p class="locked-lede">' + copy.lede + '</p>'
+    + paywallActionsMarkup() + freeList
+    + '</section></div>';
 }
 
 function articleMarkup(html, article) {
@@ -1017,7 +1054,12 @@ function pageListMarkup() {
 
 function pagesMarkup() {
   const scrub = state.issue.pages.length > 80 ? '<label class="page-scrub">Page <output id="scrub-value">' + (state.page + 1) + '</output> / ' + state.issue.pages.length + '<input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="Jump to page"></label>' : '';
-  const grid = state.issue.pages.map((page, index) => '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + '" type="button" data-page-link="' + index + '" aria-label="Go to page ' + (index + 1) + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span><strong>Page ' + (index + 1) + '</strong><small>' + accessComposition(page) + '</small></button>').join('');
+  const grid = state.issue.pages.map((page, index) => {
+    const locked = isPageLocked(index);
+    return '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + (locked ? ' is-locked' : '') + '" type="button" data-page-link="' + index + '" aria-label="Go to page ' + (index + 1) + (locked ? ' (Premium, locked)' : '') + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span>'
+      + (locked ? '<span class="page-lock-badge" aria-hidden="true">' + icon('lock') + '</span>' : '')
+      + '<strong>Page ' + (index + 1) + '</strong><small>' + (locked ? '<span class="page-locked-label">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ</span>' : accessComposition(page)) + '</small></button>';
+  }).join('');
   return scrub + '<div class="page-grid">' + grid + '</div>';
 }
 
@@ -1275,7 +1317,9 @@ function setupPageGestures() {
     preview.querySelectorAll('.hotspot').forEach((hotspot) => hotspot.remove());
     const image = preview.querySelector('img');
     image.alt = 'Page ' + (page + 1);
-    image.src = imagePath(state.issue.pages[page]);
+    preview.querySelector('.locked-page')?.remove();
+    preview.classList.toggle('is-locked', isPageLocked(page));
+    image.src = pageImageSrc(page);
     pageSpread.append(preview);
     state.gesture.swipe = { direction, page };
     pageSpread.classList.add('page-dragging');
@@ -1292,7 +1336,7 @@ function setupPageGestures() {
     if (preview) preview.style.transform = 'translate3d(' + (travel - swipe.direction * width) + 'px, 0, 0)';
   };
   pageCanvas.addEventListener('pointerdown', (event) => {
-    if (state.view !== 'page' || useScroll() || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav')) return;
+    if (state.view !== 'page' || useScroll() || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav, .locked-page-card')) return;
     state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     state.gesture.startX = event.clientX;
     state.gesture.startY = event.clientY;
@@ -1390,7 +1434,7 @@ function setupPageGestures() {
   pageCanvas.addEventListener('pointercancel', cancel);
   pageCanvas.addEventListener('lostpointercapture', cancel);
   pageCanvas.addEventListener('click', (event) => {
-    if (!useSnap() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) return;
+    if (!useSnap() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls, .locked-page-card')) return;
     setControlsVisible(document.body.classList.contains('chrome-hidden'));
   });
   pageCanvas.addEventListener('wheel', (event) => {
@@ -1434,7 +1478,7 @@ document.addEventListener('change', (event) => {
   if (event.target.id === 'account-state-menu') setAccountState(event.target.value);
 });
 document.addEventListener('click', (event) => {
-  const signIn = event.target.closest('#article-subscribe-button, #paywall-login');
+  const signIn = event.target.closest('.paywall-cta, .paywall-login-button');
   if (signIn) openPanel('profile', signIn);
 });
 $('#article-font-smaller').addEventListener('click', () => { state.textSize = Math.max(0, state.textSize - 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
@@ -1511,6 +1555,8 @@ $('#article-content').addEventListener('keydown', (event) => {
   }
 });
 pageSpread.addEventListener('click', (event) => {
+  const freeArticle = event.target.closest('.locked-free-article');
+  if (freeArticle) { openArticle(freeArticle.dataset.article); return; }
   const hotspot = event.target.closest('.hotspot');
   if (!hotspot || state.zoom.scale > 1.01 || performance.now() <= state.gesture.movedUntil) return;
   if (hotspot.dataset.tocTarget) setPage(Number(hotspot.dataset.tocTarget) - 1, { push: true });
@@ -1606,7 +1652,7 @@ window.addEventListener('keydown', (event) => {
 });
 window.addEventListener('popstate', () => loadIssue(currentIssueFromUrl() || state.issueKey).catch(console.error));
 window.addEventListener('resize', () => {
-  const continuousScroll = useScroll() && !useSnap() && pageSpread.dataset.scrollIssue === state.issue?.key + ':flow';
+  const continuousScroll = useScroll() && !useSnap() && pageSpread.dataset.scrollIssue?.startsWith(state.issue?.key + ':flow');
   if (state.issue && !continuousScroll) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); }
   if (state.panel) renderPanel();
 });
