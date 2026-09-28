@@ -139,7 +139,7 @@ function articleHref(id) {
 function pageHref(index) { return readerUrl(state.issue.key, index + 1); }
 function articleAccess(article) {
   const words = String(article?.plainText || '').trim().split(/\s+/).filter(Boolean).length;
-  return article?.plainText && words < 200 ? 'Free' : 'Premium';
+  return article?.plainText && words < 100 ? 'Free' : 'Premium';
 }
 function accessClass(article) { return articleAccess(article).toLowerCase(); }
 function isSubscriber() { return state.account === 'subscriber'; }
@@ -151,14 +151,14 @@ function setAccountState(value) {
   localStorage.setItem('reader-account', state.account);
   stopSpeech();
   renderAccountUI();
-  if (state.panel === 'profile') renderPanel();
+  if (state.panel === 'profile' || state.panel === 'menu') renderPanel();
   if (state.view === 'text' && state.articleId) openArticle(state.articleId, { push: false });
   else { renderHeader(); if (state.panel) renderPanel(); }
 }
 function renderAccountUI() {
   document.body.dataset.account = state.account;
-  const selects = [$('#account-state'), $('#account-state-profile')].filter(Boolean);
-  selects.forEach((select) => { select.value = state.account; });
+  const select = $('#account-state-menu');
+  if (select) select.value = state.account;
   renderHeader();
 }
 function savedKey(id) { return state.issue ? state.issue.key + ':' + String(id) : String(id); }
@@ -213,6 +213,8 @@ function renderHeader() {
   $('#edition-logo').alt = publicationName;
   $('#text-edition-logo').src = $('#edition-logo').src;
   $('#text-edition-logo').alt = publicationName + ' magazine';
+  const homeHref = readerUrl(latestIssueKey(), 1);
+  document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + ' home: latest edition cover'); });
   document.body.dataset.publication = publicationCode;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
   $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
@@ -225,10 +227,6 @@ function renderHeader() {
   $('#save-button').classList.toggle('is-active', saved);
   $('#save-button').setAttribute('aria-label', saved ? 'Remove saved article' : 'Save article');
   document.documentElement.style.setProperty('--article-size', [1.125, 1.25, 1.4, 1.55][state.textSize] + 'rem');
-  const accountSelect = $('#account-state');
-  if (accountSelect && accountSelect.value !== state.account) accountSelect.value = state.account;
-  const profileSelect = $('#account-state-profile');
-  if (profileSelect && profileSelect.value !== state.account) profileSelect.value = state.account;
   document.body.dataset.account = state.account;
 }
 
@@ -501,7 +499,6 @@ async function openArticle(articleId, { push = true } = {}) {
   renderViewState();
   renderHeader();
   $('#article-content').innerHTML = '<p class="loading">Loading article…</p>';
-  renderArticleAccess(null, false);
   $('#article-scroll').scrollTop = 0;
   try {
     const response = await fetch(issuePath('articles/' + article.id + '.html'));
@@ -513,7 +510,6 @@ async function openArticle(articleId, { push = true } = {}) {
     }
     const preview = needsPreview(article);
     $('#article-content').innerHTML = preview ? articlePreviewMarkup(html, article) : articleMarkup(html, article);
-    renderArticleAccess(article, preview);
     prepareSpeech();
     bindImageZoom();
     renderArticleFooterCards();
@@ -524,30 +520,6 @@ async function openArticle(articleId, { push = true } = {}) {
   renderHeader();
   renderArticleControls();
   renderListenPlayer();
-}
-
-function renderArticleAccess(article, isPreview) {
-  const host = $('#article-access');
-  if (!host) return;
-  if (!article) { host.hidden = true; return; }
-  host.hidden = false;
-  const status = $('#article-access-status');
-  if (status) {
-    if (isSubscriber()) {
-      status.textContent = '';
-      status.hidden = true;
-    } else {
-      status.hidden = false;
-      status.textContent = isPreview ? 'Premium preview · Subscribe for full access' : articleAccess(article) + ' article';
-      status.className = 'access-status access-' + accessClass(article);
-    }
-  }
-  const boundary = $('#article-preview-boundary');
-  if (boundary) boundary.hidden = !isPreview;
-  const cta = $('#article-paywall-cta');
-  if (cta) cta.hidden = !isPreview;
-  const select = $('#account-state');
-  if (select && select.value !== state.account) select.value = state.account;
 }
 
 function sanitizeArticleRoot(html, article) {
@@ -604,7 +576,26 @@ function articlePreviewMarkup(html, article) {
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
   const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
   const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
-  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p>' + escapeHtml(words.join(' ')) + '</p>' + footer;
+  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p class="paywall-preview">' + escapeHtml(words.join(' ')) + '…</p>' + paywallMarkup() + footer;
+}
+
+function paywallMarkup() {
+  const benefit = (file, text) => '<li><img src="' + appPath('Assets/' + file) + '" alt=""><span>' + text + '</span></li>';
+  const copy = publication(state.issue.key) === 'MY'
+    ? { title: 'ಮಯೂರ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ತಿಂಗಳು ಕಥೆ, ಕವನ, ಪ್ರಬಂಧಗಳ ಪೂರ್ಣ ಸಂಚಿಕೆ ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಮಯೂರ ಮಾಸಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' }
+    : { title: 'ಸುಧಾ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ವಾರ ಕಥೆ, ಧಾರಾವಾಹಿ, ಲೇಖನಗಳ ಪೂರ್ಣ ಓದು ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಸುಧಾ ವಾರಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' };
+  return '<section class="paywall" aria-label="Subscribe to continue reading">'
+    + '<img class="paywall-watermark" src="' + appPath('Assets/pv-nandi-watermark.svg') + '" alt="" aria-hidden="true">'
+    + '<h2 class="paywall-title">' + copy.title + '</h2>'
+    + '<p class="paywall-lede">' + copy.lede + '</p>'
+    + '<ul class="paywall-benefits">'
+    + benefit('icon-premium-stories.svg', 'ಎಲ್ಲಾ ಪ್ರೀಮಿಯಂ ಲೇಖನಗಳ ಪೂರ್ಣ ಓದು')
+    + benefit('icon-epaper.svg', 'ಹಿಂದಿನ ಎಲ್ಲಾ ಸಂಚಿಕೆಗಳ ಇ-ಆವೃತ್ತಿ')
+    + benefit('icon-ad-lite.svg', 'ಜಾಹೀರಾತು - ಲೈಟ್ ಅನುಭವ')
+    + '</ul>'
+    + '<button class="paywall-cta" id="article-subscribe-button" type="button"><span class="premium-icon" aria-hidden="true"></span><span>ಈಗ ಚಂದಾದಾರರಾಗಿ</span></button>'
+    + '<p class="paywall-login">ಈಗಾಗಲೇ ಸದಸ್ಯರೇ? <button id="paywall-login" type="button"><span>ಲಾಗಿನ್ ಮಾಡಿ</span><img src="' + appPath('Assets/icon-login-arrow.svg') + '" alt=""></button></p>'
+    + '</section>';
 }
 
 function articleMarkup(html, article) {
@@ -1050,7 +1041,8 @@ function savedMarkup() {
 
 function menuMarkup() {
   const dark = state.theme === 'dark';
-  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>Dark mode</strong><small>Use dark colors</small></span><span class="theme-switch" aria-hidden="true"></span></button>';
+  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>Dark mode</strong><small>Use dark colors</small></span><span class="theme-switch" aria-hidden="true"></span></button>'
+    + '<div class="menu-divider"></div><label class="panel-row account-state-control" for="account-state-menu"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Reader mode</strong><small>Prototype setting</small></span><select id="account-state-menu" name="account-state-menu"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>Free reader</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>Subscriber</option></select></label>';
 }
 
 function searchMarkup() {
@@ -1097,7 +1089,7 @@ function editionsMarkup() {
 }
 
 function profileMarkup() {
-  return '<div class="panel-section"><h3>My Profile</h3><p class="panel-row">Sign in to manage subscription and account details.</p><label class="account-state-control" for="account-state-profile">Reader mode (prototype)<select id="account-state-profile" name="account-state-profile"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>Free reader</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>Subscriber</option></select></label></div>';
+  return '<div class="panel-section"><h3>My Profile</h3><p class="panel-row">Sign in to manage subscription and account details.</p></div>';
 }
 
 function publicationMarkup() {
@@ -1212,6 +1204,21 @@ async function shareCurrent() {
 
 function showPanelNote(message) {
   if ($('#panel-body')) $('#panel-body').insertAdjacentHTML('afterbegin', '<p class="panel-note" role="status">' + escapeHtml(message) + '</p>');
+}
+
+function latestIssueKey() {
+  const code = publication(state.issue.key);
+  return allIssues().find((item) => item.publication === code && item.available !== false)?.key || state.issue.key;
+}
+
+// Header logo: open the cover of the newest edition of the current publication.
+function goHome() {
+  const key = latestIssueKey();
+  stopSpeech();
+  savePosition();
+  closePanel();
+  history.pushState({}, '', readerUrl(key, 1));
+  loadIssue(key).catch(console.error);
 }
 
 function switchEdition(key) {
@@ -1418,13 +1425,17 @@ $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.c
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 $('#subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 $('#text-subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+$('#account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+$('#text-account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 $('#back-button').addEventListener('click', returnToPage);
+document.querySelectorAll('.publication-home').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); goHome(); }));
 $('#save-button').addEventListener('click', toggleSaved);
 document.addEventListener('change', (event) => {
-  if (event.target.id === 'account-state' || event.target.id === 'account-state-profile') setAccountState(event.target.value);
+  if (event.target.id === 'account-state-menu') setAccountState(event.target.value);
 });
 document.addEventListener('click', (event) => {
-  if (event.target.closest('#article-subscribe-button')) openPanel('profile', event.target.closest('#article-subscribe-button'));
+  const signIn = event.target.closest('#article-subscribe-button, #paywall-login');
+  if (signIn) openPanel('profile', signIn);
 });
 $('#article-font-smaller').addEventListener('click', () => { state.textSize = Math.max(0, state.textSize - 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
 $('#article-font-larger').addEventListener('click', () => { state.textSize = Math.min(3, state.textSize + 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
@@ -1566,10 +1577,13 @@ $('#article-scroll').addEventListener('scroll', () => {
   const max = element.scrollHeight - element.clientHeight;
   $('#progress-bar').style.width = (max ? (element.scrollTop / max) * 100 : 0) + '%';
   const last = Number(element.dataset.lastScroll || 0);
-  const nearTop = element.scrollTop < 32;
-  const nearBottom = max - element.scrollTop < 32;
-  const scrollingUp = element.scrollTop < last;
+  // Ignore small moves: toggling the chrome resizes this scroller and nudges scrollTop.
+  if (Math.abs(element.scrollTop - last) < 8) return;
   element.dataset.lastScroll = element.scrollTop;
+  const nearTop = element.scrollTop < 32;
+  // Wider than the header height, so showing the chrome here can't push us back out of the zone.
+  const nearBottom = max - element.scrollTop < 160;
+  const scrollingUp = element.scrollTop < last;
   if (state.view === 'text') setControlsVisible(nearTop || nearBottom || scrollingUp);
 });
 $('#article-scroll').addEventListener('click', () => { if (state.view === 'text') setControlsVisible(true); });

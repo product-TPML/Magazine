@@ -6,6 +6,8 @@
   color-scheme: dark;
   --brand-sudha: #6e1318;
   --brand-mayura: #0f3d3b;
+  --paywall-from: #3a080c;
+  --paywall-to: var(--brand-sudha);
   --sudha-dark-bg: #21191a;
   --sudha-dark-canvas: #1a1415;
   --sudha-dark-surface: #2b2222;
@@ -136,6 +138,8 @@ body[data-publication="MY"] {
   --header-focus: #fff;
   --header-toggle-fill: #fff;
   --header-toggle-ink: var(--brand-mayura);
+  --paywall-from: #06201e;
+  --paywall-to: var(--brand-mayura);
 }
 
 :root[data-theme="light"] body[data-publication="SU"] {
@@ -204,7 +208,11 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .header-row { display: flex; align-items: center; gap: .5rem; width: 100%; }
 .edition-summary { display: flex; align-items: center; min-width: 0; flex: 1 1 auto; gap: .35rem; }
 .publication-logo { display: block; flex: 0 1 auto; width: clamp(3.5rem, 15vw, 5rem); max-width: 100%; height: auto; object-fit: contain; }
-.publication-control { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .35rem; min-width: 44px; min-height: 44px; padding: 0; color: var(--header-foreground); background: transparent; border: 1px solid transparent; border-radius: .65rem; }
+.publication-home { display: inline-flex; flex: 0 1 auto; align-items: center; min-width: 44px; min-height: 44px; padding: 0 .25rem; border-radius: .5rem; }
+.publication-home:hover { background: var(--header-hover); }
+.publication-control { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: .35rem; min-width: 32px; min-height: 44px; padding: 0; color: var(--header-foreground); background: transparent; border: 1px solid transparent; border-radius: .65rem; }
+.publication-control { margin-left: -.35rem; }
+.app-header .account-button { padding-inline: .3rem; }
 .publication-control:hover { background: var(--header-hover); }
 .publication-control .icon { flex: 0 0 auto; width: .9rem; height: .9rem; color: var(--header-muted); }
 .edition-control {
@@ -241,6 +249,17 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   font-weight: 800;
 }
 .subscribe-badge { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .55rem .65rem; color: var(--subscription-ink); background: var(--subscription-fill); border: 1px solid var(--subscription-border); border-radius: 4px; box-shadow: 0 2px 0 var(--subscription-shadow); white-space: nowrap; }
+.account-icon { display: block; width: 1.72rem; height: 1.375rem; background-color: currentColor; -webkit-mask: url("Assets/icon-account.svg") center / contain no-repeat; mask: url("Assets/icon-account.svg") center / contain no-repeat; }
+@media (max-width: 479px) {
+  .page-header.header-row, .story-header-actions { gap: .15rem; }
+  .app-header { padding-inline: .5rem; }
+  .app-header .icon-button { display: grid; place-items: center; width: 36px; min-width: 36px; min-height: 44px; padding: 0; }
+  .app-header .account-button { width: 34px; min-width: 34px; }
+  .publication-control { margin-left: -.2rem; }
+  .subscribe-badge { padding: .5rem; gap: .3rem; }
+  .publication-control { min-width: 28px; width: 28px; justify-content: center; }
+  .publication-home { padding-inline: .15rem; }
+}
 .premium-icon { display: block; flex: 0 0 auto; width: 1.25rem; height: 1.25rem; background-color: currentColor; -webkit-mask: url("Assets/premium-icon.svg") center / contain no-repeat; mask: url("Assets/premium-icon.svg") center / contain no-repeat; }
 .subscribe-desktop-label { display: inline; }
 .subscribe-mobile-label { display: none; }
@@ -402,17 +421,26 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .article-content .access-status { display: inline-block; margin: 0 0 .8rem; padding: .25rem .5rem; color: var(--action-ink); background: var(--action); border-radius: .3rem; font-size: .72em; font-weight: 800; text-transform: uppercase; }
 .article-content .access-status.access-free, .status-pill.access-free { color: var(--free-ink); background: var(--free-fill); }
 .article-content .access-status.access-premium, .status-pill.access-premium { color: var(--premium-ink); background: var(--premium-fill); }
-.article-access { margin: 2.5rem 0 0; padding: 1rem 0 calc(1rem + var(--safe-bottom)); border-top: 1px solid var(--line); }
+.paywall-preview { margin-bottom: 0; }
+.paywall { position: relative; display: flex; flex-direction: column; margin: 0 0 2rem; padding: 16px 16px 24px; overflow: hidden; color: #fff; background: linear-gradient(132deg, var(--paywall-from) 37.64%, var(--paywall-to) 91.6%); border-radius: 9px; box-shadow: 0 -54px 28.2px color-mix(in srgb, var(--bg) 81%, transparent), 0 0 8px rgba(0, 0, 0, .25); font-size: 1rem; line-height: 1.15; }
+.paywall > :not(.paywall-watermark) { position: relative; }
+.article-content .paywall img { margin: 0; border-radius: 0; }
+.article-content .paywall-watermark { position: absolute; right: 0; bottom: 6.75rem; width: 225px; max-width: 58%; height: auto; pointer-events: none; }
+.article-content .paywall-title { margin: 0 0 10px; color: #ffd34d; font-family: var(--font-body); font-size: 22px; font-weight: 600; line-height: 38px; }
+.article-content .paywall-lede { margin: 0 0 17px; color: #fff; font-size: 16px; line-height: 22px; }
+.article-content .paywall-benefits { display: grid; gap: 20px; margin: 0 0 18px; padding: 0; list-style: none; }
+.article-content .paywall-benefits li { margin: 0; padding: 0; display: flex; align-items: center; gap: 14px; max-width: 13rem; color: #fff; font-size: 16px; line-height: 20px; }
+.article-content .paywall-benefits img { flex: 0 0 32px; width: 32px; height: 32px; object-fit: contain; }
+.paywall-cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 51px; padding: 10px 0; color: #000; background: linear-gradient(100deg, #b78423 -.4%, #fefb62 81.45%, #f0b00b 106.61%); border: 0; border-radius: 6px; box-shadow: 0 0 8px rgba(0, 0, 0, .08); font-size: 16px; font-weight: 600; }
+.paywall-cta .premium-icon { width: 1.5rem; height: 1.5rem; }
+.article-content .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; margin: 10px 0 0; color: #fff; font-size: 16px; }
+.paywall-login button { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 .25rem; color: #fff; background: none; border: 0; font-weight: 600; }
+.article-content .paywall-login img { width: 14px; height: 14px; }
+@media (min-width: 768px) { .paywall { padding: 24px 28px 28px; } .paywall-cta { align-self: center; max-width: 26rem; } }
 .account-state-control { display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 44px; margin-bottom: 1rem; color: var(--muted); font-size: .78rem; }
 .account-state-control select { min-height: 44px; max-width: 12rem; padding: .5rem .7rem; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: .5rem; }
-.article-access > .access-status { margin: 0 0 .8rem; }
-.preview-boundary { display: flex; align-items: center; gap: .65rem; margin: 1.25rem 0; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.preview-boundary::before, .preview-boundary::after { flex: 1; height: 1px; background: var(--rule); content: ''; }
-.paywall-cta { display: grid; gap: .55rem; margin-top: 1rem; padding: 1.25rem; color: var(--text); background: linear-gradient(135deg, color-mix(in srgb, var(--surface-raised) 90%, var(--premium-marker) 10%), var(--surface)); border: 1px solid color-mix(in srgb, var(--premium-marker) 40%, var(--line)); border-radius: .8rem; box-shadow: 0 .8rem 2rem var(--shadow-medium); }
-.paywall-cta h2, .paywall-cta p { margin: 0; }
-.paywall-cta h2 { font-size: 1.25rem; }
-.paywall-cta p { color: var(--muted); font-size: .9em; }
-.paywall-cta .subscribe-button { justify-self: start; min-width: 8rem; margin-top: .35rem; }
+.panel-row.account-state-control { justify-content: flex-start; margin: 0; color: var(--text); font-size: inherit; }
+.panel-row.account-state-control select { margin-left: auto; }
 .article-content .byline { margin: 0 0 1.4rem; color: var(--muted); font-size: .9em; }
 .article-content p { margin: 0 0 1em; }
 .article-content .bodytext, .article-content .bodytext p { font: inherit; }
