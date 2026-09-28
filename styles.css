@@ -183,7 +183,7 @@ button, select, input { font: inherit; }
 button, a, select { -webkit-tap-highlight-color: transparent; }
 button, a { color: inherit; }
 button { cursor: pointer; }
-.icon { display: block; width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.9; }
+.icon { display: block; width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75; }
 button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
@@ -408,7 +408,7 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 .page-action:hover, .article-action:hover { background: var(--surface-raised); }
 .page-action:active, .article-action:active, .icon-button:active, .zoom-button:active { transform: scale(.95); }
 .control-icon { display: grid; place-items: center; min-height: 1.2em; font-size: 1.15rem; line-height: 1; }
-.control-icon .icon { width: 1.1rem; height: 1.1rem; }
+.control-icon .icon { width: 1.3rem; height: 1.3rem; }
 .page-number { font-variant-numeric: tabular-nums; }
 .page-view.chrome-hidden .page-controls { transform: translateY(100%); opacity: 0; pointer-events: none; }
 .page-view.chrome-hidden .canvas-nav { opacity: 0; pointer-events: none; }
