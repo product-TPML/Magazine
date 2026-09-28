@@ -50,7 +50,7 @@ const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
 const preloadedPageImages = new Set();
 // Layout math uses --header-height; keep it equal to the header's rendered height.
 const appHeader = $('#app-header');
-new ResizeObserver(() => { if (appHeader.offsetHeight) document.documentElement.style.setProperty('--header-height', appHeader.offsetHeight + 'px'); }).observe(appHeader);
+new ResizeObserver(() => { const height = appHeader.getBoundingClientRect().height; if (height) document.documentElement.style.setProperty('--header-height', height + 'px'); }).observe(appHeader);
 
 function initialLayout() {
   const saved = localStorage.getItem('reader-page-layout');
