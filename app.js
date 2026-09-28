@@ -1052,8 +1052,30 @@ function pageListMarkup() {
   return state.issue.pages.map((page, index) => '<button class="panel-row" type="button" data-page-link="' + index + '"><span><strong>Page ' + (index + 1) + '</strong><small>' + accessComposition(page) + '</small></span></button>').join('');
 }
 
+function scrubLabel(index) {
+  return 'Page <output id="scrub-value">' + (index + 1) + '</output> / ' + state.issue.pages.length + (isPageLocked(index) ? ' <span class="page-scrub-lock">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ</span>' : '');
+}
+
+// Slider only picks a page: sync the label and grid, and wait for Go (or Enter) to navigate.
+function previewScrubPage(value) {
+  const index = Number(value) - 1;
+  $('.page-scrub-label').innerHTML = scrubLabel(index);
+  document.querySelectorAll('.page-thumb.is-target').forEach((thumb) => thumb.classList.remove('is-target'));
+  const thumb = document.querySelector('.page-thumb[data-page-link="' + index + '"]');
+  if (thumb) { thumb.classList.add('is-target'); thumb.scrollIntoView({ block: 'nearest' }); }
+}
+
+function goToScrubPage() {
+  const input = $('#page-scrub');
+  if (!input) return;
+  closePanel();
+  setPage(Number(input.value) - 1, { push: true });
+}
+
 function pagesMarkup() {
-  const scrub = state.issue.pages.length > 80 ? '<label class="page-scrub">Page <output id="scrub-value">' + (state.page + 1) + '</output> / ' + state.issue.pages.length + '<input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="Jump to page"></label>' : '';
+  const scrub = state.issue.pages.length > 80
+    ? '<div class="page-scrub"><label for="page-scrub"><span class="page-scrub-label">' + scrubLabel(state.page) + '</span><input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="Choose page"></label><button class="page-scrub-go" id="page-scrub-go" type="button">Go</button></div>'
+    : '';
   const grid = state.issue.pages.map((page, index) => {
     const locked = isPageLocked(index);
     return '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + (locked ? ' is-locked' : '') + '" type="button" data-page-link="' + index + '" aria-label="Go to page ' + (index + 1) + (locked ? ' (Premium, locked)' : '') + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span>'
@@ -1490,8 +1512,9 @@ $('#listen-stop').addEventListener('click', stopSpeech);
 $('#listen-rate').addEventListener('change', () => { if (state.speech.status === 'playing') speakCurrentSentence(); });
 $('#close-panel').addEventListener('click', closePanel);
 $('#panel-host').addEventListener('submit', (event) => { if (event.target.id === 'search-form') { event.preventDefault(); runSearch($('#search-input').value.trim()); } });
-$('#panel-host').addEventListener('input', (event) => { if (event.target.id === 'page-scrub') $('#scrub-value').value = event.target.value; });
-$('#panel-host').addEventListener('change', (event) => { if (event.target.id === 'page-scrub') { closePanel(); setPage(Number(event.target.value) - 1, { push: true }); } });
+$('#panel-host').addEventListener('input', (event) => { if (event.target.id === 'page-scrub') previewScrubPage(event.target.value); });
+$('#panel-host').addEventListener('click', (event) => { if (event.target.closest('#page-scrub-go')) goToScrubPage(); });
+$('#panel-host').addEventListener('keydown', (event) => { if (event.target.id === 'page-scrub' && event.key === 'Enter') { event.preventDefault(); goToScrubPage(); } });
 $('#panel-host').addEventListener('click', (event) => {
   if (event.target.matches('[data-close-panel]')) { closePanel(); return; }
   if (event.target.closest('[data-home-link]')) { savePosition(); return; }
