@@ -5,6 +5,7 @@
 :root {
   color-scheme: dark;
   --brand-sudha: #6e1318;
+  --brand-mayura: #0f3d3b;
   --sudha-dark-bg: #21191a;
   --sudha-dark-canvas: #1a1415;
   --sudha-dark-surface: #2b2222;
@@ -127,14 +128,14 @@ body[data-publication="MY"] {
   --action: var(--mayura-dark-action);
   --action-ink: var(--mayura-dark-action-ink);
   --line: var(--mayura-dark-line);
-  --header-background: var(--mayura-dark-surface);
-  --header-foreground: var(--mayura-dark-text);
-  --header-muted: var(--mayura-dark-muted);
-  --header-border: var(--mayura-dark-line);
-  --header-hover: var(--mayura-dark-raised);
-  --header-focus: var(--focus);
-  --header-toggle-fill: var(--action);
-  --header-toggle-ink: var(--action-ink);
+  --header-background: var(--brand-mayura);
+  --header-foreground: #fff;
+  --header-muted: rgba(255, 255, 255, .82);
+  --header-border: rgba(240, 201, 37, .28);
+  --header-hover: rgba(255, 255, 255, .1);
+  --header-focus: #fff;
+  --header-toggle-fill: #fff;
+  --header-toggle-ink: var(--brand-mayura);
 }
 
 :root[data-theme="light"] body[data-publication="SU"] {
@@ -159,14 +160,6 @@ body[data-publication="MY"] {
   --action: var(--mayura-light-action);
   --action-ink: var(--mayura-light-action-ink);
   --line: var(--mayura-light-line);
-  --header-background: var(--mayura-light-surface);
-  --header-foreground: var(--mayura-light-text);
-  --header-muted: var(--mayura-light-muted);
-  --header-border: var(--mayura-light-line);
-  --header-hover: var(--mayura-light-raised);
-  --header-focus: var(--focus);
-  --header-toggle-fill: var(--action);
-  --header-toggle-ink: var(--action-ink);
 }
 
 /* Roles derived from the active publication palette. */

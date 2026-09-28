@@ -209,7 +209,7 @@ function renderHeader() {
   const subscriber = isSubscriber();
   const publicationCode = publication(state.issue.key);
   const publicationName = publicationCode === 'MY' ? 'Mayura' : 'Sudha';
-  $('#edition-logo').src = publicationCode === 'MY' ? (state.theme === 'dark' ? 'Assets/MAYURA-MAST-dark.svg' : 'Assets/MAYURA-MAST.svg') : 'Assets/Sudha_Mast_GOLD-New Nandi.svg';
+  $('#edition-logo').src = publicationCode === 'MY' ? 'Assets/MAYURA-MAST-white.svg' : 'Assets/Sudha_Mast_GOLD-New Nandi.svg';
   $('#edition-logo').alt = publicationName;
   $('#text-edition-logo').src = $('#edition-logo').src;
   $('#text-edition-logo').alt = publicationName + ' magazine';
