@@ -1058,7 +1058,9 @@ function closePanel() {
 
 function articleRow(article, excerpt = '') {
   const saved = isSaved(article.id) ? ' · ★' : '';
-  return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || 'Article ' + article.id) + '</strong><small>' + escapeHtml(article.byline || 'Byline unavailable') + ' · Page ' + (article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + articleAccess(article) + '</span></small></span></button>';
+  const premium = accessClass(article) === 'premium';
+  const tagGlyph = premium ? icon('lock') : '<span aria-hidden="true">○</span>';
+  return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || 'Article ' + article.id) + '</strong><small>' + escapeHtml(article.byline || 'Byline unavailable') + ' · Page ' + (article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + tagGlyph + articleAccess(article) + '</span></small></span></button>';
 }
 
 function contentsMarkup() {
