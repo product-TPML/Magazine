@@ -167,6 +167,11 @@ function setAccountState(value) {
   localStorage.setItem('reader-account', state.account);
   stopSpeech();
   renderAccountUI();
+  if (state.view === 'home') {
+    if (isSubscriber()) { closePanel(); openFromHome(state.issue.key, Number(localStorage.getItem('reader-resume:' + state.issue.key) || 0) + 1); }
+    else { renderHome(); if (state.panel) renderPanel(); }
+    return;
+  }
   if (state.panel === 'profile' || state.panel === 'menu') renderPanel();
   if (state.view === 'text' && state.articleId) openArticle(state.articleId, { push: false });
   else { renderPageCanvas(); renderPageControls(); renderHeader(); if (state.panel) renderPanel(); }
@@ -196,13 +201,14 @@ function applyTheme() {
 }
 
 function savePosition() {
-  if (!state.issue) return;
+  if (!state.issue || state.view === 'home') return;
   localStorage.setItem('reader-last-issue', state.issue.key);
   localStorage.setItem('reader-resume:' + state.issue.key, String(state.page));
   if (state.articleId) localStorage.setItem('reader-last-article:' + state.issue.key, state.articleId);
 }
 
 function updateUrl(push = false) {
+  if (state.view === 'home') return;
   const url = readerUrl(state.issue.key, state.page + 1, state.view, state.articleId);
   history[push ? 'pushState' : 'replaceState']({}, '', url);
 }
@@ -229,8 +235,8 @@ function renderHeader() {
   $('#edition-logo').alt = publicationName;
   $('#text-edition-logo').src = $('#edition-logo').src;
   $('#text-edition-logo').alt = publicationName + ' magazine';
-  const homeHref = readerUrl(latestIssueKey(), 1);
-  document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + ' home: latest edition cover'); });
+  const homeHref = subscriber ? readerUrl(latestIssueKey(), 1) : appBase.pathname + '?home=' + publicationCode;
+  document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + (subscriber ? ' home: latest edition cover' : ' home')); });
   document.body.dataset.publication = publicationCode;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
   $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
@@ -255,6 +261,8 @@ function setControlsVisible(visible) {
 }
 
 function renderViewState() {
+  document.body.dataset.view = state.view;
+  $('#home-view').hidden = state.view !== 'home';
   $('.page-view').hidden = state.view !== 'page';
   $('.text-view').hidden = state.view !== 'text';
   $('#article-controls').hidden = state.view !== 'text';
@@ -419,6 +427,7 @@ function buildPageSlot(index) {
 }
 
 function renderPageCanvas() {
+  if (state.view === 'home') return;
   if (useScroll()) { renderScrollCanvas(); return; }
   pageCanvas.classList.remove('is-scroll', 'is-snap');
   delete pageSpread.dataset.scrollIssue;
@@ -1152,11 +1161,9 @@ function editionsMarkup() {
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
-    const available = issue.available !== false;
-    const currentInfo = current ? 'Current edition' : available ? 'Continue from page ' + resume : 'Locked for non-subscribed users';
-    const lockIcon = available ? '' : '<svg class="edition-lock" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="3" y="7" width="10" height="8" rx="1.5"></rect><path d="M5.5 7V4.75a2.5 2.5 0 0 1 5 0V7"></path></svg>';
+    const currentInfo = current && state.view !== 'home' ? 'Current edition' : resume > 1 ? 'Continue from page ' + resume : 'Open';
     const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
-    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"' + (available ? '' : ' disabled') + '><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + lockIcon + currentInfo + '</span>' + pageOnly + '</button>';
+    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
   return '<p class="panel-note">Choose an edition.</p><div class="edition-grid">' + cards + '</div>';
 }
@@ -1221,7 +1228,7 @@ async function loadCatalog() {
   state.catalog = await response.json();
 }
 
-async function loadIssue(key) {
+async function loadIssue(key, { home = false } = {}) {
   stopSpeech();
   await loadCatalog();
   key ||= state.catalog.publications[0].issues[0].key;
@@ -1235,19 +1242,22 @@ async function loadIssue(key) {
   } catch { /* mappings are optional and must not block the edition */ }
   state.issue = normalizeIssue(key, coords, responses[1]?.ok ? await responses[1].json() : {}, tocMappings);
   const params = new URLSearchParams(location.search);
-  const requested = params.has('p') ? readPageNumber(params.get('p')) - 1 : Number(localStorage.getItem('reader-resume:' + key) || 0);
+  const requested = home ? 0 : params.has('p') ? readPageNumber(params.get('p')) - 1 : Number(localStorage.getItem('reader-resume:' + key) || 0);
   state.page = Math.max(0, Math.min(requested, state.issue.pages.length - 1));
-  state.articleId = params.get('article') && state.issue.articles[params.get('article')] ? params.get('article') : null;
-  state.view = params.get('view') === 'text' && state.articleId ? 'text' : 'page';
+  state.articleId = !home && params.get('article') && state.issue.articles[params.get('article')] ? params.get('article') : null;
+  state.view = home ? 'home' : params.get('view') === 'text' && state.articleId ? 'text' : 'page';
   if (useSpread()) state.page = spreadStart(state.page);
   renderHeader();
   renderViewState();
+  if (home) renderHome();
   renderPageCanvas();
   renderPageControls();
   if (state.view === 'text') await openArticle(state.articleId, { push: false });
   renderArticleControls();
   renderListenPlayer();
   loadArticleMeta().then(() => {
+    state.issue.metaLoaded = true;
+    if (state.view === 'home') renderHome();
     renderPageCanvas();
     renderHeader();
     if (state.panel) renderPanel();
@@ -1281,7 +1291,7 @@ function showPanelNote(message) {
 
 function latestIssueKey() {
   const code = publication(state.issue.key);
-  return allIssues().find((item) => item.publication === code && item.available !== false)?.key || state.issue.key;
+  return newestIssueKey(code) || state.issue.key;
 }
 
 // Header logo: open the cover of the newest edition of the current publication.
@@ -1292,6 +1302,65 @@ function goHome() {
   closePanel();
   history.pushState({}, '', readerUrl(key, 1));
   loadIssue(key).catch(console.error);
+}
+
+function newestIssueKey(code) { return allIssues().find((item) => item.publication === code)?.key; }
+
+// Non-subscribers land on home unless the URL points into an edition.
+function shouldShowHome() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('home')) return true;
+  if (params.has('issue') || issueFromPath()) return false;
+  return !isSubscriber();
+}
+
+function route() {
+  if (!shouldShowHome()) return loadIssue(currentIssueFromUrl() || state.issueKey);
+  const requested = new URLSearchParams(location.search).get('home');
+  const last = localStorage.getItem('reader-last-issue');
+  const code = requested === 'MY' || requested === 'SU' ? requested : last ? publication(last) : 'SU';
+  return showHome(code);
+}
+
+async function showHome(code, { push = false } = {}) {
+  stopSpeech();
+  savePosition();
+  closePanel();
+  await loadCatalog();
+  const url = appBase.pathname + '?home=' + code;
+  if (location.pathname + location.search !== url) history[push ? 'pushState' : 'replaceState']({}, '', url);
+  await loadIssue(newestIssueKey(code), { home: true });
+  window.scrollTo(0, 0);
+}
+
+function openFromHome(key, page) {
+  history.pushState({}, '', readerUrl(key, page));
+  loadIssue(key).catch(console.error);
+}
+
+function renderHome() {
+  const issue = state.issue;
+  const code = publication(issue.key);
+  const summary = issueSummary(issue.key) || {};
+  const coverOf = (item) => appPath('data/' + item.key + '/' + escapeHtml(item.cover || 'cover.jpg'));
+  const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0);
+  const older = allIssues().filter((item) => item.publication === code && item.key !== issue.key).map((item) => {
+    const page = Number(localStorage.getItem('reader-resume:' + item.key) || 0);
+    const date = code === 'MY' ? item.label : shortIssueDate(item.key);
+    return '<button class="home-edition" type="button" data-home-edition="' + item.key + '" aria-label="' + escapeHtml(publicationLabel(code) + ' ' + item.label) + '">'
+      + '<span class="home-edition-cover"><img loading="lazy" src="' + coverOf(item) + '" alt="">' + (page > 0 ? '<span class="home-edition-tag">p.' + (page + 1) + '</span>' : '') + '</span>'
+      + '<span class="home-edition-date">' + escapeHtml(date) + '</span></button>';
+  }).join('');
+  $('#home-view').innerHTML = '<section class="home-hero" aria-label="Current edition">'
+    + '<button class="home-hero-cover" type="button" data-home-read="1" aria-label="Read ' + escapeHtml(publicationLabel(code) + ' ' + (summary.label || '')) + '"><img src="' + coverOf(summary.key ? summary : { key: issue.key }) + '" alt=""></button>'
+    + '<div class="home-hero-copy">'
+    + '<p class="home-eyebrow">' + (code === 'MY' ? 'ಈ ತಿಂಗಳ ಸಂಚಿಕೆ' : 'ಈ ವಾರದ ಸಂಚಿಕೆ') + '</p>'
+    + '<h1 class="home-title">' + publicationLabel(code) + '<span>' + escapeHtml(summary.label || '') + '</span></h1>'
+    + '<button class="home-read" type="button" data-home-read="1">ಈಗ ಓದಿ ' + icon('forward') + '</button>'
+    + (resume > 0 ? '<button class="home-continue" type="button" data-home-read="' + (resume + 1) + '">ಪುಟ ' + (resume + 1) + ' ರಿಂದ ಮುಂದುವರಿಸಿ</button>' : '')
+    + '</div></section>'
+    + (older ? '<section class="home-shelf" aria-label="Older editions"><div class="home-shelf-head"><h2>ಹಿಂದಿನ ಸಂಚಿಕೆಗಳು</h2><button type="button" data-home-all>ಎಲ್ಲಾ ›</button></div><div class="home-carousel">' + older + '</div></section>' : '')
+    + paywallMarkup();
 }
 
 function switchEdition(key) {
@@ -1503,7 +1572,19 @@ $('#text-subscribe-button').addEventListener('click', (event) => openPanel('prof
 $('#account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 $('#text-account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 $('#back-button').addEventListener('click', returnToPage);
-document.querySelectorAll('.publication-home').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); goHome(); }));
+document.querySelectorAll('.publication-home').forEach((link) => link.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (isSubscriber()) goHome();
+  else showHome(publication(state.issue.key), { push: true }).catch(console.error);
+}));
+$('#home-view').addEventListener('click', (event) => {
+  const read = event.target.closest('[data-home-read]');
+  if (read) { openFromHome(state.issue.key, Number(read.dataset.homeRead)); return; }
+  const edition = event.target.closest('[data-home-edition]');
+  if (edition) { openFromHome(edition.dataset.homeEdition, Number(localStorage.getItem('reader-resume:' + edition.dataset.homeEdition) || 0) + 1); return; }
+  const all = event.target.closest('[data-home-all]');
+  if (all) openPanel('editions', all);
+});
 $('#save-button').addEventListener('click', toggleSaved);
 document.addEventListener('change', (event) => {
   if (event.target.id === 'account-state-menu') setAccountState(event.target.value);
@@ -1530,7 +1611,8 @@ $('#panel-host').addEventListener('click', (event) => {
   const publicationSwitch = event.target.closest('[data-publication-switch]');
   if (publicationSwitch) {
     const code = publicationSwitch.dataset.publicationSwitch;
-    const issue = allIssues().find((item) => item.publication === code && item.available !== false);
+    if (state.view === 'home') { showHome(code, { push: true }).catch(console.error); return; }
+    const issue = allIssues().find((item) => item.publication === code);
     if (issue && issue.key !== state.issue.key) switchEdition(issue.key);
     else closePanel();
     return;
@@ -1682,7 +1764,7 @@ window.addEventListener('keydown', (event) => {
   if (state.view === 'page' && !useScroll() && event.key === '-') setZoom(state.zoom.scale - .5);
   if (event.key === 'Escape' && state.panel) closePanel();
 });
-window.addEventListener('popstate', () => loadIssue(currentIssueFromUrl() || state.issueKey).catch(console.error));
+window.addEventListener('popstate', () => route().catch(console.error));
 window.addEventListener('resize', () => {
   const continuousScroll = useScroll() && !useSnap() && pageSpread.dataset.scrollIssue?.startsWith(state.issue?.key + ':flow');
   if (state.issue && !continuousScroll) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); }
@@ -1698,4 +1780,4 @@ applyTheme();
 document.body.dataset.account = state.account;
 setupPageGestures();
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
-loadIssue(state.issueKey).catch((error) => { $('main').innerHTML = '<p class="panel-row" role="alert">' + escapeHtml(error.message) + '</p>'; console.error(error); });
+route().catch((error) => { $('main').innerHTML = '<p class="panel-row" role="alert">' + escapeHtml(error.message) + '</p>'; console.error(error); });
