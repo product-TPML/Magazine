@@ -17,10 +17,277 @@ const state = {
   zoom: { scale: 1, x: 0, y: 0 },
   speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null },
   gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velocityX: 0, lastTime: 0, pinch: null, movedUntil: 0, swipe: null },
-  account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free'
+  account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free',
+  lang: localStorage.getItem('reader-lang') === 'en' ? 'en' : 'kn'
 };
 
 const $ = (selector) => document.querySelector(selector);
+
+// UI chrome text: Kannada by default, with an English option in the hamburger menu.
+// Article/paywall/home copy is always Kannada (the publication's own editorial voice), so it is
+// not part of this dictionary. `t(key, ...args)` looks up state.lang, falling back to English.
+const T = {
+  kn: {
+    choosePublication: (name) => name + ' ಆಯ್ಕೆಮಾಡಿ',
+    chooseEdition: 'ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ',
+    pageLayoutGroup: 'ಪುಟದ ವಿನ್ಯಾಸ',
+    singlePage: 'ಒಂದು ಪುಟ',
+    singlePageView: 'ಒಂದು ಪುಟದ ನೋಟ',
+    doublePage: 'ಎರಡು ಪುಟಗಳು',
+    doublePageView: 'ಎರಡು ಪುಟಗಳ ಹರವಿನ ನೋಟ',
+    scrollView: 'ನಿರಂತರ ಸ್ಕ್ರಾಲ್ ನೋಟ',
+    continuousScroll: 'ನಿರಂತರ ಸ್ಕ್ರಾಲ್',
+    subscribe: 'ಚಂದಾದಾರರಾಗಿ',
+    accountAria: 'ಸೈನ್ ಇನ್ / ನನ್ನ ಪ್ರೊಫೈಲ್',
+    menuAria: 'ಮೆನು ತೆರೆಯಿರಿ',
+    saveArticle: 'ಲೇಖನ ಉಳಿಸಿ',
+    removeSavedArticle: 'ಉಳಿಸಿದ ಲೇಖನ ತೆಗೆಯಿರಿ',
+    backToSourcePage: 'ಮೂಲ ಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ',
+    page: (n) => 'ಪುಟ ' + n,
+    pagesRange: (a, b) => 'ಪುಟಗಳು ' + a + '–' + b,
+    magazinePageAria: 'ನಿಯತಕಾಲಿಕೆ ಪುಟ',
+    previousPageAria: 'ಹಿಂದಿನ ಪುಟ',
+    nextPageAria: 'ಮುಂದಿನ ಪುಟ',
+    zoomControlsAria: 'ಪುಟ ಝೂಮ್ ನಿಯಂತ್ರಣಗಳು',
+    zoomOut: 'ಝೂಮ್ ಕಡಿಮೆ ಮಾಡಿ',
+    zoomIn: 'ಝೂಮ್ ಹೆಚ್ಚಿಸಿ',
+    resetZoom: 'ಝೂಮ್ ಮರುಹೊಂದಿಸಿ',
+    swipeHint: 'ಪುಟ ತಿರುಗಿಸಲು ಅಡ್ಡಡ್ಡ ಸ್ವೈಪ್ ಮಾಡಿ',
+    pageActionsAria: 'ಪುಟ ಕ್ರಿಯೆಗಳು',
+    contents: 'ವಿಷಯಸೂಚಿ',
+    readArticle: 'ಲೇಖನ ಓದಿ',
+    articlesCount: (n) => n + ' ಲೇಖನಗಳು',
+    layoutSwipe: 'ಸ್ವೈಪ್',
+    layoutVertical: 'ಲಂಬ',
+    layoutAriaSwipe: 'ಪುಟ ವಿನ್ಯಾಸ: ಸ್ವೈಪ್. ಲಂಬಕ್ಕೆ ಬದಲಿಸಿ',
+    layoutAriaVertical: 'ಪುಟ ವಿನ್ಯಾಸ: ಲಂಬ. ಸ್ವೈಪ್‌ಗೆ ಬದಲಿಸಿ',
+    articleImageTitle: 'ಲೇಖನದ ಚಿತ್ರ',
+    closeImageViewerAria: 'ಚಿತ್ರ ವೀಕ್ಷಕ ಮುಚ್ಚಿ',
+    previousImageAria: 'ಹಿಂದಿನ ಚಿತ್ರ',
+    nextImageAria: 'ಮುಂದಿನ ಚಿತ್ರ',
+    openArticleImageAria: 'ಲೇಖನದ ಚಿತ್ರ ತೆರೆಯಿರಿ',
+    listenControlsAria: 'ಆಲಿಸುವ ನಿಯಂತ್ರಣಗಳು',
+    playArticleAria: 'ಲೇಖನ ಪ್ಲೇ ಮಾಡಿ',
+    pauseArticleAria: 'ಲೇಖನ ವಿರಮಿಸಿ',
+    listen: 'ಆಲಿಸಿ',
+    pause: 'ವಿರಮಿಸಿ',
+    readingAloud: 'ಗಟ್ಟಿಯಾಗಿ ಓದಲಾಗುತ್ತಿದೆ',
+    paused: 'ವಿರಮಿಸಲಾಗಿದೆ',
+    noVoice: 'ಈ ಸಾಧನದಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ',
+    speechProgressAria: 'ಭಾಷಣ ಪ್ರಗತಿ',
+    speed: 'ವೇಗ',
+    speechSpeedAria: 'ಭಾಷಣ ವೇಗ',
+    stop: 'ನಿಲ್ಲಿಸಿ',
+    articleActionsAria: 'ಲೇಖನ ಕ್ರಿಯೆಗಳು',
+    smaller: 'ಚಿಕ್ಕದು',
+    larger: 'ದೊಡ್ಡದು',
+    share: 'ಹಂಚಿಕೊಳ್ಳಿ',
+    closePanelAria: 'ಪ್ಯಾನೆಲ್ ಮುಚ್ಚಿ',
+    panelTitles: { menu: 'ಮೆನು', contents: 'ವಿಷಯಸೂಚಿ', pages: 'ಪುಟಗಳು', stories: 'ಈ ಪುಟದ ಲೇಖನಗಳು', saved: 'ಉಳಿಸಿದ ಲೇಖನಗಳು', search: 'ಹುಡುಕಿ', publication: 'ಪ್ರಕಟಣೆ', editions: 'ಸಂಚಿಕೆಗಳು', profile: 'ನನ್ನ ಪ್ರೊಫೈಲ್', faqs: 'ಪ್ರಶ್ನೋತ್ತರಗಳು', default: 'ರೀಡರ್' },
+    prajavaniHome: 'ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟ',
+    search: 'ಹುಡುಕಿ',
+    searchThisEdition: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಹುಡುಕಿ',
+    signIn: 'ಸೈನ್ ಇನ್',
+    myProfile: 'ನನ್ನ ಪ್ರೊಫೈಲ್',
+    savedArticles: 'ಉಳಿಸಿದ ಲೇಖನಗಳು',
+    bookmarkedArticles: 'ನೀವು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಿದ ಲೇಖನಗಳು',
+    faqs: 'ಪ್ರಶ್ನೋತ್ತರಗಳು',
+    supportInfo: 'ಬೆಂಬಲ ಮತ್ತು ಸಂಪರ್ಕ ಮಾಹಿತಿ',
+    darkMode: 'ಡಾರ್ಕ್ ಮೋಡ್',
+    useDarkColors: 'ಗಾಢ ಬಣ್ಣಗಳನ್ನು ಬಳಸಿ',
+    readerMode: 'ಓದುಗ ಮೋಡ್',
+    prototypeSetting: 'ಪ್ರಾಯೋಗಿಕ ಸೆಟ್ಟಿಂಗ್',
+    freeReader: 'ಉಚಿತ ಓದುಗ',
+    subscriber: 'ಚಂದಾದಾರ',
+    language: 'ಭಾಷೆ',
+    languageCurrent: 'ಕನ್ನಡ',
+    signInToManage: 'ಚಂದಾದಾರಿಕೆ ಮತ್ತು ಖಾತೆ ವಿವರಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಸೈನ್ ಇನ್ ಆಗಿ.',
+    faqsBody: 'ಚಂದಾದಾರಿಕೆ ಮತ್ತು ಓದುಗ ಬೆಂಬಲಕ್ಕಾಗಿ, ಪ್ರಜಾವಾಣಿ ಮುಖಪುಟದ ಮೂಲಕ ಪ್ರಜಾವಾಣಿ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.',
+    chooseAnEdition: 'ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ.',
+    currentEdition: 'ಪ್ರಸ್ತುತ ಸಂಚಿಕೆ',
+    continueFromPage: (n) => 'ಪುಟ ' + n + ' ರಿಂದ ಮುಂದುವರಿಸಿ',
+    open: 'ತೆರೆಯಿರಿ',
+    pageOnlyEdition: 'ಪುಟ-ಮಾತ್ರ ಸಂಚಿಕೆ',
+    searchThisIssue: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಹುಡುಕಿ',
+    noMatches: 'ಯಾವುದೇ ಹೊಂದಾಣಿಕೆ ಇಲ್ಲ.',
+    premiumSearchNote: 'ಪ್ರೀಮಿಯಂ ಲೇಖನ · ಪೂರ್ಣ ಪಠ್ಯ ಓದಲು ಚಂದಾದಾರರಾಗಿ.',
+    noStoriesOnPage: 'ಈ ಪುಟದಲ್ಲಿ ಯಾವುದೇ ಲೇಖನಗಳಿಲ್ಲ.',
+    noSavedYet: 'ಇನ್ನೂ ಉಳಿಸಿದ ಲೇಖನಗಳಿಲ್ಲ.',
+    bylineUnavailable: 'ಲೇಖಕರ ಮಾಹಿತಿ ಲಭ್ಯವಿಲ್ಲ',
+    article: (n) => 'ಲೇಖನ ' + n,
+    savedArticleFallback: 'ಉಳಿಸಿದ ಲೇಖನ',
+    unavailableInEdition: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ',
+    goToPageAria: (n) => 'ಪುಟ ' + n + 'ಕ್ಕೆ ಹೋಗಿ',
+    premiumLockedSuffix: ' (ಪ್ರೀಮಿಯಂ, ಲಾಕ್ ಆಗಿದೆ)',
+    choosePageAria: 'ಪುಟ ಆಯ್ಕೆಮಾಡಿ',
+    go: 'ಹೋಗಿ',
+    noArticles: 'ಲೇಖನಗಳಿಲ್ಲ',
+    free: 'ಉಚಿತ',
+    premium: 'ಪ್ರೀಮಿಯಂ',
+    previousArticle: 'ಹಿಂದಿನ ಲೇಖನ',
+    nextArticle: 'ಮುಂದಿನ ಲೇಖನ',
+    shareSuccess: 'ಲೇಖನದ ಲಿಂಕ್ ನಕಲಿಸಲಾಗಿದೆ ಅಥವಾ ಹಂಚಿಕೊಳ್ಳಲು ಸಿದ್ಧವಿದೆ.',
+    shareFail: 'ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+    catalogLoadError: 'ಸಂಚಿಕೆಗಳ ಪಟ್ಟಿ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
+    issueLoadError: (key) => key + ' ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
+  },
+  en: {
+    choosePublication: (name) => 'Choose ' + name + ' publication',
+    chooseEdition: 'Choose edition',
+    pageLayoutGroup: 'Page layout',
+    singlePage: 'Single page',
+    singlePageView: 'Single page view',
+    doublePage: 'Two-page spread',
+    doublePageView: 'Two-page spread view',
+    scrollView: 'Continuous scroll view',
+    continuousScroll: 'Continuous scroll',
+    subscribe: 'Subscribe',
+    accountAria: 'Sign in / My profile',
+    menuAria: 'Open menu',
+    saveArticle: 'Save article',
+    removeSavedArticle: 'Remove saved article',
+    backToSourcePage: 'Back to source page',
+    page: (n) => 'Page ' + n,
+    pagesRange: (a, b) => 'Pages ' + a + '–' + b,
+    magazinePageAria: 'Magazine page',
+    previousPageAria: 'Previous page',
+    nextPageAria: 'Next page',
+    zoomControlsAria: 'Page zoom controls',
+    zoomOut: 'Zoom out',
+    zoomIn: 'Zoom in',
+    resetZoom: 'Reset zoom',
+    swipeHint: 'Swipe horizontally to turn pages',
+    pageActionsAria: 'Page actions',
+    contents: 'Contents',
+    readArticle: 'Read article',
+    articlesCount: (n) => n + ' articles',
+    layoutSwipe: 'Swipe',
+    layoutVertical: 'Vertical',
+    layoutAriaSwipe: 'Page layout: Swipe. Switch to vertical',
+    layoutAriaVertical: 'Page layout: Vertical. Switch to swipe',
+    articleImageTitle: 'Article image',
+    closeImageViewerAria: 'Close image viewer',
+    previousImageAria: 'Previous image',
+    nextImageAria: 'Next image',
+    openArticleImageAria: 'Open article image',
+    listenControlsAria: 'Listen controls',
+    playArticleAria: 'Play article',
+    pauseArticleAria: 'Pause article',
+    listen: 'Listen',
+    pause: 'Pause',
+    readingAloud: 'Reading aloud',
+    paused: 'Paused',
+    noVoice: 'No Kannada voice available on this device',
+    speechProgressAria: 'Speech progress',
+    speed: 'Speed',
+    speechSpeedAria: 'Speech speed',
+    stop: 'Stop',
+    articleActionsAria: 'Article actions',
+    smaller: 'Smaller',
+    larger: 'Larger',
+    share: 'Share',
+    closePanelAria: 'Close panel',
+    panelTitles: { menu: 'Menu', contents: 'Contents', pages: 'Pages', stories: 'Stories on this page', saved: 'Saved Articles', search: 'Search', publication: 'Publication', editions: 'Editions', profile: 'My Profile', faqs: 'FAQs', default: 'Reader' },
+    prajavaniHome: 'Prajavani Home',
+    search: 'Search',
+    searchThisEdition: 'Search this edition',
+    signIn: 'Sign In',
+    myProfile: 'My Profile',
+    savedArticles: 'Saved Articles',
+    bookmarkedArticles: 'Articles you bookmarked',
+    faqs: 'FAQs',
+    supportInfo: 'Support and contact information',
+    darkMode: 'Dark mode',
+    useDarkColors: 'Use dark colors',
+    readerMode: 'Reader mode',
+    prototypeSetting: 'Prototype setting',
+    freeReader: 'Free reader',
+    subscriber: 'Subscriber',
+    language: 'Language',
+    languageCurrent: 'English',
+    signInToManage: 'Sign in to manage subscription and account details.',
+    faqsBody: 'For subscription and reader support, contact Prajavani support through the Prajavani homepage.',
+    chooseAnEdition: 'Choose an edition.',
+    currentEdition: 'Current edition',
+    continueFromPage: (n) => 'Continue from page ' + n,
+    open: 'Open',
+    pageOnlyEdition: 'Page-only edition',
+    searchThisIssue: 'Search this issue',
+    noMatches: 'No matches.',
+    premiumSearchNote: 'Premium article · Subscribe to read the full text.',
+    noStoriesOnPage: 'No stories on this page.',
+    noSavedYet: 'No saved articles yet.',
+    bylineUnavailable: 'Byline unavailable',
+    article: (n) => 'Article ' + n,
+    savedArticleFallback: 'Saved article',
+    unavailableInEdition: 'Unavailable in this edition',
+    goToPageAria: (n) => 'Go to page ' + n,
+    premiumLockedSuffix: ' (Premium, locked)',
+    choosePageAria: 'Choose page',
+    go: 'Go',
+    noArticles: 'No articles',
+    free: 'Free',
+    premium: 'Premium',
+    previousArticle: 'Previous article',
+    nextArticle: 'Next article',
+    shareSuccess: 'Article link copied or ready to share.',
+    shareFail: 'Sharing was not available.',
+    catalogLoadError: 'Could not load the edition catalog',
+    issueLoadError: (key) => 'Could not load ' + key,
+  },
+};
+function t(key, ...args) {
+  const entry = (T[state.lang] && T[state.lang][key] !== undefined) ? T[state.lang][key] : T.en[key];
+  return typeof entry === 'function' ? entry(...args) : entry;
+}
+function setLang(value) {
+  state.lang = value === 'en' ? 'en' : 'kn';
+  localStorage.setItem('reader-lang', state.lang);
+  applyChrome();
+  renderHeader();
+  renderPageControls();
+  renderArticleControls();
+  renderListenPlayer();
+  if (state.view === 'home' && state.issue) renderHome();
+  if (state.panel) renderPanel();
+}
+// Static chrome text that index.html doesn't own dynamically (menus/panels do, via t() at render time).
+function applyChrome() {
+  const set = (selector, fn) => document.querySelectorAll(selector).forEach(fn);
+  set('#edition-button', (el) => el.setAttribute('aria-label', t('chooseEdition')));
+  set('#view-mode-toggle', (el) => el.setAttribute('aria-label', t('pageLayoutGroup')));
+  set('[data-view-mode="single"]', (el) => { el.setAttribute('aria-label', t('singlePageView')); el.title = t('singlePage'); });
+  set('[data-view-mode="double"]', (el) => { el.setAttribute('aria-label', t('doublePageView')); el.title = t('doublePage'); });
+  set('[data-view-mode="scroll"]', (el) => { el.setAttribute('aria-label', t('scrollView')); el.title = t('continuousScroll'); });
+  set('.subscribe-mobile-label, .subscribe-desktop-label, #text-subscribe-label', (el) => { el.textContent = t('subscribe'); });
+  set('.account-button', (el) => el.setAttribute('aria-label', t('accountAria')));
+  set('#menu-button, #text-menu-button', (el) => el.setAttribute('aria-label', t('menuAria')));
+  set('#back-button', (el) => el.setAttribute('aria-label', t('backToSourcePage')));
+  set('#page-canvas', (el) => el.setAttribute('aria-label', t('magazinePageAria')));
+  set('#previous-page', (el) => el.setAttribute('aria-label', t('previousPageAria')));
+  set('#next-page', (el) => el.setAttribute('aria-label', t('nextPageAria')));
+  set('.zoom-controls', (el) => el.setAttribute('aria-label', t('zoomControlsAria')));
+  set('#zoom-out', (el) => el.setAttribute('aria-label', t('zoomOut')));
+  set('#zoom-in', (el) => el.setAttribute('aria-label', t('zoomIn')));
+  set('#zoom-reset', (el) => el.setAttribute('aria-label', t('resetZoom')));
+  set('#swipe-hint', (el) => { el.textContent = t('swipeHint'); });
+  set('#page-controls', (el) => el.setAttribute('aria-label', t('pageActionsAria')));
+  set('#page-contents > span:last-child', (el) => { el.textContent = t('contents'); });
+  set('#lightbox-title', (el) => { el.textContent = t('articleImageTitle'); });
+  set('#lightbox-close', (el) => el.setAttribute('aria-label', t('closeImageViewerAria')));
+  set('#lightbox-prev', (el) => el.setAttribute('aria-label', t('previousImageAria')));
+  set('#lightbox-next', (el) => el.setAttribute('aria-label', t('nextImageAria')));
+  set('#listen-player', (el) => el.setAttribute('aria-label', t('listenControlsAria')));
+  set('#listen-progress', (el) => el.setAttribute('aria-label', t('speechProgressAria')));
+  set('#listen-speed-label', (el) => { el.textContent = t('speed'); });
+  set('#listen-rate', (el) => el.setAttribute('aria-label', t('speechSpeedAria')));
+  set('#listen-stop', (el) => { el.textContent = t('stop'); });
+  set('#article-controls', (el) => el.setAttribute('aria-label', t('articleActionsAria')));
+  set('#article-font-smaller > span:last-child', (el) => { el.textContent = t('smaller'); });
+  set('#article-font-larger > span:last-child', (el) => { el.textContent = t('larger'); });
+  set('#article-share > span:last-child', (el) => { el.textContent = t('share'); });
+  set('#close-panel', (el) => el.setAttribute('aria-label', t('closePanelAria')));
+}
 // Outline icon set on a 24px grid; geometry follows Lucide (ISC licence).
 function icon(name) {
   const paths = {
@@ -39,6 +306,7 @@ function icon(name) {
     lock: '<rect x="5" y="10.5" width="14" height="10" rx="2" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />',
     moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />',
     settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" />',
+    globe: '<circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" />',
     contents: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />',
     pages: '<rect x="4" y="4" width="6.5" height="7" rx="1.2" /><rect x="13.5" y="4" width="6.5" height="7" rx="1.2" /><rect x="4" y="13" width="6.5" height="7" rx="1.2" /><rect x="13.5" y="13" width="6.5" height="7" rx="1.2" />',
     swipe: '<rect x="8" y="4.5" width="8" height="15" rx="1.5" /><path d="M4.5 9.5 2 12l2.5 2.5M19.5 9.5 22 12l-2.5 2.5" />',
@@ -158,6 +426,7 @@ function articleAccess(article) {
   return article?.plainText && words < 100 ? 'Free' : 'Premium';
 }
 function accessClass(article) { return articleAccess(article).toLowerCase(); }
+function accessLabel(article) { return accessClass(article) === 'premium' ? t('premium') : t('free'); }
 function isSubscriber() { return state.account === 'subscriber'; }
 function isPaidArticle(article) { return articleAccess(article) === 'Premium'; }
 function needsPreview(article) { return !isSubscriber() && isPaidArticle(article); }
@@ -189,10 +458,10 @@ function accessComposition(page) {
   const articles = articlesForPage(page.index);
   const free = articles.filter((article) => articleAccess(article) === 'Free').length;
   const premium = articles.length - free;
-  if (!articles.length) return 'No articles';
-  const counts = (free ? '<span class="access-count access-free" title="Free"><span class="access-icon" aria-hidden="true">○</span><span>' + free + '</span><span class="sr-only"> Free</span></span>' : '')
-    + (premium ? '<span class="access-count access-premium" title="Premium"><span class="access-icon" aria-hidden="true">●</span><span>' + premium + '</span><span class="sr-only"> Premium</span></span>' : '');
-  return '<span class="access-composition" aria-label="' + free + ' Free, ' + premium + ' Premium">' + counts + '</span>';
+  if (!articles.length) return t('noArticles');
+  const counts = (free ? '<span class="access-count access-free" title="' + t('free') + '"><span class="access-icon" aria-hidden="true">○</span><span>' + free + '</span><span class="sr-only"> ' + t('free') + '</span></span>' : '')
+    + (premium ? '<span class="access-count access-premium" title="' + t('premium') + '"><span class="access-icon" aria-hidden="true">●</span><span>' + premium + '</span><span class="sr-only"> ' + t('premium') + '</span></span>' : '');
+  return '<span class="access-composition" aria-label="' + free + ' ' + t('free') + ', ' + premium + ' ' + t('premium') + '">' + counts + '</span>';
 }
 
 function applyTheme() {
@@ -223,7 +492,7 @@ function spreadIndices(index = state.page) {
 }
 function displayPageLabel() {
   const pages = spreadIndices();
-  return pages.length > 1 ? 'Pages ' + (pages[0] + 1) + '–' + (pages[1] + 1) : 'Page ' + (pages[0] + 1);
+  return pages.length > 1 ? t('pagesRange', pages[0] + 1, pages[1] + 1) : t('page', pages[0] + 1);
 }
 
 function renderHeader() {
@@ -239,7 +508,7 @@ function renderHeader() {
   document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + (subscriber ? ' home: latest edition cover' : ' home')); });
   document.body.dataset.publication = publicationCode;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
-  $('#publication-button').setAttribute('aria-label', 'Choose ' + publicationName + ' publication');
+  $('#publication-button').setAttribute('aria-label', t('choosePublication', publicationName));
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;
   $('#text-subscribe-button').hidden = subscriber;
@@ -247,7 +516,7 @@ function renderHeader() {
   const saved = state.articleId ? isSaved(state.articleId) : false;
   $('#save-button').innerHTML = icon('bookmark');
   $('#save-button').classList.toggle('is-active', saved);
-  $('#save-button').setAttribute('aria-label', saved ? 'Remove saved article' : 'Save article');
+  $('#save-button').setAttribute('aria-label', saved ? t('removeSavedArticle') : t('saveArticle'));
   document.documentElement.style.setProperty('--article-size', [1.125, 1.25, 1.4, 1.55][state.textSize] + 'rem');
   document.body.dataset.account = state.account;
 }
@@ -278,7 +547,7 @@ function renderPageControls() {
   const zoomActive = state.zoom.scale > 1.01 || Math.abs(state.zoom.x) > .5 || Math.abs(state.zoom.y) > .5;
   $('#page-number').querySelector('span:last-child').textContent = displayPageLabel();
   $('#page-article-action').hidden = !articles.length && !zoomActive;
-  $('#page-article-action').querySelector('span:last-child').textContent = zoomActive ? 'Reset zoom' : articles.length === 1 ? 'Read article' : articles.length + ' articles';
+  $('#page-article-action').querySelector('span:last-child').textContent = zoomActive ? t('resetZoom') : articles.length === 1 ? t('readArticle') : t('articlesCount', articles.length);
   $('#previous-page').disabled = state.page === 0;
   $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
   const viewToggle = $('#view-mode-toggle');
@@ -288,13 +557,13 @@ function renderPageControls() {
   layoutToggle.hidden = state.issue.pages.length < 2;
   const mode = useScroll() ? 'vertical' : 'swipe';
   layoutToggle.dataset.mode = mode;
-  $('#page-layout-label').textContent = mode === 'vertical' ? 'Vertical' : 'Swipe';
-  layoutToggle.setAttribute('aria-label', mode === 'vertical' ? 'Page layout: Vertical. Switch to swipe' : 'Page layout: Swipe. Switch to vertical');
+  $('#page-layout-label').textContent = mode === 'vertical' ? t('layoutVertical') : t('layoutSwipe');
+  layoutToggle.setAttribute('aria-label', mode === 'vertical' ? t('layoutAriaVertical') : t('layoutAriaSwipe'));
 }
 
 function renderArticleControls() {
   $('#article-listen').querySelector('.control-icon').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'listen');
-  $('#article-listen').querySelector('span:last-child').textContent = state.speech.status === 'playing' ? 'Pause' : 'Listen';
+  $('#article-listen').querySelector('span:last-child').textContent = state.speech.status === 'playing' ? t('pause') : t('listen');
 }
 
 function renderZoom() {
@@ -307,7 +576,7 @@ function renderZoom() {
   $('#zoom-reset').hidden = !active;
   $('#zoom-in').disabled = state.zoom.scale >= maxPageZoom() - .001;
   $('#page-article-action').hidden = !articlesForPage(state.page).length && !active;
-  $('#page-article-action').querySelector('span:last-child').textContent = active ? 'Reset zoom' : articlesForPage(state.page).length === 1 ? 'Read article' : articlesForPage(state.page).length + ' articles';
+  $('#page-article-action').querySelector('span:last-child').textContent = active ? t('resetZoom') : articlesForPage(state.page).length === 1 ? t('readArticle') : t('articlesCount', articlesForPage(state.page).length);
 }
 
 function maxPageZoom() {
@@ -381,7 +650,7 @@ function buildPageSlot(index) {
   const zoom = document.createElement('div');
   zoom.className = 'page-zoom';
   const image = document.createElement('img');
-  image.alt = 'Page ' + (index + 1);
+  image.alt = t('page', index + 1);
   image.loading = Math.abs(index - state.page) <= 1 ? 'eager' : 'lazy';
   image.addEventListener('load', () => { if (image.isConnected && !useScroll()) renderZoom(); });
   const locked = isPageLocked(index);
@@ -389,7 +658,7 @@ function buildPageSlot(index) {
   image.src = pageImageSrc(index);
   const placeholder = document.createElement('span');
   placeholder.className = 'page-placeholder';
-  placeholder.textContent = 'Page ' + (index + 1);
+  placeholder.textContent = t('page', index + 1);
   zoom.append(image, placeholder);
   if (locked) {
     zoom.insertAdjacentHTML('beforeend', lockedPageMarkup(index));
@@ -830,8 +1099,8 @@ function renderListenPlayer() {
   const supported = 'speechSynthesis' in window && state.speech.voices.length > 0;
   $('#listen-play').disabled = !supported;
   $('#listen-play').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'play');
-  $('#listen-play').setAttribute('aria-label', state.speech.status === 'playing' ? 'Pause article' : 'Play article');
-  $('#listen-status').textContent = supported ? (state.speech.status === 'paused' ? 'Paused' : 'Reading aloud') : 'No Kannada voice available on this device';
+  $('#listen-play').setAttribute('aria-label', state.speech.status === 'playing' ? t('pauseArticleAria') : t('playArticleAria'));
+  $('#listen-status').textContent = supported ? (state.speech.status === 'paused' ? t('paused') : t('readingAloud')) : t('noVoice');
   $('#listen-progress').value = state.speech.sentences.length ? state.speech.index / state.speech.sentences.length : 0;
 }
 
@@ -924,7 +1193,7 @@ function renderArticleFooterCards() {
     const target = state.issue.articles[String(id)];
     const previous = String(id) === String(article.previous);
     link.className = 'article-nav article-nav-' + (previous ? 'previous' : 'next');
-    link.innerHTML = '<span class="article-nav-direction">' + (previous ? icon('back') + 'Previous article' : 'Next article' + icon('forward')) + '</span><strong>' + escapeHtml(target?.title || 'Article') + '</strong>' + (target?.byline ? '<small>' + escapeHtml(target.byline) + '</small>' : '');
+    link.innerHTML = '<span class="article-nav-direction">' + (previous ? icon('back') + t('previousArticle') : t('nextArticle') + icon('forward')) + '</span><strong>' + escapeHtml(target?.title || t('article', '')) + '</strong>' + (target?.byline ? '<small>' + escapeHtml(target.byline) + '</small>' : '');
   });
   document.querySelectorAll('#article-content .article-footer').forEach((footer) => {
     const next = footer.querySelector('.article-nav-next');
@@ -1001,8 +1270,7 @@ function renderPanel() {
   const inert = Boolean(state.panel);
   document.querySelectorAll('#app-header, main, #page-controls, #article-controls, #listen-player').forEach((element) => { element.inert = inert; });
   if (!state.panel) return;
-  const titles = { menu: 'Menu', contents: 'Contents', pages: 'Pages', stories: 'Stories on this page', saved: 'Saved Articles', search: 'Search', publication: 'Publication', editions: 'Editions', profile: 'My Profile', faqs: 'FAQs' };
-  $('#panel-title').textContent = titles[state.panel] || 'Reader';
+  $('#panel-title').textContent = T[state.lang].panelTitles[state.panel] || t('panelTitles').default;
   const body = $('#panel-body');
   if (state.panel === 'menu') body.innerHTML = menuMarkup();
   if (state.panel === 'publication') body.innerHTML = publicationMarkup();
@@ -1013,7 +1281,7 @@ function renderPanel() {
   if (state.panel === 'search') body.innerHTML = searchMarkup();
   if (state.panel === 'editions') body.innerHTML = editionsMarkup();
   if (state.panel === 'profile') body.innerHTML = profileMarkup();
-  if (state.panel === 'faqs') body.innerHTML = '<div class="panel-section"><h3>FAQs</h3><p class="panel-row">For subscription and reader support, contact Prajavani support through the Prajavani homepage.</p></div>';
+  if (state.panel === 'faqs') body.innerHTML = '<div class="panel-section"><h3>' + t('faqs') + '</h3><p class="panel-row">' + t('faqsBody') + '</p></div>';
   renderArticleRows();
   if (state.panel === 'pages') requestAnimationFrame(() => body.querySelector('.is-current')?.scrollIntoView({ block: 'nearest' }));
 }
@@ -1031,7 +1299,7 @@ function renderArticleRows() {
     const meta = document.createElement('span');
     meta.className = 'panel-row-meta';
     const page = document.createElement('small');
-    page.textContent = 'Page ' + (article.pageIndex + 1);
+    page.textContent = t('page', article.pageIndex + 1);
     meta.append(page);
     if (status) meta.append(status);
     copy.className = 'panel-row-copy';
@@ -1060,7 +1328,7 @@ function articleRow(article, excerpt = '') {
   const saved = isSaved(article.id) ? ' · ★' : '';
   const premium = accessClass(article) === 'premium';
   const tagGlyph = premium ? icon('lock') : '<span aria-hidden="true">○</span>';
-  return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || 'Article ' + article.id) + '</strong><small>' + escapeHtml(article.byline || 'Byline unavailable') + ' · Page ' + (article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + tagGlyph + articleAccess(article) + '</span></small></span></button>';
+  return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || t('article', article.id)) + '</strong><small>' + escapeHtml(article.byline || t('bylineUnavailable')) + ' · ' + t('page', article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + tagGlyph + accessLabel(article) + '</span></small></span></button>';
 }
 
 function contentsMarkup() {
@@ -1069,11 +1337,11 @@ function contentsMarkup() {
 }
 
 function pageListMarkup() {
-  return state.issue.pages.map((page, index) => '<button class="panel-row" type="button" data-page-link="' + index + '"><span><strong>Page ' + (index + 1) + '</strong><small>' + accessComposition(page) + '</small></span></button>').join('');
+  return state.issue.pages.map((page, index) => '<button class="panel-row" type="button" data-page-link="' + index + '"><span><strong>' + t('page', index + 1) + '</strong><small>' + accessComposition(page) + '</small></span></button>').join('');
 }
 
 function scrubLabel(index) {
-  return 'Page <output id="scrub-value">' + (index + 1) + '</output> / ' + state.issue.pages.length + (isPageLocked(index) ? ' <span class="page-scrub-lock">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ</span>' : '');
+  return t('page', '') + '<output id="scrub-value">' + (index + 1) + '</output> / ' + state.issue.pages.length + (isPageLocked(index) ? ' <span class="page-scrub-lock">' + icon('lock') + t('premium') + '</span>' : '');
 }
 
 // Slider only picks a page: sync the label and grid, and wait for Go (or Enter) to navigate.
@@ -1094,43 +1362,45 @@ function goToScrubPage() {
 
 function pagesMarkup() {
   const scrub = state.issue.pages.length > 80
-    ? '<div class="page-scrub"><label for="page-scrub"><span class="page-scrub-label">' + scrubLabel(state.page) + '</span><input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="Choose page"></label><button class="page-scrub-go" id="page-scrub-go" type="button">Go</button></div>'
+    ? '<div class="page-scrub"><label for="page-scrub"><span class="page-scrub-label">' + scrubLabel(state.page) + '</span><input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="' + t('choosePageAria') + '"></label><button class="page-scrub-go" id="page-scrub-go" type="button">' + t('go') + '</button></div>'
     : '';
   const grid = state.issue.pages.map((page, index) => {
     const locked = isPageLocked(index);
-    return '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + (locked ? ' is-locked' : '') + '" type="button" data-page-link="' + index + '" aria-label="Go to page ' + (index + 1) + (locked ? ' (Premium, locked)' : '') + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span>'
+    return '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + (locked ? ' is-locked' : '') + '" type="button" data-page-link="' + index + '" aria-label="' + t('goToPageAria', index + 1) + (locked ? t('premiumLockedSuffix') : '') + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span>'
       + (locked ? '<span class="page-lock-badge" aria-hidden="true">' + icon('lock') + '</span>' : '')
-      + '<strong>Page ' + (index + 1) + '</strong><small>' + (locked ? '<span class="page-locked-label">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ</span>' : accessComposition(page)) + '</small></button>';
+      + '<strong>' + t('page', index + 1) + '</strong><small>' + (locked ? '<span class="page-locked-label">' + icon('lock') + t('premium') + '</span>' : accessComposition(page)) + '</small></button>';
   }).join('');
   return scrub + '<div class="page-grid">' + grid + '</div>';
 }
 
 function storiesMarkup() {
-  return articlesForPage(state.page).map((article) => articleRow(article)).join('') || '<p class="panel-row">No stories on this page.</p>';
+  return articlesForPage(state.page).map((article) => articleRow(article)).join('') || '<p class="panel-row">' + t('noStoriesOnPage') + '</p>';
 }
 
 function savedMarkup() {
   const entries = Object.entries(state.saved);
-  if (!entries.length) return '<p class="panel-row">No saved articles yet.</p>';
+  if (!entries.length) return '<p class="panel-row">' + t('noSavedYet') + '</p>';
   return entries.map(([key, saved]) => {
     // ponytail: edition-scoped composite keys; legacy global IDs stay unavailable, never reattached
     const separator = key.indexOf(':');
     const entryIssue = separator > 0 ? key.slice(0, separator) : null;
     const id = separator > 0 ? key.slice(separator + 1) : key;
     const article = entryIssue === state.issue.key ? state.issue.articles[id] : null;
-    if (!article) return '<div class="panel-row"><span><strong>' + escapeHtml(saved.title || 'Article ' + id) + '</strong><small>' + escapeHtml(saved.publication || 'Saved article') + ' · Unavailable in this edition</small></span></div>';
-    return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || saved.title || 'Article ' + id) + '</strong><small>' + escapeHtml(saved.publication || publicationLabel(publication(state.issue.key))) + ' · ' + escapeHtml(saved.edition || issueDate(state.issue.key)) + ' · Page ' + (saved.page || article.pageIndex + 1) + '</small><small><span class="status-pill access-' + accessClass(article) + '">' + articleAccess(article) + '</span></small></span></button>';
+    if (!article) return '<div class="panel-row"><span><strong>' + escapeHtml(saved.title || t('article', id)) + '</strong><small>' + escapeHtml(saved.publication || t('savedArticleFallback')) + ' · ' + t('unavailableInEdition') + '</small></span></div>';
+    return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || saved.title || t('article', id)) + '</strong><small>' + escapeHtml(saved.publication || publicationLabel(publication(state.issue.key))) + ' · ' + escapeHtml(saved.edition || issueDate(state.issue.key)) + ' · ' + t('page', saved.page || article.pageIndex + 1) + '</small><small><span class="status-pill access-' + accessClass(article) + '">' + accessLabel(article) + '</span></small></span></button>';
   }).join('');
 }
 
 function menuMarkup() {
   const dark = state.theme === 'dark';
-  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>Prajavani Home</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>Search</strong><small>Search this edition</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>Sign In</strong><small>My Profile</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>Saved Articles</strong><small>Articles you bookmarked</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>FAQs</strong><small>Support and contact information</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>Dark mode</strong><small>Use dark colors</small></span><span class="theme-switch" aria-hidden="true"></span></button>'
-    + '<div class="menu-divider"></div><label class="panel-row account-state-control" for="account-state-menu"><span class="menu-row-icon">' + icon('settings') + '</span><span><strong>Reader mode</strong><small>Prototype setting</small></span><select id="account-state-menu" name="account-state-menu"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>Free reader</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>Subscriber</option></select></label>';
+  const enUi = state.lang === 'en';
+  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>' + t('prajavaniHome') + '</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>' + t('search') + '</strong><small>' + t('searchThisEdition') + '</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>' + t('signIn') + '</strong><small>' + t('myProfile') + '</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>' + t('savedArticles') + '</strong><small>' + t('bookmarkedArticles') + '</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>' + t('faqs') + '</strong><small>' + t('supportInfo') + '</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>' + t('darkMode') + '</strong><small>' + t('useDarkColors') + '</small></span><span class="theme-switch" aria-hidden="true"></span></button>'
+    + '<div class="menu-divider"></div><label class="panel-row account-state-control" for="account-state-menu"><span class="menu-row-icon">' + icon('settings') + '</span><span><strong>' + t('readerMode') + '</strong><small>' + t('prototypeSetting') + '</small></span><select id="account-state-menu" name="account-state-menu"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>' + t('freeReader') + '</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>' + t('subscriber') + '</option></select></label>'
+    + '<div class="menu-divider"></div><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + enUi + '" data-action="lang"><span class="menu-row-icon">' + icon('globe') + '</span><span class="theme-toggle-copy"><strong>' + t('language') + '</strong><small>' + t('languageCurrent') + '</small></span><span class="theme-switch" aria-hidden="true"></span></button>';
 }
 
 function searchMarkup() {
-  return '<form class="search-form" id="search-form"><input id="search-input" type="search" placeholder="Search this issue" aria-label="Search this issue"><button type="submit">Search</button></form><div id="search-results"></div>';
+  return '<form class="search-form" id="search-form"><input id="search-input" type="search" placeholder="' + t('searchThisIssue') + '" aria-label="' + t('searchThisIssue') + '"><button type="submit">' + t('search') + '</button></form><div id="search-results"></div>';
 }
 
 function searchExcerpt(article, query) {
@@ -1139,7 +1409,7 @@ function searchExcerpt(article, query) {
     const haystack = (article.title || '');
     const index = haystack.toLowerCase().indexOf(query.toLowerCase());
     if (index >= 0) return '…' + haystack.slice(Math.max(0, index - 45), index + query.length + 75) + '…';
-    return 'Premium article · Subscribe to read the full text.';
+    return t('premiumSearchNote');
   }
   const text = article.plainText || article.title || '';
   const index = text.toLowerCase().indexOf(query.toLowerCase());
@@ -1155,7 +1425,7 @@ function searchableText(article) {
 function runSearch(query) {
   if (!query) { $('#search-results').innerHTML = ''; return; }
   const result = articleIds().map((id) => state.issue.articles[id]).filter((article) => searchableText(article).toLowerCase().includes(query.toLowerCase()));
-  $('#search-results').innerHTML = result.length ? result.map((article) => articleRow(article, searchExcerpt(article, query))).join('') : '<p class="panel-row">No matches.</p>';
+  $('#search-results').innerHTML = result.length ? result.map((article) => articleRow(article, searchExcerpt(article, query))).join('') : '<p class="panel-row">' + t('noMatches') + '</p>';
 }
 
 function editionsMarkup() {
@@ -1163,15 +1433,15 @@ function editionsMarkup() {
   const cards = issues.map((issue) => {
     const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
     const current = issue.key === state.issue.key;
-    const currentInfo = current && state.view !== 'home' ? 'Current edition' : resume > 1 ? 'Continue from page ' + resume : 'Open';
-    const pageOnly = current && !articleIds().length ? '<small>Page-only edition</small>' : '';
+    const currentInfo = current && state.view !== 'home' ? t('currentEdition') : resume > 1 ? t('continueFromPage', resume) : t('open');
+    const pageOnly = current && !articleIds().length ? '<small>' + t('pageOnlyEdition') + '</small>' : '';
     return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
   }).join('');
-  return '<p class="panel-note">Choose an edition.</p><div class="edition-grid">' + cards + '</div>';
+  return '<p class="panel-note">' + t('chooseAnEdition') + '</p><div class="edition-grid">' + cards + '</div>';
 }
 
 function profileMarkup() {
-  return '<div class="panel-section"><h3>My Profile</h3><p class="panel-row">Sign in to manage subscription and account details.</p></div>';
+  return '<div class="panel-section"><h3>' + t('myProfile') + '</h3><p class="panel-row">' + t('signInToManage') + '</p></div>';
 }
 
 function publicationMarkup() {
@@ -1226,7 +1496,7 @@ function validTocMappings(data, key, pageCount) {
 async function loadCatalog() {
   if (state.catalog) return;
   const response = await fetch(appPath('generated/catalog.json'));
-  if (!response.ok) throw new Error('Could not load the edition catalog');
+  if (!response.ok) throw new Error(t('catalogLoadError'));
   state.catalog = await response.json();
 }
 
@@ -1236,7 +1506,7 @@ async function loadIssue(key, { home = false } = {}) {
   key ||= state.catalog.publications[0].issues[0].key;
   state.issueKey = key;
   const responses = await Promise.all([fetch(appPath('data/' + key + '/coords.json')), fetch(appPath('data/' + key + '/bylines.json')).catch(() => null), key === 'SU-2026-09-24' ? fetch(appPath('data/' + key + '/toc-mappings-SU-2026-09-24.json')).catch(() => null) : null]);
-  if (!responses[0].ok) throw new Error('Could not load ' + key);
+  if (!responses[0].ok) throw new Error(t('issueLoadError', key));
   const coords = await responses[0].json();
   let tocMappings = [];
   try {
@@ -1281,9 +1551,9 @@ async function shareCurrent() {
   try {
     if (navigator.share) await navigator.share({ title: article.title, url });
     else if (navigator.clipboard) await navigator.clipboard.writeText(url);
-    showPanelNote('Article link copied or ready to share.');
+    showPanelNote(t('shareSuccess'));
   } catch (error) {
-    if (error.name !== 'AbortError') showPanelNote('Sharing was not available.');
+    if (error.name !== 'AbortError') showPanelNote(t('shareFail'));
   }
 }
 
@@ -1418,7 +1688,7 @@ function setupPageGestures() {
     preview.classList.add('page-swipe-preview');
     preview.querySelectorAll('.hotspot').forEach((hotspot) => hotspot.remove());
     const image = preview.querySelector('img');
-    image.alt = 'Page ' + (page + 1);
+    image.alt = t('page', page + 1);
     preview.querySelector('.locked-page')?.remove();
     preview.classList.toggle('is-locked', isPageLocked(page));
     image.src = pageImageSrc(page);
@@ -1630,6 +1900,11 @@ $('#panel-host').addEventListener('click', (event) => {
     $('#panel-host [data-action="theme"]')?.focus();
     return;
   }
+  if (action === 'lang') {
+    setLang(state.lang === 'kn' ? 'en' : 'kn');
+    $('#panel-host [data-action="lang"]')?.focus();
+    return;
+  }
   if (action === 'search') { openPanel('search', event.target.closest('[data-action]')); return; }
   if (action === 'profile') { openPanel('profile', event.target.closest('[data-action]')); return; }
   if (action === 'saved') { openPanel('saved', event.target.closest('[data-action]')); return; }
@@ -1779,6 +2054,7 @@ document.querySelectorAll('.canvas-nav').forEach((button) => {
   button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${path}" /></svg>`;
 });
 applyTheme();
+applyChrome();
 document.body.dataset.account = state.account;
 setupPageGestures();
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
