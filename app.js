@@ -15,7 +15,7 @@ const state = {
   saved: safeJson('reader-saved', {}),
   theme: savedTheme === 'dark' ? 'dark' : (savedTheme === 'light' || savedTheme === 'sepia' ? 'light' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')),
   zoom: { scale: 1, x: 0, y: 0 },
-  speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null },
+  speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null, run: 0 },
   gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velocityX: 0, lastTime: 0, pinch: null, movedUntil: 0, swipe: null },
   account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free',
   lang: localStorage.getItem('reader-lang') === 'en' ? 'en' : 'kn'
@@ -1018,24 +1018,25 @@ function articleMarkup(html, article) {
 function prepareSpeech() {
   state.speech.sentences = [];
   state.speech.index = 0;
-  const walker = document.createTreeWalker($('#article-content'), NodeFilter.SHOW_TEXT, {
-    acceptNode(node) { return node.nodeValue.trim() && !node.parentElement.closest('h1, .byline, .access-status, .article-footer') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
-  });
-  const nodes = [];
-  while (walker.nextNode()) nodes.push(walker.currentNode);
-  nodes.forEach((node) => {
-    const parts = node.nodeValue.trim().split(/(?<=[.!?।])\s+/u);
-    const fragment = document.createDocumentFragment();
-    parts.forEach((part, index) => {
+  const excluded = 'h1, .byline, .access-status, .article-footer, .article-figure, .paywall';
+  document.querySelectorAll('#article-content p, #article-content li, #article-content blockquote, #article-content h2, #article-content h3').forEach((block) => {
+    if (block.closest(excluded)) return;
+    const text = block.textContent.replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    const speechIndex = state.speech.sentences.length;
+    state.speech.sentences.push(text);
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) { return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
       const span = document.createElement('span');
       span.className = 'speech-sentence';
-      span.dataset.speechIndex = state.speech.sentences.length;
-      span.textContent = part;
-      state.speech.sentences.push(part);
-      fragment.append(span);
-      if (index < parts.length - 1) fragment.append(' ');
+      span.dataset.speechIndex = speechIndex;
+      span.textContent = node.nodeValue;
+      node.replaceWith(span);
     });
-    node.replaceWith(fragment);
   });
   loadVoices();
 }
@@ -1048,26 +1049,32 @@ function loadVoices() {
 
 function clearSpeechHighlight() { document.querySelectorAll('.speech-current').forEach((node) => node.classList.remove('speech-current')); }
 
-function speakCurrentSentence() {
+function speakCurrentSentence({ restart = false } = {}) {
   if (!state.speech.sentences.length || !state.speech.voices.length) return;
-  speechSynthesis.cancel();
+  if (restart) { state.speech.run += 1; speechSynthesis.cancel(); }
+  const run = state.speech.run;
   clearSpeechHighlight();
-  const sentence = document.querySelector('[data-speech-index="' + state.speech.index + '"]');
-  sentence?.classList.add('speech-current');
-  sentence?.scrollIntoView({ behavior: prefersReducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
+  const sentences = [...document.querySelectorAll('[data-speech-index="' + state.speech.index + '"]')];
+  sentences.forEach((sentence) => sentence.classList.add('speech-current'));
+  sentences[0]?.scrollIntoView({ behavior: prefersReducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
   const utterance = new SpeechSynthesisUtterance(state.speech.sentences[state.speech.index]);
   utterance.lang = 'kn-IN';
   utterance.rate = Number($('#listen-rate').value || 1);
   utterance.voice = state.speech.voices[0];
   utterance.onend = () => {
-    if (state.speech.status !== 'playing') return;
+    if (run !== state.speech.run || state.speech.status !== 'playing') return;
     state.speech.index += 1;
     if (state.speech.index >= state.speech.sentences.length) { state.speech.status = 'idle'; state.speech.index = 0; clearSpeechHighlight(); }
     else speakCurrentSentence();
     renderArticleControls();
     renderListenPlayer();
   };
-  utterance.onerror = () => { state.speech.status = 'idle'; renderArticleControls(); renderListenPlayer(); };
+  utterance.onerror = (event) => {
+    if (run !== state.speech.run || event.error === 'canceled' || event.error === 'interrupted') return;
+    state.speech.status = 'idle';
+    renderArticleControls();
+    renderListenPlayer();
+  };
   state.speech.utterance = utterance;
   speechSynthesis.speak(utterance);
   renderArticleControls();
@@ -1078,12 +1085,13 @@ function toggleSpeech() {
   if (!('speechSynthesis' in window) || !state.speech.voices.length) return;
   if (state.speech.status === 'playing') { speechSynthesis.pause(); state.speech.status = 'paused'; }
   else if (state.speech.status === 'paused') { speechSynthesis.resume(); state.speech.status = 'playing'; }
-  else { state.speech.status = 'playing'; speakCurrentSentence(); return; }
+  else { state.speech.status = 'playing'; speakCurrentSentence({ restart: true }); return; }
   renderArticleControls();
   renderListenPlayer();
 }
 
 function stopSpeech() {
+  state.speech.run += 1;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
   state.speech.status = 'idle';
   state.speech.index = 0;
@@ -1871,7 +1879,7 @@ $('#article-listen').addEventListener('click', toggleSpeech);
 $('#article-share').addEventListener('click', shareCurrent);
 $('#listen-play').addEventListener('click', toggleSpeech);
 $('#listen-stop').addEventListener('click', stopSpeech);
-$('#listen-rate').addEventListener('change', () => { if (state.speech.status === 'playing') speakCurrentSentence(); });
+$('#listen-rate').addEventListener('change', () => { if (state.speech.status === 'playing') speakCurrentSentence({ restart: true }); });
 $('#close-panel').addEventListener('click', closePanel);
 $('#panel-host').addEventListener('submit', (event) => { if (event.target.id === 'search-form') { event.preventDefault(); runSearch($('#search-input').value.trim()); } });
 $('#panel-host').addEventListener('input', (event) => { if (event.target.id === 'page-scrub') previewScrubPage(event.target.value); });
