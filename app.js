@@ -1019,12 +1019,12 @@ function prepareSpeech() {
   state.speech.sentences = [];
   state.speech.index = 0;
   const excluded = 'h1, .byline, .access-status, .article-footer, .article-figure, .paywall';
-  document.querySelectorAll('#article-content p, #article-content li, #article-content blockquote, #article-content h2, #article-content h3').forEach((block) => {
-    if (block.closest(excluded)) return;
-    const text = block.textContent.replace(/\s+/g, ' ').trim();
-    if (!text) return;
-    const speechIndex = state.speech.sentences.length;
-    state.speech.sentences.push(text);
+  const blocks = [...document.querySelectorAll('#article-content p, #article-content li, #article-content blockquote, #article-content h2, #article-content h3')]
+    .filter((block) => !block.closest(excluded) && block.textContent.trim());
+  const text = blocks.map((block) => block.textContent.replace(/\s+/g, ' ').trim()).join('\n\n');
+  if (text) state.speech.sentences.push(text);
+  blocks.forEach((block) => {
+    const speechIndex = 0;
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
       acceptNode(node) { return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
     });
