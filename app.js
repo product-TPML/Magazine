@@ -1083,8 +1083,12 @@ function speakCurrentSentence({ restart = false } = {}) {
 
 function toggleSpeech() {
   if (!('speechSynthesis' in window) || !state.speech.voices.length) return;
-  if (state.speech.status === 'playing') { speechSynthesis.pause(); state.speech.status = 'paused'; }
-  else if (state.speech.status === 'paused') { speechSynthesis.resume(); state.speech.status = 'playing'; }
+  if (state.speech.status === 'playing') {
+    state.speech.run += 1;
+    speechSynthesis.cancel();
+    state.speech.status = 'paused';
+  }
+  else if (state.speech.status === 'paused') { state.speech.status = 'playing'; speakCurrentSentence({ restart: true }); return; }
   else { state.speech.status = 'playing'; speakCurrentSentence({ restart: true }); return; }
   renderArticleControls();
   renderListenPlayer();
