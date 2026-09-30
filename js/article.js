@@ -124,12 +124,17 @@ function photoUrl(src) {
   return 'url("' + String(src || '').replace(/["\\\n]/g, encodeURIComponent) + '")';
 }
 
+// The publishing system sometimes leaves the image file name ("BNG09_MAHADEVAPURA_07.jpg") in the credit or caption field.
+function isImageFileName(node) {
+  return /\.(jpe?g|png|gif|webp|tiff?|bmp)$/i.test(node?.textContent.trim() || '');
+}
+
 function makeFigure(doc, picture, className) {
   const figure = doc.createElement('figure');
   figure.className = className;
   const image = picture.querySelector('img');
-  const caption = picture.querySelector('.caption');
-  const credit = picture.querySelector('.credit');
+  const caption = isImageFileName(picture.querySelector('.caption')) ? null : picture.querySelector('.caption');
+  const credit = isImageFileName(picture.querySelector('.credit')) ? null : picture.querySelector('.credit');
   if (image) {
     image.tabIndex = 0;
     image.setAttribute('role', 'button');
