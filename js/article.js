@@ -74,6 +74,11 @@ function sanitizeArticleRoot(html, article) {
   return doc;
 }
 
+// Feeds the blurred, darkened photo behind a figure's caption (see .article-figure::before in styles.css).
+function photoUrl(src) {
+  return 'url("' + String(src || '').replace(/["\\\n]/g, encodeURIComponent) + '")';
+}
+
 function articlePreviewMarkup(html, article) {
   // ponytail: build preview from sanitized text + lead figure only; never render full root and hide it
   const doc = sanitizeArticleRoot(html, article);
@@ -98,7 +103,7 @@ function articlePreviewMarkup(html, article) {
       image.tabIndex = 0;
       image.setAttribute('role', 'button');
       image.setAttribute('aria-label', t('openArticleImageAria'));
-      figure = '<figure class="article-figure article-hero">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
+      figure = '<figure class="article-figure article-hero" style="--photo:' + escapeHtml(photoUrl(image.getAttribute('src'))) + '">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
     }
   }
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
@@ -200,6 +205,7 @@ function articleMarkup(html, article) {
       image.tabIndex = 0;
       image.setAttribute('role', 'button');
       image.setAttribute('aria-label', t('openArticleImageAria'));
+      figure.style.setProperty('--photo', photoUrl(image.getAttribute('src')));
       figure.append(image);
     }
     if (caption?.textContent.trim()) {
