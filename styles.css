@@ -292,8 +292,6 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .app-header.chrome-hidden .text-tools { padding-block: 0; opacity: 0; }
 .reading-progress { position: fixed; top: var(--header-height); right: 0; left: 0; z-index: 21; height: 2px; margin: 0; background: var(--line); }
 .app-header.chrome-hidden + .reading-progress { top: 0; }
-.app-header.chrome-hidden + .reading-progress + main .text-view:not([hidden]) { min-height: 100dvh; margin-top: calc(-1 * var(--header-height)); }
-.app-header.chrome-hidden + .reading-progress + main .text-view:not([hidden]) .article-scroll { height: 100dvh; }
 .app-header.chrome-hidden + .reading-progress + main .page-view:not([hidden]) { min-height: 100dvh; margin-top: calc(-1 * var(--header-height)); }
 .app-header.chrome-hidden + .reading-progress + main .page-view:not([hidden]) .page-canvas { height: calc(100dvh - var(--bottom-height) - 1.5rem); }
 .reading-progress span { display: block; width: 0; height: 100%; background: var(--action); transition: width .12s linear; }
@@ -404,17 +402,22 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 .page-view.chrome-hidden .page-controls { transform: translateY(100%); opacity: 0; pointer-events: none; }
 .page-view.chrome-hidden .canvas-nav { opacity: 0; pointer-events: none; }
 .article-controls { grid-template-columns: repeat(4, 1fr); }
-.text-view { position: relative; container-type: inline-size; min-height: calc(100dvh - var(--header-height)); }
+/* The reading pane always fills the screen and sits under the sticky header, so showing or hiding the chrome
+   never resizes or shifts the article (that resize made the header and bottom bar jitter near the end). */
+.text-view { position: relative; container-type: inline-size; min-height: 100dvh; margin-top: calc(-1 * var(--header-height)); }
 /* Round share button pinned to the top-right of the reading pane; the headline leaves room for it. */
-.share-fab { position: absolute; top: 1rem; right: 1rem; z-index: 5; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: #fff; background: var(--brand-sudha); border: 0; border-radius: 50%; box-shadow: 0 4px 14px rgba(0, 0, 0, .28), 0 1px 3px rgba(0, 0, 0, .12); cursor: pointer; touch-action: manipulation; transition: transform .15s ease, box-shadow .2s ease; }
-body[data-publication="MY"] .share-fab { background: var(--brand-mayura); }
+.share-fab { position: absolute; top: calc(var(--header-height) + 1rem); right: 1rem; z-index: 5; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: #fff; background: var(--story-accent); border: 0; border-radius: 50%; box-shadow: 0 4px 14px rgba(0, 0, 0, .28), 0 1px 3px rgba(0, 0, 0, .12); cursor: pointer; touch-action: manipulation; transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
+body { --story-accent: var(--brand-sudha); }
+body[data-publication="MY"] { --story-accent: var(--brand-mayura); }
+/* Only offered while the top and bottom bars are showing. */
+body.chrome-hidden .share-fab { opacity: 0; transform: translateY(-.5rem); pointer-events: none; }
 .share-fab .icon { width: 1.15rem; height: 1.15rem; }
 .share-fab:hover { box-shadow: 0 6px 18px rgba(0, 0, 0, .32); transform: translateY(-1px); }
 .share-fab:active { transform: scale(.95); }
 .article-content .story-header-band h1 { padding-right: 3.25rem; }
 @media (min-width: 768px) { .share-fab { right: 2rem; } }
 @media (prefers-reduced-motion: reduce) { .share-fab { transition: none; } }
-.article-scroll { height: calc(100dvh - var(--header-height)); overflow-y: auto; padding: clamp(1rem, 3vw, 2rem) max(1rem, calc((100% - 42rem) / 2)) calc(var(--bottom-height) + 5rem + var(--safe-bottom)); }
+.article-scroll { height: 100dvh; overflow-y: auto; padding: calc(var(--header-height) + clamp(1rem, 3vw, 2rem)) max(1rem, calc((100% - 42rem) / 2)) calc(var(--bottom-height) + 5rem + var(--safe-bottom)); }
 .article-content { max-width: 42rem; margin: 0 auto; overflow-wrap: anywhere; font-size: var(--article-size, 1.125rem); line-height: 2; text-rendering: optimizeLegibility; }
 .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--text); font-family: var(--font-heading); font-weight: 600; line-height: 1.2; }
 .article-content h1 { margin: 0 0 .75rem; font-size: clamp(1.8rem, 7vw, 3rem); line-height: 1.3; letter-spacing: 0; }
@@ -637,18 +640,20 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-content img.is-image-zoomed { cursor: grab; }
 .article-footer { display: grid; grid-template-columns: 1fr; gap: .75rem; align-items: stretch; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .article-footer a { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: .75rem; color: var(--link); background: var(--surface); border: 1px solid var(--line); border-radius: .55rem; text-decoration: none; }
-.article-footer .article-nav { display: grid; align-content: center; gap: .3rem; width: 100%; min-width: 0; min-height: 6.25rem; padding: .9rem 1rem; }
-.article-footer .article-nav-previous { justify-content: start; justify-items: start; border-left: 3px solid var(--rule); text-align: left; }
-.article-footer .article-nav-next { justify-content: end; justify-items: end; border-right: 3px solid var(--rule); text-align: right; }
-.article-footer .article-nav > * { width: 100%; }
-.article-footer .article-nav-previous > *, .article-footer .article-nav-next > * { width: 100%; }
-.article-footer .article-nav-next > * { justify-self: stretch; text-align: right; }
-.article-footer .original-page { justify-content: center; color: var(--muted); font-size: .8rem; text-align: center; }
-.article-footer .article-nav-direction { display: inline-flex; align-items: center; gap: .35rem; color: var(--link); font-size: .72em; font-weight: 700; }
-.article-footer .article-nav-direction .icon { width: .9rem; height: .9rem; }
-.article-footer .article-nav strong, .article-footer .article-nav small { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.article-footer .article-nav strong { display: -webkit-box; color: var(--text); font-size: .9em; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+/* Previous / next story cards: raised card, brand-coloured arrow chip, serif title; the arrow nudges on hover. */
+.article-footer .article-nav { display: grid; align-content: start; gap: .6rem; width: 100%; min-width: 0; min-height: 7.5rem; padding: 1.1rem 1.2rem; background: var(--surface-raised); border-radius: .7rem; box-shadow: 0 .1rem .4rem var(--shadow-soft); transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.article-footer .article-nav:hover, .article-footer .article-nav:focus-visible { border-color: var(--story-accent); box-shadow: 0 .35rem .9rem var(--shadow-medium); transform: translateY(-2px); }
+.article-footer .article-nav-previous { justify-items: start; text-align: left; }
+.article-footer .article-nav-next { justify-items: end; text-align: right; }
+.article-footer .article-nav-direction { display: inline-flex; align-items: center; gap: .55rem; color: var(--muted); font-size: .72em; font-weight: 700; letter-spacing: .04em; }
+.article-footer .article-nav-direction .icon { flex: none; box-sizing: content-box; width: .95rem; height: .95rem; padding: .4rem; color: #fff; background: var(--story-accent); border-radius: 50%; transition: transform .15s ease; }
+.article-footer .article-nav-previous:hover .article-nav-direction .icon { transform: translateX(-3px); }
+.article-footer .article-nav-next:hover .article-nav-direction .icon { transform: translateX(3px); }
+.article-footer .article-nav strong, .article-footer .article-nav small { width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.article-footer .article-nav strong { display: -webkit-box; color: var(--text); font-family: var(--font-heading); font-size: 1.05em; font-weight: 600; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.article-footer .article-nav:hover strong { color: var(--story-accent); }
 .article-footer .article-nav small { color: var(--muted); font-size: .75em; }
+.article-footer .original-page { justify-content: center; color: var(--muted); font-size: .8rem; text-align: center; }
 .loading { color: var(--muted); }
 .article-controls.chrome-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
 
