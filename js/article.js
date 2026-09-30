@@ -79,8 +79,58 @@ function photoUrl(src) {
   return 'url("' + String(src || '').replace(/["\\\n]/g, encodeURIComponent) + '")';
 }
 
+function makeFigure(doc, picture, className) {
+  const figure = doc.createElement('figure');
+  figure.className = className;
+  const image = picture.querySelector('img');
+  const caption = picture.querySelector('.caption');
+  const credit = picture.querySelector('.credit');
+  if (image) {
+    image.tabIndex = 0;
+    image.setAttribute('role', 'button');
+    image.setAttribute('aria-label', t('openArticleImageAria'));
+    figure.style.setProperty('--photo', photoUrl(image.getAttribute('src')));
+    figure.append(image);
+  }
+  if (caption?.textContent.trim()) {
+    const figcaption = doc.createElement('figcaption');
+    figcaption.className = 'article-caption';
+    figcaption.innerHTML = caption.innerHTML;
+    figure.append(figcaption);
+  }
+  if (credit?.textContent.trim()) {
+    const small = doc.createElement('small');
+    small.className = 'article-credit';
+    small.innerHTML = credit.innerHTML;
+    figure.append(small);
+  }
+  return figure;
+}
+
+// Gallery carousel shared by the full article and the paywall preview, so every reader sees it.
+function makeGallery(doc, pictures) {
+  if (!pictures.length) return null;
+  const gallery = doc.createElement('section');
+  gallery.className = 'article-gallery';
+  gallery.setAttribute('aria-labelledby', 'article-gallery-title');
+  const title = doc.createElement('h2');
+  title.id = 'article-gallery-title';
+  title.textContent = t('gallery');
+  const track = doc.createElement('div');
+  track.className = 'article-gallery-track';
+  track.setAttribute('role', 'list');
+  track.setAttribute('aria-label', t('galleryImagesAria'));
+  gallery.append(title, track);
+  pictures.forEach((picture) => {
+    const figure = makeFigure(doc, picture, 'article-figure article-gallery-item');
+    figure.setAttribute('role', 'listitem');
+    track.append(figure);
+  });
+  return gallery;
+}
+
 function articlePreviewMarkup(html, article) {
-  // ponytail: build preview from sanitized text + lead figure only; never render full root and hide it
+  // ponytail: build preview from sanitized text + hero and gallery figures only; never render full root and hide it
   const doc = sanitizeArticleRoot(html, article);
   const root = doc.querySelector('.articleDetail') || doc.body;
   const extractedTitle = doc.querySelector('h1 p, h1')?.textContent.trim();
@@ -95,17 +145,14 @@ function articlePreviewMarkup(html, article) {
   const words = paras.join(' ').split(/\s+/).filter(Boolean).slice(0, 100);
   const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
   const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
-  let figure = '';
-  if (hero) {
-    const image = hero.querySelector('img');
-    const caption = hero.querySelector('.caption');
-    if (image) {
-      image.tabIndex = 0;
-      image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', t('openArticleImageAria'));
-      figure = '<figure class="article-figure article-hero" style="--photo:' + escapeHtml(photoUrl(image.getAttribute('src'))) + '">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
-    }
-  }
+  const heroFigure = hero ? makeFigure(doc, hero, 'article-figure article-hero') : null;
+  const loosePictures = [...root.querySelectorAll('img')].filter((image) => !image.closest('.pictures')).map((image) => {
+    const picture = doc.createElement('div');
+    picture.append(image);
+    return picture;
+  });
+  const gallery = makeGallery(doc, pictures.slice(1).concat(loosePictures));
+  const figure = (heroFigure ? heroFigure.outerHTML : '') + (gallery ? gallery.outerHTML : '');
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
   const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
   const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
@@ -194,57 +241,11 @@ function articleMarkup(html, article) {
   root.querySelectorAll('p').forEach((paragraph) => {
     if (!paragraph.textContent.trim() && !paragraph.querySelector('img')) paragraph.remove();
   });
-  const makeFigure = (picture, className, side = '') => {
-    const figure = doc.createElement('figure');
-    figure.className = className;
-    if (side) figure.dataset.side = side;
-    const image = picture.querySelector('img');
-    const caption = picture.querySelector('.caption');
-    const credit = picture.querySelector('.credit');
-    if (image) {
-      image.tabIndex = 0;
-      image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', t('openArticleImageAria'));
-      figure.style.setProperty('--photo', photoUrl(image.getAttribute('src')));
-      figure.append(image);
-    }
-    if (caption?.textContent.trim()) {
-      const figcaption = doc.createElement('figcaption');
-      figcaption.className = 'article-caption';
-      figcaption.innerHTML = caption.innerHTML;
-      figure.append(figcaption);
-    }
-    if (credit?.textContent.trim()) {
-      const small = doc.createElement('small');
-      small.className = 'article-credit';
-      small.innerHTML = credit.innerHTML;
-      figure.append(small);
-    }
-    return figure;
-  };
   const hero = pictures.shift();
   const galleryPictures = pictures.concat(loosePictures);
-  let gallery = null;
-  if (galleryPictures.length) {
-    gallery = doc.createElement('section');
-    gallery.className = 'article-gallery';
-    gallery.setAttribute('aria-labelledby', 'article-gallery-title');
-    const title = doc.createElement('h2');
-    title.id = 'article-gallery-title';
-    title.textContent = t('gallery');
-    const track = doc.createElement('div');
-    track.className = 'article-gallery-track';
-    track.setAttribute('role', 'list');
-    track.setAttribute('aria-label', t('galleryImagesAria'));
-    gallery.append(title, track);
-    galleryPictures.forEach((picture) => {
-      const figure = makeFigure(picture, 'article-figure article-gallery-item');
-      figure.setAttribute('role', 'listitem');
-      track.append(figure);
-    });
-  }
+  const gallery = makeGallery(doc, galleryPictures);
   if (hero) {
-    const figure = makeFigure(hero, 'article-figure article-hero');
+    const figure = makeFigure(doc, hero, 'article-figure article-hero');
     const first = root.firstElementChild;
     if (first) root.insertBefore(figure, first);
     else root.append(figure);
