@@ -2,7 +2,7 @@ import { $, appBase, pageCanvas, pageSpread, state } from './core.js';
 import { latestIssueKey } from './home.js';
 import { t } from './i18n.js';
 import { icon } from './icons.js';
-import { articlesForPage, isSubscriber, issueSummary, publication, readerUrl, shortIssueDate } from './issue.js';
+import { appPath, articlesForPage, isSubscriber, issueSummary, publication, readerUrl, shortIssueDate } from './issue.js';
 import { fitPageZoom, scrollToPage } from './pages.js';
 import { isSaved } from './prefs.js';
 
@@ -36,6 +36,7 @@ export function renderHeader() {
   const homeHref = subscriber ? readerUrl(latestIssueKey(), 1) : appBase.pathname + '?home=' + publicationCode;
   document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + (subscriber ? ' home: latest edition cover' : ' home')); });
   document.body.dataset.publication = publicationCode;
+  $('#favicon').href = appPath('Assets/favicon-' + (publicationCode === 'MY' ? 'mayura' : 'sudha') + '.svg');
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;

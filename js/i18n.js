@@ -48,6 +48,10 @@ export const T = {
     previousImageAria: 'ಹಿಂದಿನ ಚಿತ್ರ',
     nextImageAria: 'ಮುಂದಿನ ಚಿತ್ರ',
     openArticleImageAria: 'ಲೇಖನದ ಚಿತ್ರ ತೆರೆಯಿರಿ',
+    loadingArticle: 'ಲೇಖನ ಲೋಡ್ ಆಗುತ್ತಿದೆ…',
+    articleLoadError: 'ಈ ಲೇಖನವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+    retry: 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    offline: 'ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದ್ದೀರಿ',
     gallery: 'ಗ್ಯಾಲರಿ',
     galleryImagesAria: 'ಗ್ಯಾಲರಿ ಚಿತ್ರಗಳು',
     listenControlsAria: 'ಆಲಿಸುವ ನಿಯಂತ್ರಣಗಳು',
@@ -154,6 +158,10 @@ export const T = {
     previousImageAria: 'Previous image',
     nextImageAria: 'Next image',
     openArticleImageAria: 'Open article image',
+    loadingArticle: 'Loading article…',
+    articleLoadError: 'Could not load this article.',
+    retry: 'Try again',
+    offline: 'You are offline',
     gallery: 'Gallery',
     galleryImagesAria: 'Gallery images',
     listenControlsAria: 'Listen controls',
@@ -241,7 +249,7 @@ export function setLang(value) {
     const label = el.querySelector('.access-status-label');
     if (label) label.textContent = el.classList.contains('access-premium') ? t('premium') : t('free');
   });
-  document.querySelectorAll('.article-gallery h2').forEach((el) => { el.textContent = t('gallery'); });
+  document.querySelectorAll('.gallery-title-text').forEach((el) => { el.textContent = t('gallery'); });
   document.querySelectorAll('.article-gallery-track').forEach((el) => el.setAttribute('aria-label', t('galleryImagesAria')));
   document.querySelectorAll('.article-content img[role="button"]').forEach((el) => el.setAttribute('aria-label', t('openArticleImageAria')));
   if (state.view === 'home' && state.issue) renderHome();
@@ -251,13 +259,15 @@ export function setLang(value) {
 // Static chrome text that index.html doesn't own dynamically (menus/panels do, via t() at render time).
 export function applyChrome() {
   const set = (selector, fn) => document.querySelectorAll(selector).forEach(fn);
+  document.documentElement.lang = state.lang;
+  set('#offline-banner', (el) => { el.textContent = t('offline'); });
   set('#edition-button', (el) => el.setAttribute('aria-label', t('chooseEdition')));
   set('#share-fab', (el) => { el.setAttribute('aria-label', t('share')); el.title = t('share'); });
   set('#view-mode-toggle', (el) => el.setAttribute('aria-label', t('pageLayoutGroup')));
   set('[data-view-mode="single"]', (el) => { el.setAttribute('aria-label', t('singlePageView')); el.title = t('singlePage'); });
   set('[data-view-mode="double"]', (el) => { el.setAttribute('aria-label', t('doublePageView')); el.title = t('doublePage'); });
   set('[data-view-mode="scroll"]', (el) => { el.setAttribute('aria-label', t('scrollView')); el.title = t('continuousScroll'); });
-  set('.subscribe-mobile-label, .subscribe-desktop-label, #text-subscribe-label', (el) => { el.textContent = t('subscribe'); });
+  set('.subscribe-mobile-label, .subscribe-desktop-label, #text-subscribe-label, #sticky-subscribe-label', (el) => { el.textContent = t('subscribe'); });
   set('.account-button', (el) => el.setAttribute('aria-label', t('accountAria')));
   set('#menu-button, #text-menu-button', (el) => el.setAttribute('aria-label', t('menuAria')));
   set('#page-canvas', (el) => el.setAttribute('aria-label', t('magazinePageAria')));

@@ -35,3 +35,19 @@ window.addEventListener('pointerup', endGalleryDrag);
 window.addEventListener('pointercancel', endGalleryDrag);
 
 $('#article-content').addEventListener('dragstart', (event) => { if (event.target.closest('.article-gallery-track')) event.preventDefault(); });
+
+// "2 / 6" position cue in the gallery heading; scroll events don't bubble, so listen in the capture phase.
+let galleryCountFrame = 0;
+$('#article-content').addEventListener('scroll', (event) => {
+  const track = event.target;
+  if (!track.classList?.contains('article-gallery-track') || galleryCountFrame) return;
+  galleryCountFrame = requestAnimationFrame(() => {
+    galleryCountFrame = 0;
+    const items = [...track.children];
+    const left = track.scrollLeft + track.clientWidth / 2;
+    let index = items.findIndex((item) => item.offsetLeft + item.offsetWidth > left);
+    if (index < 0) index = items.length - 1;
+    const count = track.closest('.article-gallery')?.querySelector('.gallery-count');
+    if (count) count.textContent = (index + 1) + ' / ' + items.length;
+  });
+}, true);

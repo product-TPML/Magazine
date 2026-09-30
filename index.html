@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0d1512">
     <title>Sudha · Mayura</title>
-    <link rel="icon" href="data:,">
+    <link rel="icon" id="favicon" type="image/svg+xml" href="Assets/favicon-sudha.svg">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div class="app-shell">
+      <div class="offline-banner" id="offline-banner" role="status" hidden></div>
       <header class="app-header" id="app-header">
         <div class="page-header header-row">
           <a class="publication-home" id="publication-home" href="./"><img class="publication-logo" id="edition-logo" src="Assets/Sudha_Mast_GOLD-New Nandi.svg" alt="Sudha" width="96" height="32"></a>
@@ -71,10 +72,11 @@
         <article class="text-view" hidden>
           <button class="share-fab" id="share-fab" type="button" aria-label="Share"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5" /></svg></button>
           <div class="article-scroll" id="article-scroll" tabindex="0">
-            <div class="article-content" id="article-content">
-              <p class="loading">Loading article…</p>
+            <div class="article-content" id="article-content" lang="kn">
             </div>
           </div>
+
+          <button class="sticky-subscribe" id="sticky-subscribe" type="button" hidden><span class="subscribe-badge"><span class="premium-icon" aria-hidden="true"></span><span id="sticky-subscribe-label">Subscribe</span></span></button>
         </article>
       </main>
 

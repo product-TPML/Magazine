@@ -26,7 +26,8 @@ export async function openArticle(articleId, { push = true } = {}) {
   updateUrl(push);
   renderViewState();
   renderHeader();
-  $('#article-content').innerHTML = '<p class="loading">Loading article…</p>';
+  $('#sticky-subscribe').hidden = true;
+  $('#article-content').innerHTML = articleSkeletonMarkup();
   $('#article-scroll').scrollTop = 0;
   try {
     const response = await fetch(issuePath('articles/' + article.id + '.html'));
@@ -41,14 +42,30 @@ export async function openArticle(articleId, { push = true } = {}) {
     prepareSpeech();
     bindImageZoom();
     markPortraitHero();
+    observePaywall();
     renderArticleFooterCards();
   } catch (error) {
-    $('#article-content').innerHTML = '<p role="alert">Could not load this article.</p>';
+    $('#article-content').innerHTML = articleErrorMarkup(article);
     console.error(error);
   }
   renderHeader();
   renderArticleControls();
   renderListenPlayer();
+}
+
+// Placeholder shaped like a story (title, byline, hero, text) so the page doesn't jump when content arrives.
+function articleSkeletonMarkup() {
+  const line = (cls = '') => '<div class="skeleton-block skeleton-line ' + cls + '"></div>';
+  return '<div class="article-skeleton" role="status"><span class="sr-only">' + t('loadingArticle') + '</span>'
+    + line('skeleton-title') + line('skeleton-title skeleton-short') + line('skeleton-meta')
+    + '<div class="skeleton-block skeleton-hero"></div>'
+    + line() + line() + line() + line('skeleton-short') + '</div>';
+}
+
+function articleErrorMarkup(article) {
+  return '<div class="article-error" role="alert"><p>' + t('articleLoadError') + '</p><div class="article-error-actions">'
+    + '<button class="article-error-retry" type="button" data-retry-article="' + article.id + '">' + t('retry') + '</button>'
+    + '<button class="article-error-back" type="button" data-page-link="' + article.pageIndex + '">' + t('backToPage', article.pageIndex + 1) + '</button></div></div>';
 }
 
 function sanitizeArticleRoot(html, article) {
@@ -78,6 +95,19 @@ function sanitizeArticleRoot(html, article) {
 // Story header: title block plus hero image. On wide screens CSS lays them out side by side, full bleed.
 function storyHeaderMarkup(article, titleHtml, meta, heroHtml) {
   return '<header class="story-header' + (heroHtml ? '' : ' story-header--no-hero') + '"><div class="story-header-band"><p class="access-status access-' + accessClass(article) + '">' + (accessClass(article) === 'premium' ? '<span class="premium-icon" aria-hidden="true"></span>' : '') + '<span class="access-status-label">' + accessLabel(article) + '</span></p>' + titleHtml + (meta ? '<p class="byline">' + meta + '</p>' : '') + '</div>' + heroHtml + '</header>';
+}
+
+// Free readers on a premium story get a Subscribe bar whenever the inline paywall card is off screen.
+let paywallObserver = null;
+function observePaywall() {
+  paywallObserver?.disconnect();
+  const bar = $('#sticky-subscribe');
+  const paywall = document.querySelector('#article-content .paywall');
+  bar.hidden = !paywall;
+  if (!paywall) return;
+  bar.classList.remove('is-idle');
+  paywallObserver = new IntersectionObserver(([entry]) => bar.classList.toggle('is-idle', entry.isIntersecting), { root: $('#article-scroll'), threshold: 0.1 });
+  paywallObserver.observe(paywall);
 }
 
 // A full-bleed portrait hero would be taller than the screen; flag it so CSS keeps it in the article column.
@@ -129,8 +159,15 @@ function makeGallery(doc, pictures) {
   gallery.className = 'article-gallery';
   gallery.setAttribute('aria-labelledby', 'article-gallery-title');
   const title = doc.createElement('h2');
-  title.id = 'article-gallery-title';
-  title.textContent = t('gallery');
+  const titleText = doc.createElement('span');
+  titleText.id = 'article-gallery-title';
+  titleText.className = 'gallery-title-text';
+  titleText.textContent = t('gallery');
+  const count = doc.createElement('span');
+  count.className = 'gallery-count';
+  count.setAttribute('aria-hidden', 'true');
+  count.textContent = '1 / ' + pictures.length;
+  title.append(titleText, count);
   const track = doc.createElement('div');
   track.className = 'article-gallery-track';
   track.setAttribute('role', 'list');

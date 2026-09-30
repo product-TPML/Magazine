@@ -405,12 +405,27 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 /* The reading pane always fills the screen and sits under the sticky header, so showing or hiding the chrome
    never resizes or shifts the article (that resize made the header and bottom bar jitter near the end). */
 .text-view { position: relative; container-type: inline-size; min-height: 100dvh; margin-top: calc(-1 * var(--header-height)); }
+/* Phones: no scrollbar gutter (the reading-progress line already shows position). */
+@media (max-width: 767px) { .article-scroll { scrollbar-width: none; } .article-scroll::-webkit-scrollbar { display: none; } }
+/* Wider screens: the pane runs under the bars, so keep the track between them and let it grow to full height when they hide. */
+@media (min-width: 768px) {
+  .article-scroll::-webkit-scrollbar { width: .75rem; }
+  .article-scroll::-webkit-scrollbar-track { margin: var(--header-height) 0 calc(var(--bottom-height) + var(--safe-bottom)); background: transparent; }
+  .article-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 55%, transparent); background-clip: padding-box; border: 3px solid transparent; border-radius: 999px; }
+  .article-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; }
+  body.chrome-hidden .article-scroll::-webkit-scrollbar-track { margin: 0; }
+}
 /* Round share button pinned to the top-right of the reading pane; the headline leaves room for it. */
 .share-fab { position: absolute; top: calc(var(--header-height) + 1rem); right: 1rem; z-index: 5; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: #fff; background: var(--story-accent); border: 0; border-radius: 50%; box-shadow: 0 4px 14px rgba(0, 0, 0, .28), 0 1px 3px rgba(0, 0, 0, .12); cursor: pointer; touch-action: manipulation; transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
 body { --story-accent: var(--brand-sudha); }
 body[data-publication="MY"] { --story-accent: var(--brand-mayura); }
 /* Only offered while the top and bottom bars are showing. */
-body.chrome-hidden .share-fab { opacity: 0; transform: translateY(-.5rem); pointer-events: none; }
+body.chrome-hidden .share-fab { visibility: hidden; opacity: 0; transform: translateY(-.5rem); pointer-events: none; transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease, visibility 0s .2s; }
+/* Sticky Subscribe bar for free readers on premium stories; idle while the inline paywall card is on screen. */
+.sticky-subscribe { position: absolute; bottom: calc(var(--bottom-height) + var(--safe-bottom) + .75rem); left: 50%; z-index: 6; padding: 0; background: none; border: 0; cursor: pointer; transform: translateX(-50%); transition: opacity .2s ease, transform .2s ease; }
+.sticky-subscribe .subscribe-badge { padding: .7rem 1.3rem; font-size: .95rem; font-weight: 800; box-shadow: 0 2px 0 var(--subscription-shadow), 0 .5rem 1.1rem rgba(0, 0, 0, .3); }
+.sticky-subscribe.is-idle, body.chrome-hidden .sticky-subscribe { visibility: hidden; opacity: 0; pointer-events: none; transform: translate(-50%, .75rem); transition: opacity .2s ease, transform .2s ease, visibility 0s .2s; }
+@media (prefers-reduced-motion: reduce) { .sticky-subscribe { transition: none; } }
 .share-fab .icon { width: 1.15rem; height: 1.15rem; }
 .share-fab:hover { box-shadow: 0 6px 18px rgba(0, 0, 0, .32); transform: translateY(-1px); }
 .share-fab:active { transform: scale(.95); }
@@ -431,8 +446,8 @@ body.chrome-hidden .share-fab { opacity: 0; transform: translateY(-.5rem); point
 .article-content .access-status .premium-icon { width: 1.1rem; height: 1.1rem; }
 /* Contents/Stories/Saved tags: Free picks up the publication's own accent, Premium keeps the subscription gold. */
 .status-pill.access-free { color: var(--action); background: color-mix(in srgb, var(--action) 14%, var(--surface)); }
-.paywall-preview { margin-bottom: 0; }
-.paywall { position: relative; display: flex; flex-direction: column; margin: 0 0 2rem; padding: 16px 16px 24px; overflow: hidden; color: #fff; background: linear-gradient(132deg, var(--paywall-from) 37.64%, var(--paywall-to) 91.6%); border-radius: 9px; box-shadow: 0 -54px 28.2px color-mix(in srgb, var(--bg) 81%, transparent), 0 0 8px rgba(0, 0, 0, .25); font-size: 1rem; line-height: 1.15; }
+.paywall-preview { margin-bottom: 0; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 5em), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 5em), transparent); }
+.paywall { position: relative; display: flex; flex-direction: column; margin: 0 0 2rem; padding: 16px 16px 24px; overflow: hidden; color: #fff; background: linear-gradient(132deg, var(--paywall-from) 37.64%, var(--paywall-to) 91.6%); border-radius: 9px; box-shadow: 0 0 8px rgba(0, 0, 0, .25); font-size: 1rem; line-height: 1.15; }
 .paywall > :not(.paywall-watermark) { position: relative; }
 :is(.article-content, .home-view) .paywall img { margin: 0; border-radius: 0; }
 :is(.article-content, .home-view) .paywall-watermark { position: absolute; right: 0; bottom: 6.75rem; width: 225px; max-width: 58%; height: auto; pointer-events: none; }
@@ -573,11 +588,12 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-content .article-gallery { margin: 0 0 1.75rem; padding-top: .15rem; }
 .article-content .article-gallery h2 { display: flex; align-items: center; gap: .6rem; margin: 0 0 .75rem; font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
 .article-content .article-gallery h2::after { flex: 1; height: 1px; background: var(--line); content: ''; }
+.article-content .article-gallery .gallery-count { order: 2; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0; }
 .article-content .article-gallery-track { display: grid; grid-auto-flow: column; grid-auto-columns: 82%; align-items: stretch; gap: .75rem; margin-inline: -1rem; padding: .1rem 1rem .8rem; overflow-x: auto; scroll-padding-inline: 1rem; scroll-snap-type: x mandatory; overscroll-behavior-inline: contain; scrollbar-width: none; }
 .article-content .article-gallery-track::-webkit-scrollbar { display: none; }
 .article-content :is(.article-gallery-item, .article-hero) { position: relative; isolation: isolate; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: #1c1814; border: 1px solid var(--line); border-radius: .4rem; box-shadow: 0 .2rem .7rem var(--shadow-soft); scroll-snap-align: start; transition: border-color .15s ease, box-shadow .15s ease; }
 .article-content :is(.article-gallery-item, .article-hero)::before { position: absolute; inset: -1.5rem; z-index: -1; background: linear-gradient(rgba(12, 10, 8, .45), rgba(12, 10, 8, .64)), var(--photo, none) center / cover; filter: blur(14px) saturate(1.3); content: ''; }
-.article-content :is(.article-gallery-item, .article-hero) img { flex: none; width: 100%; height: auto; max-height: 26rem; margin: 0; padding: 0; object-fit: contain; border: 0; border-radius: 0; box-shadow: none; cursor: zoom-in; }
+.article-content :is(.article-gallery-item, .article-hero) img { flex: none; width: 100%; height: auto; aspect-ratio: auto 4 / 3; max-height: 26rem; margin: 0; padding: 0; object-fit: contain; border: 0; border-radius: 0; box-shadow: none; cursor: zoom-in; }
 .article-content :is(.article-gallery-item, .article-hero):hover, .article-content :is(.article-gallery-item, .article-hero):focus-within { border-color: var(--focus); box-shadow: 0 .4rem 1.1rem var(--shadow-medium); }
 .article-content :is(.article-gallery-item, .article-hero) :is(.article-caption, .article-credit) { flex: none; margin: 0; color: #f4f1ea; }
 .article-content :is(.article-gallery-item, .article-hero) .article-caption { padding: .7rem .85rem .2rem; border-left: 0; font-size: .74em; line-height: 1.5; }
@@ -655,6 +671,22 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-footer .article-nav small { color: var(--muted); font-size: .75em; }
 .article-footer .original-page { justify-content: center; color: var(--muted); font-size: .8rem; text-align: center; }
 .loading { color: var(--muted); }
+/* Story skeleton: same rhythm as a real story (title, byline, full-bleed hero, text). */
+.article-skeleton { display: grid; gap: .9rem; }
+.skeleton-block { background: linear-gradient(90deg, var(--surface-raised) 25%, color-mix(in srgb, var(--line) 55%, var(--surface-raised)) 50%, var(--surface-raised) 75%) 0 0 / 200% 100%; border-radius: .35rem; animation: skeleton-shimmer 1.4s linear infinite; }
+.skeleton-line { height: 1rem; }
+.skeleton-title { height: 2rem; }
+.skeleton-meta { width: 40%; }
+.skeleton-short { width: 60%; }
+.skeleton-hero { aspect-ratio: 16 / 10; margin: .5rem calc(-1 * max(1rem, (100cqw - 42rem) / 2)); border-radius: 0; }
+@keyframes skeleton-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-block { animation: none; } }
+.article-error { display: grid; gap: 1rem; justify-items: start; padding: 1.25rem; background: var(--surface-raised); border: 1px solid var(--line); border-radius: .7rem; }
+.article-error p { margin: 0; }
+.article-error-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.article-error-actions button { min-height: 44px; padding: .5rem 1.1rem; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: .5rem; font-weight: 600; }
+.article-error-actions .article-error-retry { color: #fff; background: var(--story-accent); border-color: transparent; }
+.offline-banner { position: fixed; top: calc(var(--header-height) + .5rem); left: 50%; z-index: 22; max-width: calc(100vw - 2rem); padding: .4rem .95rem; color: #f4f1ea; background: #1c1814; border-radius: 999px; box-shadow: 0 .2rem .8rem rgba(0, 0, 0, .3); font-size: .8rem; font-weight: 600; transform: translateX(-50%); }
 .article-controls.chrome-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
 
 .image-lightbox { position: fixed; inset: 0; z-index: 50; color: var(--text); }

@@ -45,6 +45,8 @@ $('#subscribe-button').addEventListener('click', (event) => openPanel('profile',
 
 $('#text-subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 
+$('#sticky-subscribe').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+
 $('#account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
 
 $('#text-account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
@@ -155,6 +157,8 @@ $('#panel-host').addEventListener('keydown', (event) => {
 });
 
 $('#article-content').addEventListener('click', (event) => {
+  const retry = event.target.closest('[data-retry-article]');
+  if (retry) { openArticle(retry.dataset.retryArticle, { push: false }); return; }
   const image = event.target.closest('.article-content img');
   if (image) {
     event.preventDefault();
@@ -242,15 +246,60 @@ $('#image-lightbox').addEventListener('pointerdown', (event) => {
   lightboxSwipeStart = { x: event.clientX, y: event.clientY };
 });
 
+// Dragging the viewer down follows the finger and dims the scrim; letting go past 80px closes it.
+function resetLightboxDrag() {
+  const figure = $('.lightbox-figure');
+  const backdrop = $('.lightbox-backdrop');
+  figure.style.transition = '';
+  figure.style.transform = '';
+  backdrop.style.opacity = '';
+}
+
+$('#image-lightbox').addEventListener('pointermove', (event) => {
+  if (!lightboxSwipeStart) return;
+  const deltaX = event.clientX - lightboxSwipeStart.x;
+  const deltaY = event.clientY - lightboxSwipeStart.y;
+  if (!lightboxSwipeStart.vertical && (Math.abs(deltaY) < 12 || Math.abs(deltaY) < Math.abs(deltaX))) return;
+  lightboxSwipeStart.vertical = true;
+  $('.lightbox-figure').style.transition = 'none';
+  $('.lightbox-figure').style.transform = 'translateY(' + deltaY + 'px)';
+  $('.lightbox-backdrop').style.opacity = String(Math.max(.35, 1 - Math.abs(deltaY) / 400));
+});
+
 $('#image-lightbox').addEventListener('pointerup', (event) => {
   if (!lightboxSwipeStart) return;
   const deltaX = event.clientX - lightboxSwipeStart.x;
   const deltaY = event.clientY - lightboxSwipeStart.y;
   lightboxSwipeStart = null;
+  resetLightboxDrag();
+  if (Math.abs(deltaY) > 80 && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) { closeLightbox(); return; }
   if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) moveLightbox(deltaX < 0 ? 1 : -1);
 });
 
-$('#image-lightbox').addEventListener('pointercancel', () => { lightboxSwipeStart = null; });
+$('#image-lightbox').addEventListener('pointercancel', () => { lightboxSwipeStart = null; resetLightboxDrag(); });
+
+// Double-tap toggles 2x zoom around the tapped point.
+let lightboxTap = null;
+$('#lightbox-image').addEventListener('pointerdown', (event) => { lightboxTap = { x: event.clientX, y: event.clientY, t: performance.now(), single: lightboxZoom.pointers.size <= 1 }; });
+$('#lightbox-image').addEventListener('pointerup', (event) => {
+  const down = lightboxTap;
+  lightboxTap = null;
+  if (!down || !down.single || Math.hypot(event.clientX - down.x, event.clientY - down.y) > 10 || performance.now() - down.t > 300) return;
+  const previous = lightboxLastTap;
+  lightboxLastTap = { x: event.clientX, y: event.clientY, t: performance.now() };
+  if (!previous || lightboxLastTap.t - previous.t > 350 || Math.hypot(event.clientX - previous.x, event.clientY - previous.y) > 40) return;
+  lightboxLastTap = null;
+  const image = $('#lightbox-image');
+  if (lightboxZoom.scale > 1) { lightboxZoom.scale = 1; lightboxZoom.x = 0; lightboxZoom.y = 0; }
+  else {
+    const rect = image.getBoundingClientRect();
+    lightboxZoom.scale = 2;
+    lightboxZoom.x = (1 - 2) * (event.clientX - (rect.left + rect.width / 2));
+    lightboxZoom.y = (1 - 2) * (event.clientY - (rect.top + rect.height / 2));
+  }
+  renderLightboxZoom();
+});
+let lightboxLastTap = null;
 
 $('#swipe-hint').addEventListener('click', (event) => { event.currentTarget.hidden = true; localStorage.setItem('reader-swipe-hint', 'seen'); });
 
@@ -322,3 +371,12 @@ setupPageGestures();
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
 
 route().catch((error) => { $('main').innerHTML = '<p class="panel-row" role="alert">' + escapeHtml(error.message) + '</p>'; console.error(error); });
+
+// Offline banner; a story that failed to load is retried automatically when the connection returns.
+const syncOnline = () => { $('#offline-banner').hidden = navigator.onLine; };
+window.addEventListener('offline', syncOnline);
+window.addEventListener('online', () => {
+  syncOnline();
+  if (state.view === 'text' && document.querySelector('#article-content .article-error')) openArticle(state.articleId, { push: false });
+});
+syncOnline();
