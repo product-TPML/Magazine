@@ -428,8 +428,9 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 :is(.article-content, .home-view) .paywall-benefits img { flex: 0 0 32px; width: 32px; height: 32px; object-fit: contain; }
 .paywall-cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 51px; padding: 10px 0; color: #000; background: linear-gradient(100deg, #b78423 -.4%, #fefb62 81.45%, #f0b00b 106.61%); border: 0; border-radius: 6px; box-shadow: 0 0 8px rgba(0, 0, 0, .08); font-size: 16px; font-weight: 600; }
 .paywall-cta .premium-icon { width: 1.5rem; height: 1.5rem; }
-:is(.article-content, .home-view) .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; margin: 10px 0 0; color: #fff; font-size: 16px; }
+:is(.article-content, .home-view) .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .1rem .4rem; line-height: 1.4; text-align: center; margin: 10px 0 0; color: #fff; font-size: 16px; }
 .paywall-login button { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 .25rem; color: #fff; background: none; border: 0; font-weight: 600; }
+.paywall-login button span { text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .2em; }
 :is(.article-content, .home-view) .paywall-login img { width: 14px; height: 14px; }
 @media (min-width: 768px) { .paywall { padding: 24px 28px 28px; } .paywall-cta { align-self: center; max-width: 26rem; } }
 /* Non-subscriber home: current edition + older editions, sized to fit one phone screen */
@@ -512,7 +513,7 @@ body[data-view="home"] .edition-summary, body[data-view="home"] #view-mode-toggl
 .locked-chip .icon { width: .95rem; height: .95rem; }
 .locked-title { margin: 0 0 8px; color: #ffd34d; font-family: var(--font-body); font-size: 18px; font-weight: 600; line-height: 28px; }
 .locked-lede { margin: 0 0 14px; color: #fff; font-size: 14px; line-height: 20px; }
-.locked-page-card .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; margin: 6px 0 0; color: #fff; font-size: 15px; }
+.locked-page-card .paywall-login { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .1rem .4rem; line-height: 1.4; text-align: center; margin: 6px 0 0; color: #fff; font-size: 15px; }
 .locked-page-card .paywall-login img { width: 14px; height: 14px; }
 .locked-free { display: grid; gap: .1rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .2); font-size: 14px; }
 .locked-free > span { color: rgba(255, 255, 255, .8); }
