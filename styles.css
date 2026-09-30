@@ -422,7 +422,10 @@ body[data-publication="MY"] .share-fab { background: var(--brand-mayura); }
 .article-content h3, .article-content h4, .article-content h5, .article-content h6 { margin: 1.8rem 0 .55rem; font-size: clamp(1.15rem, 4vw, 1.55rem); }
 .article-content .access-status { display: inline-block; margin: 0 0 .8rem; padding: .25rem .5rem; color: var(--action-ink); background: var(--action); border-radius: .3rem; font-size: .72em; font-weight: 800; text-transform: uppercase; }
 .article-content .access-status.access-free { color: var(--free-ink); background: var(--free-fill); }
-.article-content .access-status.access-premium, .status-pill.access-premium { color: var(--premium-ink); background: var(--premium-fill); }
+.status-pill.access-premium { color: var(--premium-ink); background: var(--premium-fill); }
+/* Premium badge in the story header matches the Subscribe button: gold fill, Nandi mark, raised edge. */
+.article-content .access-status.access-premium { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .65rem; color: var(--subscription-ink); background: var(--subscription-fill); border: 1px solid var(--subscription-border); border-radius: 4px; box-shadow: 0 2px 0 var(--subscription-shadow); line-height: 1.2; }
+.article-content .access-status .premium-icon { width: 1.1rem; height: 1.1rem; }
 /* Contents/Stories/Saved tags: Free picks up the publication's own accent, Premium keeps the subscription gold. */
 .status-pill.access-free { color: var(--action); background: color-mix(in srgb, var(--action) 14%, var(--surface)); }
 .paywall-preview { margin-bottom: 0; }
@@ -593,6 +596,7 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
   .article-content .story-header:not(.story-header--no-hero) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: calc(-1 * clamp(1rem, 3vw, 2rem)) calc(-1 * max(1rem, (100cqw - 42rem) / 2)) 2rem; }
   .article-content .story-header:not(.story-header--no-hero) .story-header-band { display: flex; flex-direction: column; padding: 2.5rem clamp(1.5rem, 4cqw, 4rem); background: var(--surface-raised); border-left: 4px solid var(--link); }
   .article-content .story-header .story-header-band :is(h1, .access-status) { margin-top: 0; }
+  .article-content .story-header .story-header-band .access-status { align-self: flex-start; }
   .article-content .story-header .story-header-band .byline { margin: auto 0 0; padding-top: 1.5rem; border-top: 1px solid var(--link); }
   .article-content .story-header .article-hero { order: -1; align-self: stretch; justify-content: center; min-height: 26rem; margin: 0; border-width: 0; border-radius: 0; box-shadow: none; }
   .article-content .story-header .article-hero img { max-height: 36rem; }
@@ -722,6 +726,10 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .theme-toggle[aria-checked="true"] .theme-switch { border-color: var(--action); background: var(--action); }
 .theme-toggle[aria-checked="true"] .theme-switch::before { background: var(--action-ink); transform: translateX(1rem); }
 .menu-divider { height: 1px; margin: .15rem 0 .55rem; background: var(--line); }
+/* Testing-only controls sit in one dashed box so they read as not user-facing. */
+.menu-group { margin: 0 0 .55rem; padding: .5rem .5rem .25rem; border: 1px dashed var(--line); border-radius: .6rem; }
+.menu-group-label { margin: 0 .3rem .3rem; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.menu-group .account-state-control { margin-bottom: 0; }
 .search-form { display: flex; gap: .5rem; padding: .5rem .25rem; }
 .search-form input { min-width: 0; flex: 1; padding: .75rem; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: .5rem; }
 .search-form button { min-height: 44px; padding: .5rem .8rem; color: var(--action-ink); background: var(--action); border: 0; border-radius: .5rem; }

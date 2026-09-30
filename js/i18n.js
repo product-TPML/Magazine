@@ -237,6 +237,10 @@ export function setLang(value) {
   renderPageControls();
   renderArticleControls();
   renderListenPlayer();
+  document.querySelectorAll('.article-content .access-status').forEach((el) => {
+    const label = el.querySelector('.access-status-label');
+    if (label) label.textContent = el.classList.contains('access-premium') ? t('premium') : t('free');
+  });
   document.querySelectorAll('.article-gallery h2').forEach((el) => { el.textContent = t('gallery'); });
   document.querySelectorAll('.article-gallery-track').forEach((el) => el.setAttribute('aria-label', t('galleryImagesAria')));
   document.querySelectorAll('.article-content img[role="button"]').forEach((el) => el.setAttribute('aria-label', t('openArticleImageAria')));

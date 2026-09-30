@@ -3,7 +3,7 @@ import { $, escapeHtml, state } from './core.js';
 import { t } from './i18n.js';
 import { icon } from './icons.js';
 import { bindImageZoom } from './imagezoom.js';
-import { accessClass, appPath, articleAccess, articleHref, articlesForPage, currentArticle, isPaidArticle, issuePath, needsPreview, pageHref, publication } from './issue.js';
+import { accessClass, accessLabel, appPath, articleHref, articlesForPage, currentArticle, isPaidArticle, issuePath, needsPreview, pageHref, publication } from './issue.js';
 import { closeLightbox } from './lightbox.js';
 import { loadArticleMeta, renderArticleMetaFromHtml } from './loader.js';
 import { resetZoom } from './pages.js';
@@ -77,7 +77,7 @@ function sanitizeArticleRoot(html, article) {
 
 // Story header: title block plus hero image. On wide screens CSS lays them out side by side, full bleed.
 function storyHeaderMarkup(article, titleHtml, meta, heroHtml) {
-  return '<header class="story-header' + (heroHtml ? '' : ' story-header--no-hero') + '"><div class="story-header-band"><p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + titleHtml + (meta ? '<p class="byline">' + meta + '</p>' : '') + '</div>' + heroHtml + '</header>';
+  return '<header class="story-header' + (heroHtml ? '' : ' story-header--no-hero') + '"><div class="story-header-band"><p class="access-status access-' + accessClass(article) + '">' + (accessClass(article) === 'premium' ? '<span class="premium-icon" aria-hidden="true"></span>' : '') + '<span class="access-status-label">' + accessLabel(article) + '</span></p>' + titleHtml + (meta ? '<p class="byline">' + meta + '</p>' : '') + '</div>' + heroHtml + '</header>';
 }
 
 // A full-bleed portrait hero would be taller than the screen; flag it so CSS keeps it in the article column.
