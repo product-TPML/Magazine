@@ -248,6 +248,7 @@ export function setLang(value) {
 export function applyChrome() {
   const set = (selector, fn) => document.querySelectorAll(selector).forEach(fn);
   set('#edition-button', (el) => el.setAttribute('aria-label', t('chooseEdition')));
+  set('#share-fab', (el) => { el.setAttribute('aria-label', t('share')); el.title = t('share'); });
   set('#view-mode-toggle', (el) => el.setAttribute('aria-label', t('pageLayoutGroup')));
   set('[data-view-mode="single"]', (el) => { el.setAttribute('aria-label', t('singlePageView')); el.title = t('singlePage'); });
   set('[data-view-mode="double"]', (el) => { el.setAttribute('aria-label', t('doublePageView')); el.title = t('doublePage'); });

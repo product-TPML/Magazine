@@ -40,6 +40,7 @@ export async function openArticle(articleId, { push = true } = {}) {
     $('#article-content').innerHTML = preview ? articlePreviewMarkup(html, article) : articleMarkup(html, article);
     prepareSpeech();
     bindImageZoom();
+    markPortraitHero();
     renderArticleFooterCards();
   } catch (error) {
     $('#article-content').innerHTML = '<p role="alert">Could not load this article.</p>';
@@ -72,6 +73,20 @@ function sanitizeArticleRoot(html, article) {
     if (href && !/^(https?:|mailto:|#)/i.test(href)) link.removeAttribute('href');
   });
   return doc;
+}
+
+// Story header: title block plus hero image. On wide screens CSS lays them out side by side, full bleed.
+function storyHeaderMarkup(article, titleHtml, meta, heroHtml) {
+  return '<header class="story-header' + (heroHtml ? '' : ' story-header--no-hero') + '"><div class="story-header-band"><p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + titleHtml + (meta ? '<p class="byline">' + meta + '</p>' : '') + '</div>' + heroHtml + '</header>';
+}
+
+// A full-bleed portrait hero would be taller than the screen; flag it so CSS keeps it in the article column.
+function markPortraitHero() {
+  const image = document.querySelector('#article-content .article-hero img');
+  if (!image) return;
+  const apply = () => image.closest('.article-hero')?.classList.toggle('is-portrait', image.naturalHeight > image.naturalWidth);
+  if (image.complete) apply();
+  else image.addEventListener('load', apply, { once: true });
 }
 
 // Feeds the blurred, darkened photo behind a figure's caption (see .article-figure::before in styles.css).
@@ -152,11 +167,11 @@ function articlePreviewMarkup(html, article) {
     return picture;
   });
   const gallery = makeGallery(doc, pictures.slice(1).concat(loosePictures));
-  const figure = (heroFigure ? heroFigure.outerHTML : '') + (gallery ? gallery.outerHTML : '');
+  const galleryHtml = gallery ? gallery.outerHTML : '';
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
   const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
   const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
-  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p class="paywall-preview">' + escapeHtml(words.join(' ')) + '…</p>' + paywallMarkup() + footer;
+  return storyHeaderMarkup(article, title, meta, heroFigure ? heroFigure.outerHTML : '') + galleryHtml + '<p class="paywall-preview">' + escapeHtml(words.join(' ')) + '…</p>' + paywallMarkup() + footer;
 }
 
 function paywallCopy() {
@@ -244,13 +259,8 @@ function articleMarkup(html, article) {
   const hero = pictures.shift();
   const galleryPictures = pictures.concat(loosePictures);
   const gallery = makeGallery(doc, galleryPictures);
-  if (hero) {
-    const figure = makeFigure(doc, hero, 'article-figure article-hero');
-    const first = root.firstElementChild;
-    if (first) root.insertBefore(figure, first);
-    else root.append(figure);
-    if (gallery) figure.after(gallery);
-  } else if (gallery) {
+  const heroHtml = hero ? makeFigure(doc, hero, 'article-figure article-hero').outerHTML : '';
+  if (gallery) {
     const first = root.firstElementChild;
     if (first) root.insertBefore(gallery, first);
     else root.append(gallery);
@@ -266,7 +276,7 @@ function articleMarkup(html, article) {
   const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
   const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
   const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
-  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + root.innerHTML + footer;
+  return storyHeaderMarkup(article, title, meta, heroHtml) + root.innerHTML + footer;
 }
 
 function renderArticleFooterCards() {

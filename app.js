@@ -85,6 +85,8 @@ $('#article-listen').addEventListener('click', toggleSpeech);
 
 $('#article-share').addEventListener('click', shareCurrent);
 
+$('#share-fab').addEventListener('click', shareCurrent);
+
 $('#listen-play').addEventListener('click', toggleSpeech);
 
 $('#listen-stop').addEventListener('click', stopSpeech);

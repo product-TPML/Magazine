@@ -404,7 +404,16 @@ html:has(.page-view:not([hidden])) { overflow: hidden; }
 .page-view.chrome-hidden .page-controls { transform: translateY(100%); opacity: 0; pointer-events: none; }
 .page-view.chrome-hidden .canvas-nav { opacity: 0; pointer-events: none; }
 .article-controls { grid-template-columns: repeat(4, 1fr); }
-.text-view { min-height: calc(100dvh - var(--header-height)); }
+.text-view { position: relative; container-type: inline-size; min-height: calc(100dvh - var(--header-height)); }
+/* Round share button pinned to the top-right of the reading pane; the headline leaves room for it. */
+.share-fab { position: absolute; top: 1rem; right: 1rem; z-index: 5; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; color: #fff; background: var(--brand-sudha); border: 0; border-radius: 50%; box-shadow: 0 4px 14px rgba(0, 0, 0, .28), 0 1px 3px rgba(0, 0, 0, .12); cursor: pointer; touch-action: manipulation; transition: transform .15s ease, box-shadow .2s ease; }
+body[data-publication="MY"] .share-fab { background: var(--brand-mayura); }
+.share-fab .icon { width: 1.15rem; height: 1.15rem; }
+.share-fab:hover { box-shadow: 0 6px 18px rgba(0, 0, 0, .32); transform: translateY(-1px); }
+.share-fab:active { transform: scale(.95); }
+.article-content .story-header-band h1 { padding-right: 3.25rem; }
+@media (min-width: 768px) { .share-fab { right: 2rem; } }
+@media (prefers-reduced-motion: reduce) { .share-fab { transition: none; } }
 .article-scroll { height: calc(100dvh - var(--header-height)); overflow-y: auto; padding: clamp(1rem, 3vw, 2rem) max(1rem, calc((100% - 42rem) / 2)) calc(var(--bottom-height) + 5rem + var(--safe-bottom)); }
 .article-content { max-width: 42rem; margin: 0 auto; overflow-wrap: anywhere; font-size: var(--article-size, 1.125rem); line-height: 1.7; text-rendering: optimizeLegibility; }
 .article-content h1, .article-content h2, .article-content h3, .article-content h4, .article-content h5, .article-content h6 { color: var(--text); font-family: var(--font-heading); font-weight: 600; line-height: 1.2; }
@@ -552,7 +561,9 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-content .article-caption { display: block; margin: .45rem 0 0; padding-left: .6rem; color: var(--muted); border-left: 3px solid var(--rule); font-size: .78em; line-height: 1.5; }
 .article-content .article-credit { display: block; margin-top: .25rem; color: var(--muted); font-size: .68em; line-height: 1.35; }
 .article-content .article-caption p, .article-content .article-credit p { margin: 0; }
-.article-content .article-hero { margin: .25rem 0 1.5rem; }
+/* Hero bleeds to the full width of the reading pane (cancels .article-scroll's side padding, which is derived from
+   the .text-view width); text inside it stays aligned with the article column. */
+.article-content .article-hero { margin: .25rem calc(-1 * max(1rem, (100cqw - 42rem) / 2)) 1.5rem; }
 .article-content .article-gallery { margin: 0 0 1.75rem; padding-top: .15rem; }
 .article-content .article-gallery h2 { display: flex; align-items: center; gap: .6rem; margin: 0 0 .75rem; font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
 .article-content .article-gallery h2::after { flex: 1; height: 1px; background: var(--line); content: ''; }
@@ -560,7 +571,7 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-content .article-gallery-track::-webkit-scrollbar { display: none; }
 .article-content :is(.article-gallery-item, .article-hero) { position: relative; isolation: isolate; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: #1c1814; border: 1px solid var(--line); border-radius: .4rem; box-shadow: 0 .2rem .7rem var(--shadow-soft); scroll-snap-align: start; transition: border-color .15s ease, box-shadow .15s ease; }
 .article-content :is(.article-gallery-item, .article-hero)::before { position: absolute; inset: -1.5rem; z-index: -1; background: linear-gradient(rgba(12, 10, 8, .45), rgba(12, 10, 8, .64)), var(--photo, none) center / cover; filter: blur(14px) saturate(1.3); content: ''; }
-.article-content :is(.article-gallery-item, .article-hero) img { flex: none; width: 100%; height: auto; aspect-ratio: 4 / 3; margin: 0; padding: 0; object-fit: cover; border: 0; border-radius: 0; box-shadow: none; cursor: zoom-in; }
+.article-content :is(.article-gallery-item, .article-hero) img { flex: none; width: 100%; height: auto; max-height: 26rem; margin: 0; padding: 0; object-fit: contain; border: 0; border-radius: 0; box-shadow: none; cursor: zoom-in; }
 .article-content :is(.article-gallery-item, .article-hero):hover, .article-content :is(.article-gallery-item, .article-hero):focus-within { border-color: var(--focus); box-shadow: 0 .4rem 1.1rem var(--shadow-medium); }
 .article-content :is(.article-gallery-item, .article-hero) :is(.article-caption, .article-credit) { flex: none; margin: 0; color: #f4f1ea; }
 .article-content :is(.article-gallery-item, .article-hero) .article-caption { padding: .7rem .85rem .2rem; border-left: 0; font-size: .74em; line-height: 1.5; }
@@ -568,9 +579,25 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .article-content :is(.article-gallery-item, .article-hero) .article-caption:last-child { padding-bottom: .7rem; }
 .article-content :is(.article-gallery-item, .article-hero) .article-credit:not(:last-child) { padding-top: .2rem; }
 .article-content :is(.article-gallery-item, .article-hero) > :last-child:not(img) { flex: 1; }
+.article-content .article-hero { border-width: 1px 0; border-radius: 0; box-shadow: none; }
+.article-content .article-hero img { max-height: none; }
+.article-content .article-hero :is(.article-caption, .article-credit) { padding-inline: max(1rem, calc((100cqw - 42rem) / 2)); }
+/* Portrait heroes would be taller than the screen at full bleed, so they stay in the article column as a card. */
+.article-content .article-hero.is-portrait { margin-inline: 0; border-width: 1px; border-radius: .4rem; box-shadow: 0 .2rem .7rem var(--shadow-soft); }
+.article-content .article-hero.is-portrait :is(.article-caption, .article-credit) { padding-inline: .85rem; }
+/* Wide screens: full-bleed split header, hero on the left and the title block on the right. */
+@media (min-width: 1024px) {
+  .article-content .story-header:not(.story-header--no-hero) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: calc(-1 * clamp(1rem, 3vw, 2rem)) calc(-1 * max(1rem, (100cqw - 42rem) / 2)) 2rem; }
+  .article-content .story-header:not(.story-header--no-hero) .story-header-band { display: flex; flex-direction: column; padding: 2.5rem clamp(1.5rem, 4cqw, 4rem); background: var(--surface-raised); border-left: 4px solid var(--link); }
+  .article-content .story-header .story-header-band :is(h1, .access-status) { margin-top: 0; }
+  .article-content .story-header .story-header-band .byline { margin: auto 0 0; padding-top: 1.5rem; border-top: 1px solid var(--link); }
+  .article-content .story-header .article-hero { order: -1; align-self: stretch; justify-content: center; min-height: 26rem; margin: 0; border-width: 0; border-radius: 0; box-shadow: none; }
+  .article-content .story-header .article-hero img { max-height: 36rem; }
+  .article-content .story-header .article-hero > :last-child:not(img) { flex: none; }
+  .article-content .story-header .article-hero :is(.article-caption, .article-credit) { padding-inline: 1.5rem; }
+}
 @media (min-width: 768px) {
   .article-content .article-gallery-track { cursor: grab; user-select: none; }
-  .article-content .article-hero img { aspect-ratio: 16 / 9; }
   .article-content .article-gallery-item img { cursor: grab; }
   .article-content .article-gallery-track.is-dragging { cursor: grabbing; scroll-snap-type: none; scroll-behavior: auto; }
   .article-content .article-gallery-track.is-dragging .article-gallery-item img { cursor: grabbing; }

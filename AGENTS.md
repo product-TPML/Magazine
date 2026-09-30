@@ -22,6 +22,9 @@ Context: this repo holds extracted Sudha/Mayura e-magazine editions (`data/`), t
 6. **Performance.**
    An edition has 60–165 page images. Lazy-load below-the-fold pages and thumbs, size-constrain them, and never decode a whole issue at once.
 
+7. **Never crop editorial images.**
+   Hero and gallery images must always show in full: natural aspect ratio at full width of their frame, `object-fit: contain` if a height limit applies, never `cover` or a fixed aspect ratio that cuts the photo.
+
 ## Verify every UI change
 
 Render at **360px** and **≥1280px** in a real browser before calling it done; no horizontal scroll on mobile.
