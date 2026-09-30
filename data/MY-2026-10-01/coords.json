@@ -1,0 +1,3721 @@
+﻿{
+    "pub":  "my",
+    "date":  "2026-10-01",
+    "edition":  "Mayura Magazine",
+    "product":  "Mayura",
+    "pubDate":  20261001,
+    "fullPdfFile":  "/webepaper/pdf/full/full.pdf",
+    "tiles":  false,
+    "pageCount":  164,
+    "articleCount":  39,
+    "coverImage":  "cover.jpg",
+    "pages":  [
+                  {
+                      "id":  "1748311",
+                      "name":  "Seite 1",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748311.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748311.png",
+                      "pdfFile":  "webepaper/pdf/1748311.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748312",
+                      "name":  "Seite 2",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748312.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748312.png",
+                      "pdfFile":  "webepaper/pdf/1748312.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+                                  {
+                                      "id":  "ad514809",
+                                      "top":  "2.6470587%",
+                                      "left":  "1.4583334%",
+                                      "width":  "94.37499%",
+                                      "height":  "94.411766%",
+                                      "imgFile":  "webepaper/photos/ad514809.jpg"
+                                  }
+                              ]
+                  },
+                  {
+                      "id":  "1748313",
+                      "name":  "Seite 3",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748313.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748313.png",
+                      "pdfFile":  "webepaper/pdf/1748313.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "25692903",
+                                           "top":  "0.0%",
+                                           "left":  "0.41666666%",
+                                           "width":  "92.083336%",
+                                           "height":  "91.911766%",
+                                           "htmlFile":  "article/webepaper/html/25692903.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87grjm6goz91j7vrffzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748314",
+                      "name":  "Seite 4",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748314.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748314.png",
+                      "pdfFile":  "webepaper/pdf/1748314.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748315",
+                      "name":  "Seite 5",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748315.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748315.png",
+                      "pdfFile":  "webepaper/pdf/1748315.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748316",
+                      "name":  "Seite 6",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748316.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748316.png",
+                      "pdfFile":  "webepaper/pdf/1748316.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1813206228",
+                                           "top":  "0.0%",
+                                           "left":  "19.791666%",
+                                           "width":  "57.708336%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1813206228.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87fcfxznn0ke7h2d2p0"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748363",
+                      "name":  "Seite 7",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748363.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748363.png",
+                      "pdfFile":  "webepaper/pdf/1748363.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1813206228",
+                                           "top":  "0.0%",
+                                           "left":  "16.458334%",
+                                           "width":  "73.12499%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1813206228.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87fcfxznn0ke7h2d2p0"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748364",
+                      "name":  "Seite 8",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748364.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748364.png",
+                      "pdfFile":  "webepaper/pdf/1748364.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "249004595",
+                                           "top":  "52.058823%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "39.117645%",
+                                           "htmlFile":  "article/webepaper/html/249004595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87fqgq9vn139aukefzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748365",
+                      "name":  "Seite 9",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748365.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748365.png",
+                      "pdfFile":  "webepaper/pdf/1748365.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "249004595",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/249004595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87fqgq9vn139aukefzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748209",
+                      "name":  "Seite 10",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748209.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748209.png",
+                      "pdfFile":  "webepaper/pdf/1748209.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "249004595",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/249004595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87fqgq9vn139aukefzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748210",
+                      "name":  "Seite 11",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748210.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748210.png",
+                      "pdfFile":  "webepaper/pdf/1748210.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1877450137",
+                                           "top":  "0.0%",
+                                           "left":  "10.0%",
+                                           "width":  "89.791664%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1877450137.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e6tl6aj1j36b5f6r"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748211",
+                      "name":  "Seite 12",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748211.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748211.png",
+                      "pdfFile":  "webepaper/pdf/1748211.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1421261871",
+                                           "top":  "21.029411%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "70.14706%",
+                                           "htmlFile":  "article/webepaper/html/1421261871.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gdh5dsyhv1kf7vunv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748344",
+                      "name":  "Seite 13",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748344.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748344.png",
+                      "pdfFile":  "webepaper/pdf/1748344.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1421261871",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1421261871.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gdh5dsyhv1kf7vunv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748345",
+                      "name":  "Seite 14",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748345.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748345.png",
+                      "pdfFile":  "webepaper/pdf/1748345.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1421261871",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1421261871.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gdh5dsyhv1kf7vunv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748346",
+                      "name":  "Seite 15",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748346.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748346.png",
+                      "pdfFile":  "webepaper/pdf/1748346.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1421261871",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1421261871.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gdh5dsyhv1kf7vunv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748347",
+                      "name":  "Seite 16",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748347.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748347.png",
+                      "pdfFile":  "webepaper/pdf/1748347.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1421261871",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1421261871.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gdh5dsyhv1kf7vunv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748348",
+                      "name":  "Seite 17",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748348.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748348.png",
+                      "pdfFile":  "webepaper/pdf/1748348.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "449514836",
+                                           "top":  "1.9117647%",
+                                           "left":  "10.0%",
+                                           "width":  "89.791664%",
+                                           "height":  "89.70589%",
+                                           "htmlFile":  "article/webepaper/html/449514836.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87grxoqwpo11km2xs2oy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748349",
+                      "name":  "Seite 18",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748349.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748349.png",
+                      "pdfFile":  "webepaper/pdf/1748349.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748340",
+                      "name":  "Seite 19",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748340.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748340.png",
+                      "pdfFile":  "webepaper/pdf/1748340.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "87.083336%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748341",
+                      "name":  "Seite 20",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748341.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748341.png",
+                      "pdfFile":  "webepaper/pdf/1748341.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748342",
+                      "name":  "Seite 21",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748342.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748342.png",
+                      "pdfFile":  "webepaper/pdf/1748342.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748343",
+                      "name":  "Seite 22",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748343.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748343.png",
+                      "pdfFile":  "webepaper/pdf/1748343.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "5.882353%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.7353%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748234",
+                      "name":  "Seite 23",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748234.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748234.png",
+                      "pdfFile":  "webepaper/pdf/1748234.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "785307595",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/785307595.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87epf2rholgj7w6pfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748212",
+                      "name":  "Seite 24",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748212.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748212.png",
+                      "pdfFile":  "webepaper/pdf/1748212.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "498646469",
+                                           "top":  "21.911764%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "77.94118%",
+                                           "htmlFile":  "article/webepaper/html/498646469.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e6sa1q4dy3dqxpdlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748213",
+                      "name":  "Seite 25",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748213.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748213.png",
+                      "pdfFile":  "webepaper/pdf/1748213.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "498646469",
+                                           "top":  "2.6470587%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "97.20589%",
+                                           "htmlFile":  "article/webepaper/html/498646469.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e6sa1q4dy3dqxpdlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748235",
+                      "name":  "Seite 26",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748235.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748235.png",
+                      "pdfFile":  "webepaper/pdf/1748235.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748268",
+                      "name":  "Seite 27",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748268.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748268.png",
+                      "pdfFile":  "webepaper/pdf/1748268.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748269",
+                      "name":  "Seite 28",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748269.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748269.png",
+                      "pdfFile":  "webepaper/pdf/1748269.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748270",
+                      "name":  "Seite 29",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748270.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748270.png",
+                      "pdfFile":  "webepaper/pdf/1748270.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1207049412",
+                                           "top":  "6.029412%",
+                                           "left":  "17.916666%",
+                                           "width":  "69.79167%",
+                                           "height":  "9.117647%",
+                                           "htmlFile":  "article/webepaper/html/1207049412.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879l1v7ycl0mlxybnv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748271",
+                      "name":  "Seite 30",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748271.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748271.png",
+                      "pdfFile":  "webepaper/pdf/1748271.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748272",
+                      "name":  "Seite 31",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748272.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748272.png",
+                      "pdfFile":  "webepaper/pdf/1748272.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1207049412",
+                                           "top":  "6.029412%",
+                                           "left":  "16.666666%",
+                                           "width":  "69.791664%",
+                                           "height":  "13.676472%",
+                                           "htmlFile":  "article/webepaper/html/1207049412.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879l1v7ycl0mlxybnv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748273",
+                      "name":  "Seite 32",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748273.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748273.png",
+                      "pdfFile":  "webepaper/pdf/1748273.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748319",
+                      "name":  "Seite 33",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748319.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748319.png",
+                      "pdfFile":  "webepaper/pdf/1748319.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1127934174",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/1127934174.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ecqp2r2rs44urkr8x"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748192",
+                      "name":  "Seite 34",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748192.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748192.png",
+                      "pdfFile":  "webepaper/pdf/1748192.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1789164116",
+                                           "top":  "10.588235%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "81.02942%",
+                                           "htmlFile":  "article/webepaper/html/1789164116.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gtyhnu9es1ltooa8nz"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748193",
+                      "name":  "Seite 35",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748193.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748193.png",
+                      "pdfFile":  "webepaper/pdf/1748193.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1789164116",
+                                           "top":  "0.88235295%",
+                                           "left":  "7.2916665%",
+                                           "width":  "84.583336%",
+                                           "height":  "90.29411%",
+                                           "htmlFile":  "article/webepaper/html/1789164116.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87gtyhnu9es1ltooa8nz"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748194",
+                      "name":  "Seite 36",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748194.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748194.png",
+                      "pdfFile":  "webepaper/pdf/1748194.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1504026689",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1504026689.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87alcfclqc211yhjinxd"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748195",
+                      "name":  "Seite 37",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748195.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748195.png",
+                      "pdfFile":  "webepaper/pdf/1748195.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1504026689",
+                                           "top":  "1.9117647%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "89.70589%",
+                                           "htmlFile":  "article/webepaper/html/1504026689.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87alcfclqc211yhjinxd"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748196",
+                      "name":  "Seite 38",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748196.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748196.png",
+                      "pdfFile":  "webepaper/pdf/1748196.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1504026689",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1504026689.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87alcfclqc211yhjinxd"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748197",
+                      "name":  "Seite 39",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748197.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748197.png",
+                      "pdfFile":  "webepaper/pdf/1748197.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1504026689",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1504026689.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87alcfclqc211yhjinxd"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748198",
+                      "name":  "Seite 40",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748198.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748198.png",
+                      "pdfFile":  "webepaper/pdf/1748198.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748199",
+                      "name":  "Seite 41",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748199.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748199.png",
+                      "pdfFile":  "webepaper/pdf/1748199.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748200",
+                      "name":  "Seite 42",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748200.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748200.png",
+                      "pdfFile":  "webepaper/pdf/1748200.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748201",
+                      "name":  "Seite 43",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748201.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748201.png",
+                      "pdfFile":  "webepaper/pdf/1748201.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748202",
+                      "name":  "Seite 44",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748202.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748202.png",
+                      "pdfFile":  "webepaper/pdf/1748202.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748203",
+                      "name":  "Seite 45",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748203.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748203.png",
+                      "pdfFile":  "webepaper/pdf/1748203.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "92.083336%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748204",
+                      "name":  "Seite 46",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748204.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748204.png",
+                      "pdfFile":  "webepaper/pdf/1748204.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748205",
+                      "name":  "Seite 47",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748205.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748205.png",
+                      "pdfFile":  "webepaper/pdf/1748205.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "5.4411764%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.73529%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748206",
+                      "name":  "Seite 48",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748206.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748206.png",
+                      "pdfFile":  "webepaper/pdf/1748206.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748207",
+                      "name":  "Seite 49",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748207.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748207.png",
+                      "pdfFile":  "webepaper/pdf/1748207.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1981804282",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1981804282.html",
+                                           "contentElementId":  "/dcx/atom/document/doc86yb3vpc7j9d2p8uco9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748208",
+                      "name":  "Seite 50",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748208.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748208.png",
+                      "pdfFile":  "webepaper/pdf/1748208.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1358138865",
+                                           "top":  "10.588235%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "80.882355%",
+                                           "htmlFile":  "article/webepaper/html/1358138865.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bqn56fw0n2fudffyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748320",
+                      "name":  "Seite 51",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748320.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748320.png",
+                      "pdfFile":  "webepaper/pdf/1748320.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1358138865",
+                                           "top":  "2.5%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "88.97059%",
+                                           "htmlFile":  "article/webepaper/html/1358138865.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bqn56fw0n2fudffyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748307",
+                      "name":  "Seite 52",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748307.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748307.png",
+                      "pdfFile":  "webepaper/pdf/1748307.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1358138865",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1358138865.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bqn56fw0n2fudffyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748216",
+                      "name":  "Seite 53",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748216.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748216.png",
+                      "pdfFile":  "webepaper/pdf/1748216.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1358138865",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1358138865.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bqn56fw0n2fudffyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748217",
+                      "name":  "Seite 54",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748217.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748217.png",
+                      "pdfFile":  "webepaper/pdf/1748217.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1358138865",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1358138865.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bqn56fw0n2fudffyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748218",
+                      "name":  "Seite 55",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748218.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748218.png",
+                      "pdfFile":  "webepaper/pdf/1748218.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "525216102",
+                                           "top":  "0.0%",
+                                           "left":  "10.0%",
+                                           "width":  "89.791664%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/525216102.html",
+                                           "contentElementId":  "/dcx/atom/document/doc873irfrfsth1eajrk2oz"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748219",
+                      "name":  "Seite 56",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748219.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748219.png",
+                      "pdfFile":  "webepaper/pdf/1748219.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "446029232",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/446029232.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8780zgtbkvpm0stodlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748220",
+                      "name":  "Seite 57",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748220.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748220.png",
+                      "pdfFile":  "webepaper/pdf/1748220.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "446029232",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "91.875%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/446029232.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8780zgtbkvpm0stodlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748221",
+                      "name":  "Seite 58",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748221.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748221.png",
+                      "pdfFile":  "webepaper/pdf/1748221.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "446029232",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/446029232.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8780zgtbkvpm0stodlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748222",
+                      "name":  "Seite 59",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748222.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748222.png",
+                      "pdfFile":  "webepaper/pdf/1748222.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "446029232",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/446029232.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8780zgtbkvpm0stodlm"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748223",
+                      "name":  "Seite 60",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748223.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748223.png",
+                      "pdfFile":  "webepaper/pdf/1748223.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748224",
+                      "name":  "Seite 61",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748224.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748224.png",
+                      "pdfFile":  "webepaper/pdf/1748224.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "97.91667%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748225",
+                      "name":  "Seite 62",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748225.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748225.png",
+                      "pdfFile":  "webepaper/pdf/1748225.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748226",
+                      "name":  "Seite 63",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748226.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748226.png",
+                      "pdfFile":  "webepaper/pdf/1748226.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748227",
+                      "name":  "Seite 64",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748227.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748227.png",
+                      "pdfFile":  "webepaper/pdf/1748227.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748250",
+                      "name":  "Seite 65",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748250.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748250.png",
+                      "pdfFile":  "webepaper/pdf/1748250.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2026469462",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2026469462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874xr1sz0vmmpbjufyr"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748251",
+                      "name":  "Seite 66",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748251.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748251.png",
+                      "pdfFile":  "webepaper/pdf/1748251.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "10.588235%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "86.47059%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748252",
+                      "name":  "Seite 67",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748252.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748252.png",
+                      "pdfFile":  "webepaper/pdf/1748252.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "0.0%",
+                                           "width":  "92.083336%",
+                                           "height":  "91.02941%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748253",
+                      "name":  "Seite 68",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748253.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748253.png",
+                      "pdfFile":  "webepaper/pdf/1748253.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "5.7352943%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.44118%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748254",
+                      "name":  "Seite 69",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748254.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748254.png",
+                      "pdfFile":  "webepaper/pdf/1748254.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748255",
+                      "name":  "Seite 70",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748255.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748255.png",
+                      "pdfFile":  "webepaper/pdf/1748255.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748256",
+                      "name":  "Seite 71",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748256.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748256.png",
+                      "pdfFile":  "webepaper/pdf/1748256.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748257",
+                      "name":  "Seite 72",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748257.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748257.png",
+                      "pdfFile":  "webepaper/pdf/1748257.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748258",
+                      "name":  "Seite 73",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748258.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748258.png",
+                      "pdfFile":  "webepaper/pdf/1748258.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748259",
+                      "name":  "Seite 74",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748259.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748259.png",
+                      "pdfFile":  "webepaper/pdf/1748259.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "5.4411764%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "86.02941%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748260",
+                      "name":  "Seite 75",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748260.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748260.png",
+                      "pdfFile":  "webepaper/pdf/1748260.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748308",
+                      "name":  "Seite 76",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748308.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748308.png",
+                      "pdfFile":  "webepaper/pdf/1748308.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748309",
+                      "name":  "Seite 77",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748309.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748309.png",
+                      "pdfFile":  "webepaper/pdf/1748309.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748310",
+                      "name":  "Seite 78",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748310.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748310.png",
+                      "pdfFile":  "webepaper/pdf/1748310.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748321",
+                      "name":  "Seite 79",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748321.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748321.png",
+                      "pdfFile":  "webepaper/pdf/1748321.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1181290000",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1181290000.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879665nx1q9tulbknv5"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748322",
+                      "name":  "Seite 80",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748322.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748322.png",
+                      "pdfFile":  "webepaper/pdf/1748322.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1177708132",
+                                           "top":  "8.382353%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.617645%",
+                                           "htmlFile":  "article/webepaper/html/1177708132.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8781zibamleyeftcf6r"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748323",
+                      "name":  "Seite 81",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748323.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748323.png",
+                      "pdfFile":  "webepaper/pdf/1748323.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1177708132",
+                                           "top":  "8.382353%",
+                                           "left":  "0.0%",
+                                           "width":  "92.083336%",
+                                           "height":  "91.617645%",
+                                           "htmlFile":  "article/webepaper/html/1177708132.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8781zibamleyeftcf6r"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748324",
+                      "name":  "Seite 82",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748324.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748324.png",
+                      "pdfFile":  "webepaper/pdf/1748324.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1177708132",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1177708132.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8781zibamleyeftcf6r"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748325",
+                      "name":  "Seite 83",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748325.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748325.png",
+                      "pdfFile":  "webepaper/pdf/1748325.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1177708132",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1177708132.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8781zibamleyeftcf6r"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748326",
+                      "name":  "Seite 84",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748326.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748326.png",
+                      "pdfFile":  "webepaper/pdf/1748326.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748327",
+                      "name":  "Seite 85",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748327.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748327.png",
+                      "pdfFile":  "webepaper/pdf/1748327.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748328",
+                      "name":  "Seite 86",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748328.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748328.png",
+                      "pdfFile":  "webepaper/pdf/1748328.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748329",
+                      "name":  "Seite 87",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748329.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748329.png",
+                      "pdfFile":  "webepaper/pdf/1748329.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "92.083336%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748330",
+                      "name":  "Seite 88",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748330.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748330.png",
+                      "pdfFile":  "webepaper/pdf/1748330.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "6.029412%",
+                                           "left":  "0.0%",
+                                           "width":  "89.58333%",
+                                           "height":  "93.82353%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748331",
+                      "name":  "Seite 89",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748331.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748331.png",
+                      "pdfFile":  "webepaper/pdf/1748331.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748332",
+                      "name":  "Seite 90",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748332.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748332.png",
+                      "pdfFile":  "webepaper/pdf/1748332.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.7353%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748275",
+                      "name":  "Seite 91",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748275.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748275.png",
+                      "pdfFile":  "webepaper/pdf/1748275.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "6.3235292%",
+                                           "left":  "10.208333%",
+                                           "width":  "89.58333%",
+                                           "height":  "93.67647%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748276",
+                      "name":  "Seite 92",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748276.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748276.png",
+                      "pdfFile":  "webepaper/pdf/1748276.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "89.791664%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748277",
+                      "name":  "Seite 93",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748277.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748277.png",
+                      "pdfFile":  "webepaper/pdf/1748277.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748278",
+                      "name":  "Seite 94",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748278.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748278.png",
+                      "pdfFile":  "webepaper/pdf/1748278.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "93.82353%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748279",
+                      "name":  "Seite 95",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748279.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748279.png",
+                      "pdfFile":  "webepaper/pdf/1748279.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "333843462",
+                                           "top":  "0.0%",
+                                           "left":  "10.0%",
+                                           "width":  "81.875%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/333843462.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87e7gi177eb1lp6p78oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748280",
+                      "name":  "Seite 96",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748280.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748280.png",
+                      "pdfFile":  "webepaper/pdf/1748280.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1655593969",
+                                           "top":  "10.588235%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "80.588234%",
+                                           "htmlFile":  "article/webepaper/html/1655593969.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87f8ftpmrt4r8ww2jxp"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748281",
+                      "name":  "Seite 97",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748281.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748281.png",
+                      "pdfFile":  "webepaper/pdf/1748281.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1655593969",
+                                           "top":  "5.882353%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.29411%",
+                                           "htmlFile":  "article/webepaper/html/1655593969.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87f8ftpmrt4r8ww2jxp"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748282",
+                      "name":  "Seite 98",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748282.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748282.png",
+                      "pdfFile":  "webepaper/pdf/1748282.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1655593969",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1655593969.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87f8ftpmrt4r8ww2jxp"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748283",
+                      "name":  "Seite 99",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748283.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748283.png",
+                      "pdfFile":  "webepaper/pdf/1748283.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1655593969",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1655593969.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87f8ftpmrt4r8ww2jxp"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748284",
+                      "name":  "Seite 100",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748284.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748284.png",
+                      "pdfFile":  "webepaper/pdf/1748284.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1655593969",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1655593969.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87f8ftpmrt4r8ww2jxp"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748285",
+                      "name":  "Seite 101",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748285.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748285.png",
+                      "pdfFile":  "webepaper/pdf/1748285.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "269019253",
+                                           "top":  "0.0%",
+                                           "left":  "15.625%",
+                                           "width":  "84.166664%",
+                                           "height":  "97.20589%",
+                                           "htmlFile":  "article/webepaper/html/269019253.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874118nvaqhxznsdfzl"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748286",
+                      "name":  "Seite 102",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748286.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748286.png",
+                      "pdfFile":  "webepaper/pdf/1748286.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "264148900",
+                                           "top":  "8.235294%",
+                                           "left":  "0.0%",
+                                           "width":  "89.58333%",
+                                           "height":  "83.67647%",
+                                           "htmlFile":  "article/webepaper/html/264148900.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87710walv6c1bzncyr8x"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748287",
+                      "name":  "Seite 103",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748287.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748287.png",
+                      "pdfFile":  "webepaper/pdf/1748287.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "264148900",
+                                           "top":  "8.382353%",
+                                           "left":  "10.0%",
+                                           "width":  "81.875%",
+                                           "height":  "82.79411%",
+                                           "htmlFile":  "article/webepaper/html/264148900.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87710walv6c1bzncyr8x"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748288",
+                      "name":  "Seite 104",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748288.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748288.png",
+                      "pdfFile":  "webepaper/pdf/1748288.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748289",
+                      "name":  "Seite 105",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748289.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748289.png",
+                      "pdfFile":  "webepaper/pdf/1748289.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "92.083336%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748290",
+                      "name":  "Seite 106",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748290.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748290.png",
+                      "pdfFile":  "webepaper/pdf/1748290.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748291",
+                      "name":  "Seite 107",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748291.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748291.png",
+                      "pdfFile":  "webepaper/pdf/1748291.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748292",
+                      "name":  "Seite 108",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748292.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748292.png",
+                      "pdfFile":  "webepaper/pdf/1748292.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748293",
+                      "name":  "Seite 109",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748293.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748293.png",
+                      "pdfFile":  "webepaper/pdf/1748293.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "32.205883%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748274",
+                      "name":  "Seite 110",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748274.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748274.png",
+                      "pdfFile":  "webepaper/pdf/1748274.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2127199107",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/2127199107.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k6hgx5og1exl238qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748350",
+                      "name":  "Seite 111",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748350.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748350.png",
+                      "pdfFile":  "webepaper/pdf/1748350.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2014439093",
+                                           "top":  "0.0%",
+                                           "left":  "10.208333%",
+                                           "width":  "89.58333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/2014439093.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87814alu07agyogu8i8"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748351",
+                      "name":  "Seite 112",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748351.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748351.png",
+                      "pdfFile":  "webepaper/pdf/1748351.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "228213977",
+                                           "top":  "20.147058%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "71.32353%",
+                                           "htmlFile":  "article/webepaper/html/228213977.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bn2w00aco32lwk2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748352",
+                      "name":  "Seite 113",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748352.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748352.png",
+                      "pdfFile":  "webepaper/pdf/1748352.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "228213977",
+                                           "top":  "0.0%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/228213977.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bn2w00aco32lwk2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748353",
+                      "name":  "Seite 114",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748353.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748353.png",
+                      "pdfFile":  "webepaper/pdf/1748353.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1815263852",
+                                           "top":  "42.5%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.666664%",
+                                           "height":  "48.676468%",
+                                           "htmlFile":  "article/webepaper/html/1815263852.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87grlfv2e411ap4exfzl"
+                                       },
+                                       {
+                                           "id":  "228213977",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "32.205883%",
+                                           "htmlFile":  "article/webepaper/html/228213977.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87bn2w00aco32lwk2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748333",
+                      "name":  "Seite 115",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748333.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748333.png",
+                      "pdfFile":  "webepaper/pdf/1748333.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2114432990",
+                                           "top":  "10.588235%",
+                                           "left":  "0.0%",
+                                           "width":  "95.0%",
+                                           "height":  "81.176476%",
+                                           "htmlFile":  "article/webepaper/html/2114432990.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87405568fvctxlkz8qy"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748334",
+                      "name":  "Seite 116",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748334.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748334.png",
+                      "pdfFile":  "webepaper/pdf/1748334.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1912878791",
+                                           "top":  "2.6470587%",
+                                           "left":  "6.25%",
+                                           "width":  "93.541664%",
+                                           "height":  "88.82353%",
+                                           "htmlFile":  "article/webepaper/html/1912878791.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87719p38m5kcmcl6hyj"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748335",
+                      "name":  "Seite 117",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748335.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748335.png",
+                      "pdfFile":  "webepaper/pdf/1748335.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1912878791",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.76471%",
+                                           "htmlFile":  "article/webepaper/html/1912878791.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87719p38m5kcmcl6hyj"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748336",
+                      "name":  "Seite 118",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748336.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748336.png",
+                      "pdfFile":  "webepaper/pdf/1748336.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1834406524",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "89.58333%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/1834406524.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87c6vdgteg515b8q7co9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748317",
+                      "name":  "Seite 119",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748317.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748317.png",
+                      "pdfFile":  "webepaper/pdf/1748317.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1834406524",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1834406524.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87c6vdgteg515b8q7co9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748318",
+                      "name":  "Seite 120",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748318.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748318.png",
+                      "pdfFile":  "webepaper/pdf/1748318.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1834406524",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1834406524.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87c6vdgteg515b8q7co9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748294",
+                      "name":  "Seite 121",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748294.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748294.png",
+                      "pdfFile":  "webepaper/pdf/1748294.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1834406524",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1834406524.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87c6vdgteg515b8q7co9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748296",
+                      "name":  "Seite 122",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748296.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748296.png",
+                      "pdfFile":  "webepaper/pdf/1748296.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1834406524",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1834406524.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87c6vdgteg515b8q7co9"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748297",
+                      "name":  "Seite 123",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748297.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748297.png",
+                      "pdfFile":  "webepaper/pdf/1748297.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "469628939",
+                                           "top":  "10.441176%",
+                                           "left":  "0.0%",
+                                           "width":  "95.416664%",
+                                           "height":  "80.73529%",
+                                           "htmlFile":  "article/webepaper/html/469628939.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8770rdliz0710sj4x8oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748298",
+                      "name":  "Seite 124",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748298.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748298.png",
+                      "pdfFile":  "webepaper/pdf/1748298.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748299",
+                      "name":  "Seite 125",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748299.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748299.png",
+                      "pdfFile":  "webepaper/pdf/1748299.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748300",
+                      "name":  "Seite 126",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748300.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748300.png",
+                      "pdfFile":  "webepaper/pdf/1748300.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748301",
+                      "name":  "Seite 127",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748301.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748301.png",
+                      "pdfFile":  "webepaper/pdf/1748301.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748302",
+                      "name":  "Seite 128",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748302.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748302.png",
+                      "pdfFile":  "webepaper/pdf/1748302.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "5.4411764%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.617645%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748303",
+                      "name":  "Seite 129",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748303.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748303.png",
+                      "pdfFile":  "webepaper/pdf/1748303.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "6.029412%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.176476%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748304",
+                      "name":  "Seite 130",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748304.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748304.png",
+                      "pdfFile":  "webepaper/pdf/1748304.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748305",
+                      "name":  "Seite 131",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748305.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748305.png",
+                      "pdfFile":  "webepaper/pdf/1748305.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748295",
+                      "name":  "Seite 132",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748295.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748295.png",
+                      "pdfFile":  "webepaper/pdf/1748295.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "739776733",
+                                           "top":  "5.4411764%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.73529%",
+                                           "htmlFile":  "article/webepaper/html/739776733.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87810bli7mvwncv217l7"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748306",
+                      "name":  "Seite 133",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748306.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748306.png",
+                      "pdfFile":  "webepaper/pdf/1748306.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "168704106",
+                                           "top":  "21.17647%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "70.0%",
+                                           "htmlFile":  "article/webepaper/html/168704106.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ftzpppnao1a3iyspt6"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748337",
+                      "name":  "Seite 134",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748337.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748337.png",
+                      "pdfFile":  "webepaper/pdf/1748337.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "168704106",
+                                           "top":  "1.0294118%",
+                                           "left":  "7.7083335%",
+                                           "width":  "86.666664%",
+                                           "height":  "90.29412%",
+                                           "htmlFile":  "article/webepaper/html/168704106.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ftzpppnao1a3iyspt6"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748338",
+                      "name":  "Seite 135",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748338.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748338.png",
+                      "pdfFile":  "webepaper/pdf/1748338.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "168704106",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/168704106.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ftzpppnao1a3iyspt6"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748339",
+                      "name":  "Seite 136",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748339.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748339.png",
+                      "pdfFile":  "webepaper/pdf/1748339.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "168704106",
+                                           "top":  "1.0294118%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "90.58824%",
+                                           "htmlFile":  "article/webepaper/html/168704106.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ftzpppnao1a3iyspt6"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748228",
+                      "name":  "Seite 137",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748228.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748228.png",
+                      "pdfFile":  "webepaper/pdf/1748228.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "168704106",
+                                           "top":  "1.0294118%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "90.58824%",
+                                           "htmlFile":  "article/webepaper/html/168704106.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87ftzpppnao1a3iyspt6"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748229",
+                      "name":  "Seite 138",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748229.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748229.png",
+                      "pdfFile":  "webepaper/pdf/1748229.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748230",
+                      "name":  "Seite 139",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748230.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748230.png",
+                      "pdfFile":  "webepaper/pdf/1748230.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "98.333336%",
+                                           "height":  "91.61765%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748231",
+                      "name":  "Seite 140",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748231.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748231.png",
+                      "pdfFile":  "webepaper/pdf/1748231.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748232",
+                      "name":  "Seite 141",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748232.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748232.png",
+                      "pdfFile":  "webepaper/pdf/1748232.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748233",
+                      "name":  "Seite 142",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748233.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748233.png",
+                      "pdfFile":  "webepaper/pdf/1748233.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748236",
+                      "name":  "Seite 143",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748236.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748236.png",
+                      "pdfFile":  "webepaper/pdf/1748236.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748237",
+                      "name":  "Seite 144",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748237.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748237.png",
+                      "pdfFile":  "webepaper/pdf/1748237.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748238",
+                      "name":  "Seite 145",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748238.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748238.png",
+                      "pdfFile":  "webepaper/pdf/1748238.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748239",
+                      "name":  "Seite 146",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748239.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748239.png",
+                      "pdfFile":  "webepaper/pdf/1748239.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748240",
+                      "name":  "Seite 147",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748240.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748240.png",
+                      "pdfFile":  "webepaper/pdf/1748240.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748241",
+                      "name":  "Seite 148",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748241.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748241.png",
+                      "pdfFile":  "webepaper/pdf/1748241.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748242",
+                      "name":  "Seite 149",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748242.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748242.png",
+                      "pdfFile":  "webepaper/pdf/1748242.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748243",
+                      "name":  "Seite 150",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748243.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748243.png",
+                      "pdfFile":  "webepaper/pdf/1748243.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748244",
+                      "name":  "Seite 151",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748244.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748244.png",
+                      "pdfFile":  "webepaper/pdf/1748244.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1475876016",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/1475876016.html",
+                                           "contentElementId":  "/dcx/atom/document/doc8793877xcdf13p5oc2ow"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748245",
+                      "name":  "Seite 152",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748245.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748245.png",
+                      "pdfFile":  "webepaper/pdf/1748245.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748246",
+                      "name":  "Seite 153",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748246.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748246.png",
+                      "pdfFile":  "webepaper/pdf/1748246.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "0.0%",
+                                           "left":  "0.0%",
+                                           "width":  "100.0%",
+                                           "height":  "100.0%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748247",
+                      "name":  "Seite 154",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748247.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748247.png",
+                      "pdfFile":  "webepaper/pdf/1748247.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748248",
+                      "name":  "Seite 155",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748248.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748248.png",
+                      "pdfFile":  "webepaper/pdf/1748248.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748249",
+                      "name":  "Seite 156",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748249.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748249.png",
+                      "pdfFile":  "webepaper/pdf/1748249.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "6.029412%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "85.14706%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748214",
+                      "name":  "Seite 157",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748214.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748214.png",
+                      "pdfFile":  "webepaper/pdf/1748214.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "485077366",
+                                           "top":  "6.029412%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "85.58824%",
+                                           "htmlFile":  "article/webepaper/html/485077366.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87et5snz7l1sqxc08ki"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748215",
+                      "name":  "Seite 158",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748215.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748215.png",
+                      "pdfFile":  "webepaper/pdf/1748215.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1871529848",
+                                           "top":  "10.294118%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "81.32353%",
+                                           "htmlFile":  "article/webepaper/html/1871529848.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87grnszlgjsdh1m68oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748190",
+                      "name":  "Seite 159",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748190.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748190.png",
+                      "pdfFile":  "webepaper/pdf/1748190.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "1871529848",
+                                           "top":  "0.0%",
+                                           "left":  "10.208333%",
+                                           "width":  "81.875%",
+                                           "height":  "91.32353%",
+                                           "htmlFile":  "article/webepaper/html/1871529848.html",
+                                           "contentElementId":  "/dcx/atom/document/doc87grnszlgjsdh1m68oc"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748191",
+                      "name":  "Seite 160",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748191.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748191.png",
+                      "pdfFile":  "webepaper/pdf/1748191.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "980586145",
+                                           "top":  "3.3823528%",
+                                           "left":  "7.7083335%",
+                                           "width":  "81.87499%",
+                                           "height":  "86.32353%",
+                                           "htmlFile":  "article/webepaper/html/980586145.html",
+                                           "contentElementId":  "/dcx/atom/document/doc879natn2sjl1esos22ox"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748261",
+                      "name":  "Seite 161",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748261.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748261.png",
+                      "pdfFile":  "webepaper/pdf/1748261.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "2001939088",
+                                           "top":  "1.7647059%",
+                                           "left":  "10.208333%",
+                                           "width":  "82.08333%",
+                                           "height":  "89.70588%",
+                                           "htmlFile":  "article/webepaper/html/2001939088.html",
+                                           "contentElementId":  "/dcx/atom/document/doc877k8rfpw1wo2485w64"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748262",
+                      "name":  "Seite 162",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748262.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748262.png",
+                      "pdfFile":  "webepaper/pdf/1748262.pdf",
+                      "articles":  [
+                                       {
+                                           "id":  "377860465",
+                                           "top":  "0.0%",
+                                           "left":  "7.7083335%",
+                                           "width":  "92.08333%",
+                                           "height":  "81.7647%",
+                                           "htmlFile":  "article/webepaper/html/377860465.html",
+                                           "contentElementId":  "/dcx/atom/document/doc874024g306b1nhxiag25"
+                                       }
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748263",
+                      "name":  "Seite 163",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748263.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748263.png",
+                      "pdfFile":  "webepaper/pdf/1748263.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+
+                              ]
+                  },
+                  {
+                      "id":  "1748264",
+                      "name":  "Seite 164",
+                      "width":  480,
+                      "height":  680,
+                      "imgFile":  "webepaper/photos/1748264.png",
+                      "imgThumbFile":  "webepaper/photos/thumbs/1748264.png",
+                      "pdfFile":  "webepaper/pdf/1748264.pdf",
+                      "articles":  [
+
+                                   ],
+                      "ads":  [
+                                  {
+                                      "id":  "ad496888",
+                                      "top":  "0.0%",
+                                      "left":  "0.0%",
+                                      "width":  "100.0%",
+                                      "height":  "100.0%",
+                                      "imgFile":  "webepaper/photos/ad496888.jpg"
+                                  }
+                              ]
+                  }
+              ]
+}
