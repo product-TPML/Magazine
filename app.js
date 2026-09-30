@@ -66,6 +66,8 @@ const T = {
     previousImageAria: 'ಹಿಂದಿನ ಚಿತ್ರ',
     nextImageAria: 'ಮುಂದಿನ ಚಿತ್ರ',
     openArticleImageAria: 'ಲೇಖನದ ಚಿತ್ರ ತೆರೆಯಿರಿ',
+    gallery: 'ಗ್ಯಾಲರಿ',
+    galleryImagesAria: 'ಗ್ಯಾಲರಿ ಚಿತ್ರಗಳು',
     listenControlsAria: 'ಆಲಿಸುವ ನಿಯಂತ್ರಣಗಳು',
     playArticleAria: 'ಲೇಖನ ಪ್ಲೇ ಮಾಡಿ',
     pauseArticleAria: 'ಲೇಖನ ವಿರಮಿಸಿ',
@@ -170,6 +172,8 @@ const T = {
     previousImageAria: 'Previous image',
     nextImageAria: 'Next image',
     openArticleImageAria: 'Open article image',
+    gallery: 'Gallery',
+    galleryImagesAria: 'Gallery images',
     listenControlsAria: 'Listen controls',
     playArticleAria: 'Play article',
     pauseArticleAria: 'Pause article',
@@ -248,6 +252,9 @@ function setLang(value) {
   renderPageControls();
   renderArticleControls();
   renderListenPlayer();
+  document.querySelectorAll('.article-gallery h2').forEach((el) => { el.textContent = t('gallery'); });
+  document.querySelectorAll('.article-gallery-track').forEach((el) => el.setAttribute('aria-label', t('galleryImagesAria')));
+  document.querySelectorAll('.article-content img[role="button"]').forEach((el) => el.setAttribute('aria-label', t('openArticleImageAria')));
   if (state.view === 'home' && state.issue) renderHome();
   if (state.panel) renderPanel();
 }
@@ -871,7 +878,7 @@ function articlePreviewMarkup(html, article) {
     if (image) {
       image.tabIndex = 0;
       image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', 'Open article image');
+      image.setAttribute('aria-label', t('openArticleImageAria'));
       figure = '<figure class="article-figure article-hero">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
     }
   }
@@ -955,6 +962,14 @@ function articleMarkup(html, article) {
   });
   const pictures = [...root.querySelectorAll('.pictures > .picture')];
   root.querySelector('.pictures')?.remove();
+  const loosePictures = [...root.querySelectorAll('img')].map((image) => {
+    const picture = doc.createElement('div');
+    picture.append(image);
+    return picture;
+  });
+  root.querySelectorAll('p').forEach((paragraph) => {
+    if (!paragraph.textContent.trim() && !paragraph.querySelector('img')) paragraph.remove();
+  });
   const makeFigure = (picture, className, side = '') => {
     const figure = doc.createElement('figure');
     figure.className = className;
@@ -965,7 +980,7 @@ function articleMarkup(html, article) {
     if (image) {
       image.tabIndex = 0;
       image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', 'Open article image');
+      image.setAttribute('aria-label', t('openArticleImageAria'));
       figure.append(image);
     }
     if (caption?.textContent.trim()) {
@@ -982,24 +997,37 @@ function articleMarkup(html, article) {
     }
     return figure;
   };
-  const paragraphs = [...root.querySelectorAll('p:not([class])')];
   const hero = pictures.shift();
+  const galleryPictures = pictures.concat(loosePictures);
+  let gallery = null;
+  if (galleryPictures.length) {
+    gallery = doc.createElement('section');
+    gallery.className = 'article-gallery';
+    gallery.setAttribute('aria-labelledby', 'article-gallery-title');
+    const title = doc.createElement('h2');
+    title.id = 'article-gallery-title';
+    title.textContent = t('gallery');
+    const track = doc.createElement('div');
+    track.className = 'article-gallery-track';
+    track.setAttribute('role', 'list');
+    track.setAttribute('aria-label', t('galleryImagesAria'));
+    gallery.append(title, track);
+    galleryPictures.forEach((picture) => {
+      const figure = makeFigure(picture, 'article-figure article-gallery-item');
+      figure.setAttribute('role', 'listitem');
+      track.append(figure);
+    });
+  }
   if (hero) {
     const figure = makeFigure(hero, 'article-figure article-hero');
     const first = root.firstElementChild;
     if (first) root.insertBefore(figure, first);
     else root.append(figure);
-  }
-  if (paragraphs.length && pictures.length) {
-    const inlineCount = Math.min(pictures.length, Math.floor(paragraphs.length / 4), 4);
-    const interval = Math.max(3, Math.floor(paragraphs.length / (inlineCount + 1)));
-    pictures.slice(0, inlineCount).forEach((picture, index) => {
-      const position = Math.min(1 + (index + 1) * interval, paragraphs.length - 1);
-      paragraphs[position].before(makeFigure(picture, 'article-figure article-float', index % 2 ? 'left' : 'right'));
-    });
-    pictures.slice(inlineCount).forEach((picture) => root.append(makeFigure(picture, 'article-figure article-float')));
-  } else {
-    pictures.forEach((picture) => root.append(makeFigure(picture, 'article-figure article-float')));
+    if (gallery) figure.after(gallery);
+  } else if (gallery) {
+    const first = root.firstElementChild;
+    if (first) root.insertBefore(gallery, first);
+    else root.append(gallery);
   }
   root.querySelectorAll('p').forEach((paragraph) => {
     if (!/^\s*l\s+/i.test(paragraph.textContent)) return;
@@ -1125,17 +1153,6 @@ function clampImageZoom(zoom, image) {
 
 function bindImageZoom() {
   document.querySelectorAll('#article-content img.zoomable').forEach((image) => {
-    const figure = image.closest('.article-float');
-    if (figure) {
-      const classify = () => {
-        if (!image.naturalWidth || !image.naturalHeight) return;
-        const ratio = image.naturalWidth / image.naturalHeight;
-        figure.classList.remove('is-portrait', 'is-landscape', 'is-square');
-        figure.classList.add(ratio >= 1.15 ? 'is-landscape' : ratio <= .9 ? 'is-portrait' : 'is-square');
-      };
-      if (image.complete) classify();
-      else image.addEventListener('load', classify, { once: true });
-    }
     const zoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null, moved: false, startX: 0, startY: 0, movedUntil: 0 };
     const apply = () => { image.style.transform = 'translate3d(' + zoom.x + 'px, ' + zoom.y + 'px, 0) scale(' + zoom.scale + ')'; image.classList.toggle('is-image-zoomed', zoom.scale > 1); image.style.touchAction = zoom.scale > 1 ? 'none' : 'pan-y'; };
     apply();
@@ -1937,10 +1954,38 @@ $('#panel-host').addEventListener('keydown', (event) => {
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
+let galleryDrag = null;
+let galleryDragUntil = 0;
+$('#article-content').addEventListener('pointerdown', (event) => {
+  const track = event.target.closest('.article-gallery-track');
+  if (!track || event.pointerType !== 'mouse' || event.button !== 0) return;
+  galleryDrag = { track, startX: event.clientX, startScroll: track.scrollLeft, moved: false };
+});
+window.addEventListener('pointermove', (event) => {
+  if (!galleryDrag) return;
+  const dx = event.clientX - galleryDrag.startX;
+  if (!galleryDrag.moved && Math.abs(dx) < 5) return;
+  if (!galleryDrag.moved) { galleryDrag.moved = true; galleryDrag.track.classList.add('is-dragging'); }
+  galleryDrag.track.scrollLeft = galleryDrag.startScroll - dx;
+});
+const endGalleryDrag = () => {
+  if (!galleryDrag) return;
+  const { track, moved } = galleryDrag;
+  galleryDrag = null;
+  if (!moved) return;
+  galleryDragUntil = performance.now() + 250;
+  const before = track.scrollLeft;
+  track.classList.remove('is-dragging');
+  track.scrollTo({ left: before, behavior: 'auto' });
+};
+window.addEventListener('pointerup', endGalleryDrag);
+window.addEventListener('pointercancel', endGalleryDrag);
+$('#article-content').addEventListener('dragstart', (event) => { if (event.target.closest('.article-gallery-track')) event.preventDefault(); });
 $('#article-content').addEventListener('click', (event) => {
   const image = event.target.closest('.article-content img');
   if (image) {
     event.preventDefault();
+    if (performance.now() < galleryDragUntil) return;
     if (image._imageZoom && performance.now() < image._imageZoom.movedUntil) return;
     openLightbox([...document.querySelectorAll('#article-content .article-figure img')].indexOf(image));
     return;
