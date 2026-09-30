@@ -11,7 +11,6 @@ import { renderListenPlayer } from './speech.js';
 // not part of this dictionary. `t(key, ...args)` looks up state.lang, falling back to English.
 export const T = {
   kn: {
-    choosePublication: (name) => name + ' ಆಯ್ಕೆಮಾಡಿ',
     chooseEdition: 'ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ',
     pageLayoutGroup: 'ಪುಟದ ವಿನ್ಯಾಸ',
     singlePage: 'ಒಂದು ಪುಟ',
@@ -118,7 +117,6 @@ export const T = {
     issueLoadError: (key) => key + ' ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
   },
   en: {
-    choosePublication: (name) => 'Choose ' + name + ' publication',
     chooseEdition: 'Choose edition',
     pageLayoutGroup: 'Page layout',
     singlePage: 'Single page',

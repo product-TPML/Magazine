@@ -37,8 +37,6 @@ $('#page-article-action').addEventListener('click', (event) => {
 
 $('#edition-button').addEventListener('click', (event) => openPanel('editions', event.currentTarget));
 
-$('#publication-button').addEventListener('click', (event) => openPanel('publication', event.currentTarget));
-
 $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
 
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
@@ -131,6 +129,7 @@ $('#panel-host').addEventListener('click', (event) => {
     $('#panel-host [data-action="lang"]')?.focus();
     return;
   }
+  if (action === 'publication') { openPanel('publication', event.target.closest('[data-action]')); return; }
   if (action === 'search') { openPanel('search', event.target.closest('[data-action]')); return; }
   if (action === 'profile') { openPanel('profile', event.target.closest('[data-action]')); return; }
   if (action === 'saved') { openPanel('saved', event.target.closest('[data-action]')); return; }

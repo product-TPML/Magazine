@@ -37,7 +37,6 @@ export function renderHeader() {
   document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + (subscriber ? ' home: latest edition cover' : ' home')); });
   document.body.dataset.publication = publicationCode;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
-  $('#publication-button').setAttribute('aria-label', t('choosePublication', publicationName));
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;
   $('#text-subscribe-button').hidden = subscriber;
