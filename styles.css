@@ -691,7 +691,7 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 
 .image-lightbox { position: fixed; inset: 0; z-index: 50; color: var(--text); }
 .lightbox-backdrop { position: absolute; inset: 0; background: var(--scrim-heavy); }
-.lightbox-dialog { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; grid-template-rows: auto minmax(0, 1fr); width: 100%; height: 100%; padding: max(.5rem, env(safe-area-inset-top)) max(.5rem, env(safe-area-inset-right)) max(.5rem, env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left)); touch-action: pan-y; }
+.lightbox-dialog { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; grid-template-rows: auto minmax(0, 1fr); width: 100%; height: 100%; padding: max(.5rem, env(safe-area-inset-top)) max(.5rem, env(safe-area-inset-right)) max(.5rem, env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left)); touch-action: none; }
 .lightbox-toolbar { grid-column: 1 / -1; display: flex; align-items: center; gap: .75rem; min-height: 3.25rem; }
 .lightbox-toolbar h2 { flex: 1; margin: 0; font-size: .9rem; }
 .lightbox-toolbar span { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
@@ -701,7 +701,9 @@ body[data-account="subscriber"] .access-composition { display: none !important; 
 .lightbox-figure img { display: block; max-width: 100%; max-height: calc(100dvh - 8rem); width: auto; height: auto; object-fit: contain; border-radius: .25rem; transform: translate3d(0, 0, 0) scale(1); transform-origin: center; touch-action: none; will-change: transform; }
 .lightbox-figure img.is-zoomed { cursor: grab; }
 .lightbox-figure figcaption { max-width: 42rem; padding: .6rem; color: var(--muted); font-size: .85rem; line-height: 1.45; text-align: center; }
-.lightbox-open { overflow: hidden; }
+/* Every gesture in the viewer (swipe, swipe-down, pinch, pan, double-tap) is handled in JS, so the browser must not claim vertical touches or pull-to-refresh. */
+.image-lightbox { touch-action: none; overscroll-behavior: none; }
+.lightbox-open { overflow: hidden; overscroll-behavior: none; }
 
 @media (max-width: 640px) {
   .article-content .article-float, .article-content .article-float.is-portrait, .article-content .article-float.is-square { width: 100%; margin: 1.1rem 0; }
