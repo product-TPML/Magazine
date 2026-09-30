@@ -25,7 +25,7 @@ export const T = {
     menuAria: 'ಮೆನು ತೆರೆಯಿರಿ',
     saveArticle: 'ಲೇಖನ ಉಳಿಸಿ',
     removeSavedArticle: 'ಉಳಿಸಿದ ಲೇಖನ ತೆಗೆಯಿರಿ',
-    backToSourcePage: 'ಮೂಲ ಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ',
+    backToPage: (n) => 'ಪುಟ ' + n + 'ಕ್ಕೆ ಹಿಂತಿರುಗಿ',
     page: (n) => 'ಪುಟ ' + n,
     pagesRange: (a, b) => 'ಪುಟಗಳು ' + a + '–' + b,
     magazinePageAria: 'ನಿಯತಕಾಲಿಕೆ ಪುಟ',
@@ -132,7 +132,7 @@ export const T = {
     menuAria: 'Open menu',
     saveArticle: 'Save article',
     removeSavedArticle: 'Remove saved article',
-    backToSourcePage: 'Back to source page',
+    backToPage: (n) => 'Back to page ' + n,
     page: (n) => 'Page ' + n,
     pagesRange: (a, b) => 'Pages ' + a + '–' + b,
     magazinePageAria: 'Magazine page',
@@ -257,7 +257,6 @@ export function applyChrome() {
   set('.subscribe-mobile-label, .subscribe-desktop-label, #text-subscribe-label', (el) => { el.textContent = t('subscribe'); });
   set('.account-button', (el) => el.setAttribute('aria-label', t('accountAria')));
   set('#menu-button, #text-menu-button', (el) => el.setAttribute('aria-label', t('menuAria')));
-  set('#back-button', (el) => el.setAttribute('aria-label', t('backToSourcePage')));
   set('#page-canvas', (el) => el.setAttribute('aria-label', t('magazinePageAria')));
   set('#previous-page', (el) => el.setAttribute('aria-label', t('previousPageAria')));
   set('#next-page', (el) => el.setAttribute('aria-label', t('nextPageAria')));

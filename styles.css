@@ -269,7 +269,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   .premium-icon { width: 1rem; height: 1rem; }
 }
 .view-mode-toggle { display: none; }
-.icon-button, .back-button, .text-size-button {
+.icon-button, .text-size-button {
   min-width: 44px;
   padding: .75rem;
   color: var(--text);
@@ -277,7 +277,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   border: 1px solid transparent;
   border-radius: .6rem;
 }
-.app-header .icon-button, .app-header .back-button, .app-header .text-size-button { color: var(--header-foreground); }
+.app-header .icon-button, .app-header .text-size-button { color: var(--header-foreground); }
 .panel-heading .icon-button { color: var(--text); }
 .lightbox-toolbar .icon-button { color: var(--on-scrim); }
 .icon-button { font-size: 1.3rem; }
@@ -286,15 +286,10 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 .app-header .icon-button:hover { background: var(--header-hover); }
 .panel-heading .icon-button:hover { background: var(--surface-raised); }
 .lightbox-toolbar .icon-button:hover { background: rgba(255, 255, 255, .16); }
-.back-button:hover, .text-size-button:hover { background: var(--header-hover); }
+.text-size-button:hover { background: var(--header-hover); }
 .text-header .header-row { gap: .5rem; }
 .text-publication-logo { display: block; flex: 0 1 auto; width: clamp(3.5rem, 15vw, 5rem); max-width: 100%; height: auto; object-fit: contain; }
 .story-header-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .35rem; margin-left: auto; }
-.back-button { display: inline-flex; align-items: center; gap: .4rem; flex: 1; min-width: 0; padding: .75rem .25rem; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
-.article-source-page { flex: 0 0 auto; width: fit-content; margin: 0 0 .75rem -.25rem; padding-block: .5rem; border-radius: .4rem; color: var(--link); }
-.article-source-page:hover { background: var(--surface-raised); }
-@media (max-width: 767px) { .article-source-page { display: flex; margin: 0 -.25rem .75rem auto; } }
-.back-button .icon { flex: 0 0 auto; width: 1.15rem; height: 1.15rem; }
 .text-tools { display: flex; align-items: center; gap: .35rem; padding: 0 .1rem; overflow: hidden; color: var(--header-muted); font-size: .8rem; transition: opacity .2s ease, padding .2s ease; }
 .text-tools span { min-width: 0; margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .text-size-button { min-width: 44px; padding: .75rem; }

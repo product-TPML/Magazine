@@ -41,7 +41,9 @@ export function renderHeader() {
   $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
   $('#subscribe-button').hidden = subscriber;
   $('#text-subscribe-button').hidden = subscriber;
-  $('#back-page-label').textContent = 'ಪುಟ ' + (state.page + 1);
+  const backLabel = t('backToPage', state.page + 1);
+  $('#back-button').setAttribute('aria-label', backLabel);
+  $('#back-button').title = backLabel;
   const saved = state.articleId ? isSaved(state.articleId) : false;
   $('#save-button').innerHTML = icon('bookmark');
   $('#save-button').classList.toggle('is-active', saved);
