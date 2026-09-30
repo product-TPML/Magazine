@@ -1,1883 +1,64 @@
-const savedTheme = localStorage.getItem('reader-theme');
-
-const state = {
-  issueKey: currentIssueFromUrl(),
-  catalog: null,
-  issue: null,
-  page: 0,
-  view: 'page',
-  articleId: null,
-  panel: null,
-  panelReturnFocus: null,
-  lightbox: { open: false, index: 0, images: [], returnFocus: null },
-  textSize: Math.max(0, Math.min(3, Number(localStorage.getItem('reader-text-size') || 0))),
-  layout: initialLayout(),
-  saved: safeJson('reader-saved', {}),
-  theme: savedTheme === 'dark' ? 'dark' : (savedTheme === 'light' || savedTheme === 'sepia' ? 'light' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')),
-  zoom: { scale: 1, x: 0, y: 0 },
-  speech: { status: 'idle', index: 0, sentences: [], voices: [], utterance: null, run: 0 },
-  gesture: { pointers: new Map(), moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velocityX: 0, lastTime: 0, pinch: null, movedUntil: 0, swipe: null },
-  account: localStorage.getItem('reader-account') === 'subscriber' ? 'subscriber' : 'free',
-  lang: localStorage.getItem('reader-lang') === 'en' ? 'en' : 'kn'
-};
-
-const $ = (selector) => document.querySelector(selector);
-
-// UI chrome text: Kannada by default, with an English option in the hamburger menu.
-// Article/paywall/home copy is always Kannada (the publication's own editorial voice), so it is
-// not part of this dictionary. `t(key, ...args)` looks up state.lang, falling back to English.
-const T = {
-  kn: {
-    choosePublication: (name) => name + ' ಆಯ್ಕೆಮಾಡಿ',
-    chooseEdition: 'ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ',
-    pageLayoutGroup: 'ಪುಟದ ವಿನ್ಯಾಸ',
-    singlePage: 'ಒಂದು ಪುಟ',
-    singlePageView: 'ಒಂದು ಪುಟದ ನೋಟ',
-    doublePage: 'ಎರಡು ಪುಟಗಳು',
-    doublePageView: 'ಎರಡು ಪುಟಗಳ ಹರವಿನ ನೋಟ',
-    scrollView: 'ನಿರಂತರ ಸ್ಕ್ರಾಲ್ ನೋಟ',
-    continuousScroll: 'ನಿರಂತರ ಸ್ಕ್ರಾಲ್',
-    subscribe: 'ಚಂದಾದಾರರಾಗಿ',
-    accountAria: 'ಸೈನ್ ಇನ್ / ನನ್ನ ಪ್ರೊಫೈಲ್',
-    menuAria: 'ಮೆನು ತೆರೆಯಿರಿ',
-    saveArticle: 'ಲೇಖನ ಉಳಿಸಿ',
-    removeSavedArticle: 'ಉಳಿಸಿದ ಲೇಖನ ತೆಗೆಯಿರಿ',
-    backToSourcePage: 'ಮೂಲ ಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ',
-    page: (n) => 'ಪುಟ ' + n,
-    pagesRange: (a, b) => 'ಪುಟಗಳು ' + a + '–' + b,
-    magazinePageAria: 'ನಿಯತಕಾಲಿಕೆ ಪುಟ',
-    previousPageAria: 'ಹಿಂದಿನ ಪುಟ',
-    nextPageAria: 'ಮುಂದಿನ ಪುಟ',
-    zoomControlsAria: 'ಪುಟ ಝೂಮ್ ನಿಯಂತ್ರಣಗಳು',
-    zoomOut: 'ಝೂಮ್ ಕಡಿಮೆ ಮಾಡಿ',
-    zoomIn: 'ಝೂಮ್ ಹೆಚ್ಚಿಸಿ',
-    resetZoom: 'ಝೂಮ್ ಮರುಹೊಂದಿಸಿ',
-    swipeHint: 'ಪುಟ ತಿರುಗಿಸಲು ಅಡ್ಡಡ್ಡ ಸ್ವೈಪ್ ಮಾಡಿ',
-    pageActionsAria: 'ಪುಟ ಕ್ರಿಯೆಗಳು',
-    contents: 'ವಿಷಯಸೂಚಿ',
-    readArticle: 'ಲೇಖನ ಓದಿ',
-    articlesCount: (n) => n + ' ಲೇಖನಗಳು',
-    layoutSwipe: 'ಸ್ವೈಪ್',
-    layoutVertical: 'ಲಂಬ',
-    layoutAriaSwipe: 'ಪುಟ ವಿನ್ಯಾಸ: ಸ್ವೈಪ್. ಲಂಬಕ್ಕೆ ಬದಲಿಸಿ',
-    layoutAriaVertical: 'ಪುಟ ವಿನ್ಯಾಸ: ಲಂಬ. ಸ್ವೈಪ್‌ಗೆ ಬದಲಿಸಿ',
-    articleImageTitle: 'ಲೇಖನದ ಚಿತ್ರ',
-    closeImageViewerAria: 'ಚಿತ್ರ ವೀಕ್ಷಕ ಮುಚ್ಚಿ',
-    previousImageAria: 'ಹಿಂದಿನ ಚಿತ್ರ',
-    nextImageAria: 'ಮುಂದಿನ ಚಿತ್ರ',
-    openArticleImageAria: 'ಲೇಖನದ ಚಿತ್ರ ತೆರೆಯಿರಿ',
-    gallery: 'ಗ್ಯಾಲರಿ',
-    galleryImagesAria: 'ಗ್ಯಾಲರಿ ಚಿತ್ರಗಳು',
-    listenControlsAria: 'ಆಲಿಸುವ ನಿಯಂತ್ರಣಗಳು',
-    playArticleAria: 'ಲೇಖನ ಪ್ಲೇ ಮಾಡಿ',
-    pauseArticleAria: 'ಲೇಖನ ವಿರಮಿಸಿ',
-    listen: 'ಆಲಿಸಿ',
-    pause: 'ವಿರಮಿಸಿ',
-    readingAloud: 'ಗಟ್ಟಿಯಾಗಿ ಓದಲಾಗುತ್ತಿದೆ',
-    paused: 'ವಿರಮಿಸಲಾಗಿದೆ',
-    noVoice: 'ಈ ಸಾಧನದಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ',
-    speechProgressAria: 'ಭಾಷಣ ಪ್ರಗತಿ',
-    speed: 'ವೇಗ',
-    speechSpeedAria: 'ಭಾಷಣ ವೇಗ',
-    stop: 'ನಿಲ್ಲಿಸಿ',
-    articleActionsAria: 'ಲೇಖನ ಕ್ರಿಯೆಗಳು',
-    smaller: 'ಚಿಕ್ಕದು',
-    larger: 'ದೊಡ್ಡದು',
-    share: 'ಹಂಚಿಕೊಳ್ಳಿ',
-    closePanelAria: 'ಪ್ಯಾನೆಲ್ ಮುಚ್ಚಿ',
-    panelTitles: { menu: 'ಮೆನು', contents: 'ವಿಷಯಸೂಚಿ', pages: 'ಪುಟಗಳು', stories: 'ಈ ಪುಟದ ಲೇಖನಗಳು', saved: 'ಉಳಿಸಿದ ಲೇಖನಗಳು', search: 'ಹುಡುಕಿ', publication: 'ಪ್ರಕಟಣೆ', editions: 'ಸಂಚಿಕೆಗಳು', profile: 'ನನ್ನ ಪ್ರೊಫೈಲ್', faqs: 'ಪ್ರಶ್ನೋತ್ತರಗಳು', default: 'ರೀಡರ್' },
-    prajavaniHome: 'ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟ',
-    search: 'ಹುಡುಕಿ',
-    searchThisEdition: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಹುಡುಕಿ',
-    signIn: 'ಸೈನ್ ಇನ್',
-    myProfile: 'ನನ್ನ ಪ್ರೊಫೈಲ್',
-    savedArticles: 'ಉಳಿಸಿದ ಲೇಖನಗಳು',
-    bookmarkedArticles: 'ನೀವು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಿದ ಲೇಖನಗಳು',
-    faqs: 'ಪ್ರಶ್ನೋತ್ತರಗಳು',
-    supportInfo: 'ಬೆಂಬಲ ಮತ್ತು ಸಂಪರ್ಕ ಮಾಹಿತಿ',
-    darkMode: 'ಡಾರ್ಕ್ ಮೋಡ್',
-    useDarkColors: 'ಗಾಢ ಬಣ್ಣಗಳನ್ನು ಬಳಸಿ',
-    readerMode: 'ಓದುಗ ಮೋಡ್',
-    prototypeSetting: 'ಪ್ರಾಯೋಗಿಕ ಸೆಟ್ಟಿಂಗ್',
-    freeReader: 'ಉಚಿತ ಓದುಗ',
-    subscriber: 'ಚಂದಾದಾರ',
-    language: 'ಭಾಷೆ',
-    languageCurrent: 'ಕನ್ನಡ',
-    signInToManage: 'ಚಂದಾದಾರಿಕೆ ಮತ್ತು ಖಾತೆ ವಿವರಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಸೈನ್ ಇನ್ ಆಗಿ.',
-    faqsBody: 'ಚಂದಾದಾರಿಕೆ ಮತ್ತು ಓದುಗ ಬೆಂಬಲಕ್ಕಾಗಿ, ಪ್ರಜಾವಾಣಿ ಮುಖಪುಟದ ಮೂಲಕ ಪ್ರಜಾವಾಣಿ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.',
-    chooseAnEdition: 'ಸಂಚಿಕೆ ಆಯ್ಕೆಮಾಡಿ.',
-    currentEdition: 'ಪ್ರಸ್ತುತ ಸಂಚಿಕೆ',
-    continueFromPage: (n) => 'ಪುಟ ' + n + ' ರಿಂದ ಮುಂದುವರಿಸಿ',
-    open: 'ತೆರೆಯಿರಿ',
-    pageOnlyEdition: 'ಪುಟ-ಮಾತ್ರ ಸಂಚಿಕೆ',
-    searchThisIssue: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಹುಡುಕಿ',
-    noMatches: 'ಯಾವುದೇ ಹೊಂದಾಣಿಕೆ ಇಲ್ಲ.',
-    premiumSearchNote: 'ಪ್ರೀಮಿಯಂ ಲೇಖನ · ಪೂರ್ಣ ಪಠ್ಯ ಓದಲು ಚಂದಾದಾರರಾಗಿ.',
-    noStoriesOnPage: 'ಈ ಪುಟದಲ್ಲಿ ಯಾವುದೇ ಲೇಖನಗಳಿಲ್ಲ.',
-    noSavedYet: 'ಇನ್ನೂ ಉಳಿಸಿದ ಲೇಖನಗಳಿಲ್ಲ.',
-    bylineUnavailable: 'ಲೇಖಕರ ಮಾಹಿತಿ ಲಭ್ಯವಿಲ್ಲ',
-    article: (n) => 'ಲೇಖನ ' + n,
-    savedArticleFallback: 'ಉಳಿಸಿದ ಲೇಖನ',
-    unavailableInEdition: 'ಈ ಸಂಚಿಕೆಯಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ',
-    goToPageAria: (n) => 'ಪುಟ ' + n + 'ಕ್ಕೆ ಹೋಗಿ',
-    premiumLockedSuffix: ' (ಪ್ರೀಮಿಯಂ, ಲಾಕ್ ಆಗಿದೆ)',
-    choosePageAria: 'ಪುಟ ಆಯ್ಕೆಮಾಡಿ',
-    go: 'ಹೋಗಿ',
-    noArticles: 'ಲೇಖನಗಳಿಲ್ಲ',
-    free: 'ಉಚಿತ',
-    premium: 'ಪ್ರೀಮಿಯಂ',
-    previousArticle: 'ಹಿಂದಿನ ಲೇಖನ',
-    nextArticle: 'ಮುಂದಿನ ಲೇಖನ',
-    shareSuccess: 'ಲೇಖನದ ಲಿಂಕ್ ನಕಲಿಸಲಾಗಿದೆ ಅಥವಾ ಹಂಚಿಕೊಳ್ಳಲು ಸಿದ್ಧವಿದೆ.',
-    shareFail: 'ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
-    catalogLoadError: 'ಸಂಚಿಕೆಗಳ ಪಟ್ಟಿ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
-    issueLoadError: (key) => key + ' ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
-  },
-  en: {
-    choosePublication: (name) => 'Choose ' + name + ' publication',
-    chooseEdition: 'Choose edition',
-    pageLayoutGroup: 'Page layout',
-    singlePage: 'Single page',
-    singlePageView: 'Single page view',
-    doublePage: 'Two-page spread',
-    doublePageView: 'Two-page spread view',
-    scrollView: 'Continuous scroll view',
-    continuousScroll: 'Continuous scroll',
-    subscribe: 'Subscribe',
-    accountAria: 'Sign in / My profile',
-    menuAria: 'Open menu',
-    saveArticle: 'Save article',
-    removeSavedArticle: 'Remove saved article',
-    backToSourcePage: 'Back to source page',
-    page: (n) => 'Page ' + n,
-    pagesRange: (a, b) => 'Pages ' + a + '–' + b,
-    magazinePageAria: 'Magazine page',
-    previousPageAria: 'Previous page',
-    nextPageAria: 'Next page',
-    zoomControlsAria: 'Page zoom controls',
-    zoomOut: 'Zoom out',
-    zoomIn: 'Zoom in',
-    resetZoom: 'Reset zoom',
-    swipeHint: 'Swipe horizontally to turn pages',
-    pageActionsAria: 'Page actions',
-    contents: 'Contents',
-    readArticle: 'Read article',
-    articlesCount: (n) => n + ' articles',
-    layoutSwipe: 'Swipe',
-    layoutVertical: 'Vertical',
-    layoutAriaSwipe: 'Page layout: Swipe. Switch to vertical',
-    layoutAriaVertical: 'Page layout: Vertical. Switch to swipe',
-    articleImageTitle: 'Article image',
-    closeImageViewerAria: 'Close image viewer',
-    previousImageAria: 'Previous image',
-    nextImageAria: 'Next image',
-    openArticleImageAria: 'Open article image',
-    gallery: 'Gallery',
-    galleryImagesAria: 'Gallery images',
-    listenControlsAria: 'Listen controls',
-    playArticleAria: 'Play article',
-    pauseArticleAria: 'Pause article',
-    listen: 'Listen',
-    pause: 'Pause',
-    readingAloud: 'Reading aloud',
-    paused: 'Paused',
-    noVoice: 'No Kannada voice available on this device',
-    speechProgressAria: 'Speech progress',
-    speed: 'Speed',
-    speechSpeedAria: 'Speech speed',
-    stop: 'Stop',
-    articleActionsAria: 'Article actions',
-    smaller: 'Smaller',
-    larger: 'Larger',
-    share: 'Share',
-    closePanelAria: 'Close panel',
-    panelTitles: { menu: 'Menu', contents: 'Contents', pages: 'Pages', stories: 'Stories on this page', saved: 'Saved Articles', search: 'Search', publication: 'Publication', editions: 'Editions', profile: 'My Profile', faqs: 'FAQs', default: 'Reader' },
-    prajavaniHome: 'Prajavani Home',
-    search: 'Search',
-    searchThisEdition: 'Search this edition',
-    signIn: 'Sign In',
-    myProfile: 'My Profile',
-    savedArticles: 'Saved Articles',
-    bookmarkedArticles: 'Articles you bookmarked',
-    faqs: 'FAQs',
-    supportInfo: 'Support and contact information',
-    darkMode: 'Dark mode',
-    useDarkColors: 'Use dark colors',
-    readerMode: 'Reader mode',
-    prototypeSetting: 'Prototype setting',
-    freeReader: 'Free reader',
-    subscriber: 'Subscriber',
-    language: 'Language',
-    languageCurrent: 'English',
-    signInToManage: 'Sign in to manage subscription and account details.',
-    faqsBody: 'For subscription and reader support, contact Prajavani support through the Prajavani homepage.',
-    chooseAnEdition: 'Choose an edition.',
-    currentEdition: 'Current edition',
-    continueFromPage: (n) => 'Continue from page ' + n,
-    open: 'Open',
-    pageOnlyEdition: 'Page-only edition',
-    searchThisIssue: 'Search this issue',
-    noMatches: 'No matches.',
-    premiumSearchNote: 'Premium article · Subscribe to read the full text.',
-    noStoriesOnPage: 'No stories on this page.',
-    noSavedYet: 'No saved articles yet.',
-    bylineUnavailable: 'Byline unavailable',
-    article: (n) => 'Article ' + n,
-    savedArticleFallback: 'Saved article',
-    unavailableInEdition: 'Unavailable in this edition',
-    goToPageAria: (n) => 'Go to page ' + n,
-    premiumLockedSuffix: ' (Premium, locked)',
-    choosePageAria: 'Choose page',
-    go: 'Go',
-    noArticles: 'No articles',
-    free: 'Free',
-    premium: 'Premium',
-    previousArticle: 'Previous article',
-    nextArticle: 'Next article',
-    shareSuccess: 'Article link copied or ready to share.',
-    shareFail: 'Sharing was not available.',
-    catalogLoadError: 'Could not load the edition catalog',
-    issueLoadError: (key) => 'Could not load ' + key,
-  },
-};
-function t(key, ...args) {
-  const entry = (T[state.lang] && T[state.lang][key] !== undefined) ? T[state.lang][key] : T.en[key];
-  return typeof entry === 'function' ? entry(...args) : entry;
-}
-function setLang(value) {
-  state.lang = value === 'en' ? 'en' : 'kn';
-  localStorage.setItem('reader-lang', state.lang);
-  applyChrome();
-  renderHeader();
-  renderPageControls();
-  renderArticleControls();
-  renderListenPlayer();
-  document.querySelectorAll('.article-gallery h2').forEach((el) => { el.textContent = t('gallery'); });
-  document.querySelectorAll('.article-gallery-track').forEach((el) => el.setAttribute('aria-label', t('galleryImagesAria')));
-  document.querySelectorAll('.article-content img[role="button"]').forEach((el) => el.setAttribute('aria-label', t('openArticleImageAria')));
-  if (state.view === 'home' && state.issue) renderHome();
-  if (state.panel) renderPanel();
-}
-// Static chrome text that index.html doesn't own dynamically (menus/panels do, via t() at render time).
-function applyChrome() {
-  const set = (selector, fn) => document.querySelectorAll(selector).forEach(fn);
-  set('#edition-button', (el) => el.setAttribute('aria-label', t('chooseEdition')));
-  set('#view-mode-toggle', (el) => el.setAttribute('aria-label', t('pageLayoutGroup')));
-  set('[data-view-mode="single"]', (el) => { el.setAttribute('aria-label', t('singlePageView')); el.title = t('singlePage'); });
-  set('[data-view-mode="double"]', (el) => { el.setAttribute('aria-label', t('doublePageView')); el.title = t('doublePage'); });
-  set('[data-view-mode="scroll"]', (el) => { el.setAttribute('aria-label', t('scrollView')); el.title = t('continuousScroll'); });
-  set('.subscribe-mobile-label, .subscribe-desktop-label, #text-subscribe-label', (el) => { el.textContent = t('subscribe'); });
-  set('.account-button', (el) => el.setAttribute('aria-label', t('accountAria')));
-  set('#menu-button, #text-menu-button', (el) => el.setAttribute('aria-label', t('menuAria')));
-  set('#back-button', (el) => el.setAttribute('aria-label', t('backToSourcePage')));
-  set('#page-canvas', (el) => el.setAttribute('aria-label', t('magazinePageAria')));
-  set('#previous-page', (el) => el.setAttribute('aria-label', t('previousPageAria')));
-  set('#next-page', (el) => el.setAttribute('aria-label', t('nextPageAria')));
-  set('.zoom-controls', (el) => el.setAttribute('aria-label', t('zoomControlsAria')));
-  set('#zoom-out', (el) => el.setAttribute('aria-label', t('zoomOut')));
-  set('#zoom-in', (el) => el.setAttribute('aria-label', t('zoomIn')));
-  set('#zoom-reset', (el) => el.setAttribute('aria-label', t('resetZoom')));
-  set('#swipe-hint', (el) => { el.textContent = t('swipeHint'); });
-  set('#page-controls', (el) => el.setAttribute('aria-label', t('pageActionsAria')));
-  set('#page-contents > span:last-child', (el) => { el.textContent = t('contents'); });
-  set('#lightbox-title', (el) => { el.textContent = t('articleImageTitle'); });
-  set('#lightbox-close', (el) => el.setAttribute('aria-label', t('closeImageViewerAria')));
-  set('#lightbox-prev', (el) => el.setAttribute('aria-label', t('previousImageAria')));
-  set('#lightbox-next', (el) => el.setAttribute('aria-label', t('nextImageAria')));
-  set('#listen-player', (el) => el.setAttribute('aria-label', t('listenControlsAria')));
-  set('#listen-progress', (el) => el.setAttribute('aria-label', t('speechProgressAria')));
-  set('#listen-speed-label', (el) => { el.textContent = t('speed'); });
-  set('#listen-rate', (el) => el.setAttribute('aria-label', t('speechSpeedAria')));
-  set('#listen-stop', (el) => { el.textContent = t('stop'); });
-  set('#article-controls', (el) => el.setAttribute('aria-label', t('articleActionsAria')));
-  set('#article-font-smaller > span:last-child', (el) => { el.textContent = t('smaller'); });
-  set('#article-font-larger > span:last-child', (el) => { el.textContent = t('larger'); });
-  set('#article-share > span:last-child', (el) => { el.textContent = t('share'); });
-  set('#close-panel', (el) => el.setAttribute('aria-label', t('closePanelAria')));
-}
-// Outline icon set on a 24px grid; geometry follows Lucide (ISC licence).
-function icon(name) {
-  const paths = {
-    bookmark: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1Z" />',
-    play: '<path d="M7 4.5v15l12.5-7.5Z" />',
-    pause: '<rect x="6.5" y="5" width="3.5" height="14" rx="1" /><rect x="14" y="5" width="3.5" height="14" rx="1" />',
-    back: '<path d="m15 5-7 7 7 7M8 12h12" />',
-    forward: '<path d="m9 5 7 7-7 7" />',
-    share: '<circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5" />',
-    home: '<path d="M3.5 10.5 12 3.5l8.5 7" /><path d="M5.5 9v10.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9" /><path d="M10 20.5V15h4v5.5" />',
-    search: '<circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" />',
-    profile: '<circle cx="12" cy="8" r="4" /><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />',
-    saved: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1Z" />',
-    faq: '<circle cx="12" cy="12" r="9" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" />',
-    sun: '<circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />',
-    lock: '<rect x="5" y="10.5" width="14" height="10" rx="2" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />',
-    moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z" />',
-    settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" />',
-    globe: '<circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" />',
-    contents: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />',
-    pages: '<rect x="4" y="4" width="6.5" height="7" rx="1.2" /><rect x="13.5" y="4" width="6.5" height="7" rx="1.2" /><rect x="4" y="13" width="6.5" height="7" rx="1.2" /><rect x="13.5" y="13" width="6.5" height="7" rx="1.2" />',
-    swipe: '<rect x="8" y="4.5" width="8" height="15" rx="1.5" /><path d="M4.5 9.5 2 12l2.5 2.5M19.5 9.5 22 12l-2.5 2.5" />',
-    vertical: '<rect x="8" y="6.5" width="8" height="11" rx="1.5" /><path d="M9.5 4 12 1.8 14.5 4M9.5 20 12 22.2 14.5 20" />',
-    read: '<path d="M2.5 4.5h6a3.5 3.5 0 0 1 3.5 3.5v12a2.5 2.5 0 0 0-2.5-2.5h-7Z" /><path d="M21.5 4.5h-6A3.5 3.5 0 0 0 12 8v12a2.5 2.5 0 0 1 2.5-2.5h7Z" />',
-    listen: '<path d="M3.5 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-7a8.5 8.5 0 0 1 17 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />',
-    menu: '<path d="M4 6.5h16M4 12h16M4 17.5h16" />'
-  };
-  return '<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">' + (paths[name] || '') + '</svg>';
-}
-const appBase = new URL('.', document.currentScript.src);
-const pageCanvas = $('#page-canvas');
-const pageSpread = $('#page-spread');
-const pageZoomStage = $('#page-zoom-stage');
-let renderedPageZoom = { scale: 1, x: 0, y: 0 };
-let scrollSyncFrame = 0;
-const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const lightboxZoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null };
-const preloadedPageImages = new Set();
-// Layout math uses --header-height; keep it equal to the header's rendered height.
-const appHeader = $('#app-header');
-new ResizeObserver(() => { const height = appHeader.getBoundingClientRect().height; if (height) document.documentElement.style.setProperty('--header-height', height + 'px'); }).observe(appHeader);
-
-function initialLayout() {
-  const saved = localStorage.getItem('reader-page-layout');
-  if (saved === 'single' || saved === 'double' || saved === 'scroll') return saved;
-  return localStorage.getItem('reader-single-page') === 'true' ? 'single' : 'double';
-}
-
-function safeJson(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; }
-}
-
-function currentIssueFromUrl() {
-  const params = new URLSearchParams(location.search);
-  return params.get('issue') || issueFromPath() || localStorage.getItem('reader-last-issue') || null;
-}
-
-function issueFromPath(pathname = location.pathname) {
-  const match = pathname.match(/^\/(sudha|mayura)\/(\d{4}-\d{2}-\d{2})\/read\/?$/i);
-  if (!match) return null;
-  return (match[1].toLowerCase() === 'mayura' ? 'MY' : 'SU') + '-' + match[2];
-}
-
-function publication(key) { return key && key.startsWith('MY') ? 'MY' : 'SU'; }
-function publicationLabel(code) { return code === 'MY' ? 'ಮಯೂರ' : 'ಸುಧಾ'; }
-function appPath(path) { return new URL(path, appBase).pathname; }
-function issuePath(file) { return appPath('data/' + state.issue.key + '/' + file); }
-function readerUrl(key, page, view = 'page', articleId = null) {
-  const params = new URLSearchParams({ issue: key, p: String(page) });
-  if (view === 'text' && articleId) {
-    params.set('view', 'text');
-    params.set('article', String(articleId));
-  }
-  return appBase.pathname + '?' + params;
-}
-
-function issueDate(key) {
-  const parts = key.match(/^[A-Z]{2}-(\d{4})-(\d{2})-(\d{2})$/);
-  if (!parts) return key;
-  return new Date(parts[1] + '-' + parts[2] + '-' + parts[3] + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function shortIssueDate(key) {
-  const parts = key.match(/^[A-Z]{2}-(\d{4})-(\d{2})-(\d{2})$/);
-  if (!parts) return key;
-  return new Date(parts[1] + '-' + parts[2] + '-' + parts[3] + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-
-function imagePath(page, thumb = false) {
-  const file = (thumb ? page.imgThumbFile : page.imgFile).split('/').pop();
-  return issuePath((thumb ? 'thumbs/' : 'pages/') + file);
-}
-
-// Free readers can't open pages that carry a Premium article; those pages only ever load the thumbnail.
-function isPageLocked(index) { return !isSubscriber() && articlesForPage(index).some(isPaidArticle); }
-function lockedPages() { return state.issue.pages.map((page, index) => index).filter(isPageLocked); }
-function pageImageSrc(index) { return imagePath(state.issue.pages[index], isPageLocked(index)); }
-
-function preloadNearbyPages(index) {
-  for (let pageIndex = Math.max(0, index - 3); pageIndex <= Math.min(state.issue.pages.length - 1, index + 3); pageIndex += 1) {
-    if (isPageLocked(pageIndex)) continue;
-    const src = imagePath(state.issue.pages[pageIndex]);
-    if (preloadedPageImages.has(src)) continue;
-    preloadedPageImages.add(src);
-    const image = new Image();
-    image.decoding = 'async';
-    image.src = src;
-  }
-}
-
-function parsePercent(value) { return Number.parseFloat(String(value || 0)) / 100; }
-function readPageNumber(value) { const page = Number.parseInt(value, 10); return Number.isFinite(page) ? Math.max(1, page) : 1; }
-function allIssues() { return state.catalog?.publications.flatMap((item) => item.issues.map((issue) => ({ ...issue, publication: item.code, publicationTitle: item.title }))) || []; }
-function issueSummary(key) { return allIssues().find((issue) => issue.key === key); }
-function currentArticle() { return state.issue?.articles[state.articleId] || null; }
-function articleIds() { return Object.keys(state.issue?.articles || {}).sort((a, b) => articleOrder(state.issue.articles[a], state.issue.articles[b])); }
-function articleOrder(a, b) { return (a.pageIndex - b.pageIndex) || (parsePercent(a.top) - parsePercent(b.top)) || (parsePercent(a.left) - parsePercent(b.left)); }
-function articlesForPage(index) { return state.issue.pages[index]?.articles.map((item) => state.issue.articles[String(item.id)]).filter(Boolean).sort(articleOrder) || []; }
-
-function articleForPage(index) {
-  const page = state.issue.pages[index];
-  if (!page || !page.articles.length) return null;
-  const last = state.issue.lastOpened?.[index];
-  return page.articles.map((item) => state.issue.articles[String(item.id)]).filter(Boolean).find((article) => String(article.id) === String(last))
-    || articlesForPage(index).sort((a, b) => (parsePercent(b.width) * parsePercent(b.height)) - (parsePercent(a.width) * parsePercent(a.height)))[0];
-}
-
-function articleHref(id) {
-  const article = state.issue.articles[String(id)];
-  return article ? readerUrl(state.issue.key, article.pageIndex + 1, 'text', article.id) : '#';
-}
-
-function pageHref(index) { return readerUrl(state.issue.key, index + 1); }
-function articleAccess(article) {
-  const words = String(article?.plainText || '').trim().split(/\s+/).filter(Boolean).length;
-  return article?.plainText && words < 100 ? 'Free' : 'Premium';
-}
-function accessClass(article) { return articleAccess(article).toLowerCase(); }
-function accessLabel(article) { return accessClass(article) === 'premium' ? t('premium') : t('free'); }
-function isSubscriber() { return state.account === 'subscriber'; }
-function isPaidArticle(article) { return articleAccess(article) === 'Premium'; }
-function needsPreview(article) { return !isSubscriber() && isPaidArticle(article); }
-function getAccountState() { return isSubscriber() ? 'subscriber' : 'free'; }
-function setAccountState(value) {
-  state.account = value === 'subscriber' ? 'subscriber' : 'free';
-  localStorage.setItem('reader-account', state.account);
-  stopSpeech();
-  renderAccountUI();
-  if (state.view === 'home') {
-    if (isSubscriber()) { closePanel(); openFromHome(state.issue.key, Number(localStorage.getItem('reader-resume:' + state.issue.key) || 0) + 1); }
-    else { renderHome(); if (state.panel) renderPanel(); }
-    return;
-  }
-  if (state.panel === 'profile' || state.panel === 'menu') renderPanel();
-  if (state.view === 'text' && state.articleId) openArticle(state.articleId, { push: false });
-  else { renderPageCanvas(); renderPageControls(); renderHeader(); if (state.panel) renderPanel(); }
-}
-function renderAccountUI() {
-  document.body.dataset.account = state.account;
-  const select = $('#account-state-menu');
-  if (select) select.value = state.account;
-  renderHeader();
-}
-function savedKey(id) { return state.issue ? state.issue.key + ':' + String(id) : String(id); }
-function isSaved(id) { return Boolean(state.issue && state.saved[savedKey(id)]); }
-
-function accessComposition(page) {
-  const articles = articlesForPage(page.index);
-  const free = articles.filter((article) => articleAccess(article) === 'Free').length;
-  const premium = articles.length - free;
-  if (!articles.length) return t('noArticles');
-  const counts = (free ? '<span class="access-count access-free" title="' + t('free') + '"><span class="access-icon" aria-hidden="true">○</span><span>' + free + '</span><span class="sr-only"> ' + t('free') + '</span></span>' : '')
-    + (premium ? '<span class="access-count access-premium" title="' + t('premium') + '"><span class="access-icon" aria-hidden="true">●</span><span>' + premium + '</span><span class="sr-only"> ' + t('premium') + '</span></span>' : '');
-  return '<span class="access-composition" aria-label="' + free + ' ' + t('free') + ', ' + premium + ' ' + t('premium') + '">' + counts + '</span>';
-}
-
-function applyTheme() {
-  document.documentElement.dataset.theme = state.theme;
-  localStorage.setItem('reader-theme', state.theme);
-}
-
-function savePosition() {
-  if (!state.issue || state.view === 'home') return;
-  localStorage.setItem('reader-last-issue', state.issue.key);
-  localStorage.setItem('reader-resume:' + state.issue.key, String(state.page));
-  if (state.articleId) localStorage.setItem('reader-last-article:' + state.issue.key, state.articleId);
-}
-
-function updateUrl(push = false) {
-  if (state.view === 'home') return;
-  const url = readerUrl(state.issue.key, state.page + 1, state.view, state.articleId);
-  history[push ? 'pushState' : 'replaceState']({}, '', url);
-}
-
-function useSpread() { return Boolean(state.issue && state.layout === 'double' && pageCanvas.clientWidth >= 900 && state.issue.pages.length > 1); }
-function useScroll() { return Boolean(state.issue && state.layout === 'scroll' && state.issue.pages.length > 1); }
-function useSnap() { return useScroll() && innerWidth < 1024; }
-function spreadStart(index = state.page) { return !useSpread() || index === 0 ? index : 1 + Math.floor((index - 1) / 2) * 2; }
-function spreadIndices(index = state.page) {
-  const start = spreadStart(index);
-  return [start, useSpread() && start > 0 && state.issue.pages[start + 1] ? start + 1 : null].filter((value) => value !== null);
-}
-function displayPageLabel() {
-  const pages = spreadIndices();
-  return pages.length > 1 ? t('pagesRange', pages[0] + 1, pages[1] + 1) : t('page', pages[0] + 1);
-}
-
-function renderHeader() {
-  const summary = issueSummary(state.issue.key);
-  const subscriber = isSubscriber();
-  const publicationCode = publication(state.issue.key);
-  const publicationName = publicationCode === 'MY' ? 'Mayura' : 'Sudha';
-  $('#edition-logo').src = publicationCode === 'MY' ? 'Assets/MAYURA-MAST-white.svg' : 'Assets/Sudha_Mast_GOLD-New Nandi.svg';
-  $('#edition-logo').alt = publicationName;
-  $('#text-edition-logo').src = $('#edition-logo').src;
-  $('#text-edition-logo').alt = publicationName + ' magazine';
-  const homeHref = subscriber ? readerUrl(latestIssueKey(), 1) : appBase.pathname + '?home=' + publicationCode;
-  document.querySelectorAll('.publication-home').forEach((link) => { link.href = homeHref; link.setAttribute('aria-label', publicationName + (subscriber ? ' home: latest edition cover' : ' home')); });
-  document.body.dataset.publication = publicationCode;
-  document.querySelector('meta[name="theme-color"]').content = getComputedStyle($('#app-header')).backgroundColor;
-  $('#publication-button').setAttribute('aria-label', t('choosePublication', publicationName));
-  $('#edition-label').textContent = innerWidth < 480 ? shortIssueDate(state.issue.key) : (summary?.label || shortIssueDate(state.issue.key));
-  $('#subscribe-button').hidden = subscriber;
-  $('#text-subscribe-button').hidden = subscriber;
-  $('#back-page-label').textContent = 'ಪುಟ ' + (state.page + 1);
-  const saved = state.articleId ? isSaved(state.articleId) : false;
-  $('#save-button').innerHTML = icon('bookmark');
-  $('#save-button').classList.toggle('is-active', saved);
-  $('#save-button').setAttribute('aria-label', saved ? t('removeSavedArticle') : t('saveArticle'));
-  document.documentElement.style.setProperty('--article-size', [1.125, 1.25, 1.4, 1.55][state.textSize] + 'rem');
-  document.body.dataset.account = state.account;
-}
-
-function setControlsVisible(visible) {
-  document.body.classList.toggle('chrome-hidden', !visible && !state.panel);
-  $('#app-header').classList.toggle('chrome-hidden', !visible && !state.panel);
-  $('.page-view').classList.toggle('chrome-hidden', !visible && state.view === 'page');
-  $('#article-controls').classList.toggle('chrome-hidden', !visible && state.view === 'text');
-  if (useSnap() && state.view === 'page' && pageSpread.dataset.scrollIssue) requestAnimationFrame(() => { fitPageZoom(); scrollToPage(state.page); });
-}
-
-function renderViewState() {
-  document.body.dataset.view = state.view;
-  $('#home-view').hidden = state.view !== 'home';
-  $('.page-view').hidden = state.view !== 'page';
-  $('.text-view').hidden = state.view !== 'text';
-  $('#article-controls').hidden = state.view !== 'text';
-  $('#reading-progress').hidden = state.view !== 'text';
-  $('#view-mode-toggle').hidden = state.view !== 'page' || innerWidth < 1024 || !state.issue || state.issue.pages.length < 2;
-  $('.page-header').hidden = state.view === 'text';
-  $('.text-header').hidden = state.view !== 'text';
-  setControlsVisible(true);
-}
-
-function renderPageControls() {
-  const articles = articlesForPage(state.page);
-  const zoomActive = state.zoom.scale > 1.01 || Math.abs(state.zoom.x) > .5 || Math.abs(state.zoom.y) > .5;
-  $('#page-number').querySelector('span:last-child').textContent = displayPageLabel();
-  $('#page-article-action').hidden = !articles.length && !zoomActive;
-  $('#page-article-action').querySelector('span:last-child').textContent = zoomActive ? t('resetZoom') : articles.length === 1 ? t('readArticle') : t('articlesCount', articles.length);
-  $('#previous-page').disabled = state.page === 0;
-  $('#next-page').disabled = state.page >= state.issue.pages.length - 1;
-  const viewToggle = $('#view-mode-toggle');
-  viewToggle.hidden = state.view !== 'page' || innerWidth < 1024 || state.issue.pages.length < 2;
-  viewToggle.querySelectorAll('[data-view-mode]').forEach((option) => option.setAttribute('aria-pressed', String(option.dataset.viewMode === state.layout)));
-  const layoutToggle = $('#page-layout-toggle');
-  layoutToggle.hidden = state.issue.pages.length < 2;
-  const mode = useScroll() ? 'vertical' : 'swipe';
-  layoutToggle.dataset.mode = mode;
-  $('#page-layout-label').textContent = mode === 'vertical' ? t('layoutVertical') : t('layoutSwipe');
-  layoutToggle.setAttribute('aria-label', mode === 'vertical' ? t('layoutAriaVertical') : t('layoutAriaSwipe'));
-}
-
-function renderArticleControls() {
-  $('#article-listen').querySelector('.control-icon').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'listen');
-  $('#article-listen').querySelector('span:last-child').textContent = state.speech.status === 'playing' ? t('pause') : t('listen');
-}
-
-function renderZoom() {
-  state.zoom.scale = Math.min(state.zoom.scale, maxPageZoom());
-  clampPageZoom();
-  const transform = 'translate3d(' + state.zoom.x + 'px, ' + state.zoom.y + 'px, 0) scale(' + state.zoom.scale + ')';
-  pageZoomStage.style.transform = transform;
-  renderedPageZoom = { ...state.zoom };
-  const active = state.zoom.scale > 1.01 || Math.abs(state.zoom.x) > .5 || Math.abs(state.zoom.y) > .5;
-  $('#zoom-reset').hidden = !active;
-  $('#zoom-in').disabled = state.zoom.scale >= maxPageZoom() - .001;
-  $('#page-article-action').hidden = !articlesForPage(state.page).length && !active;
-  $('#page-article-action').querySelector('span:last-child').textContent = active ? t('resetZoom') : articlesForPage(state.page).length === 1 ? t('readArticle') : t('articlesCount', articlesForPage(state.page).length);
-}
-
-function maxPageZoom() {
-  const images = [...pageSpread.querySelectorAll('.page-slot:not(.is-locked) .page-zoom img')];
-  if (!images.length) return 1;
-  return Math.min(4, ...images.map((image) => {
-    if (!image.naturalWidth || !image.naturalHeight || !image.clientWidth || !image.clientHeight) return 1;
-    return Math.max(1, Math.min(image.naturalWidth / image.clientWidth, image.naturalHeight / image.clientHeight));
-  }));
-}
-
-function clampPageZoom() {
-  if (state.zoom.scale <= 1.01) {
-    state.zoom.x = 0;
-    state.zoom.y = 0;
-    return;
-  }
-  const canvas = pageCanvas.getBoundingClientRect();
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  const content = [...pageSpread.querySelectorAll('.page-zoom')].map((element) => element.getBoundingClientRect());
-  if (!content.length || !canvas.width || !canvas.height) return;
-  const bounds = content.reduce((result, rect) => ({
-    left: Math.min(result.left, centerX + (rect.left - canvas.left - centerX - renderedPageZoom.x) / renderedPageZoom.scale),
-    top: Math.min(result.top, centerY + (rect.top - canvas.top - centerY - renderedPageZoom.y) / renderedPageZoom.scale),
-    right: Math.max(result.right, centerX + (rect.right - canvas.left - centerX - renderedPageZoom.x) / renderedPageZoom.scale),
-    bottom: Math.max(result.bottom, centerY + (rect.bottom - canvas.top - centerY - renderedPageZoom.y) / renderedPageZoom.scale)
-  }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
-  const visibleX = Math.min(64, canvas.width, (bounds.right - bounds.left) * state.zoom.scale);
-  const visibleY = Math.min(64, canvas.height, (bounds.bottom - bounds.top) * state.zoom.scale);
-  state.zoom.x = Math.max(visibleX - centerX - (bounds.right - centerX) * state.zoom.scale, Math.min(canvas.width - visibleX - centerX - (bounds.left - centerX) * state.zoom.scale, state.zoom.x));
-  state.zoom.y = Math.max(visibleY - centerY - (bounds.bottom - centerY) * state.zoom.scale, Math.min(canvas.height - visibleY - centerY - (bounds.top - centerY) * state.zoom.scale, state.zoom.y));
-}
-
-function fitPageZoom() {
-  pageSpread.querySelectorAll('.page-slot').forEach((slot) => {
-    const page = state.issue.pages[Number(slot.dataset.page)];
-    const zoom = slot.querySelector('.page-zoom');
-    const ratio = (page.width || 3) / (page.height || 4);
-    const height = Math.min(pageCanvas.clientHeight, slot.clientWidth / ratio);
-    zoom.style.width = Math.max(0, height * ratio) + 'px';
-    zoom.style.height = Math.max(0, height) + 'px';
-  });
-}
-
-function resetZoom() {
-  state.zoom.scale = 1;
-  state.zoom.x = 0;
-  state.zoom.y = 0;
-  renderZoom();
-  if (state.issue) renderPageControls();
-}
-
-function setZoom(scale, anchorX = pageCanvas.clientWidth / 2, anchorY = pageCanvas.clientHeight / 2) {
-  const previous = state.zoom.scale;
-  state.zoom.scale = Math.max(1, Math.min(maxPageZoom(), scale));
-  const ratio = state.zoom.scale / previous;
-  state.zoom.x = (state.zoom.x - (anchorX - pageCanvas.clientWidth / 2)) * ratio + (anchorX - pageCanvas.clientWidth / 2);
-  state.zoom.y = (state.zoom.y - (anchorY - pageCanvas.clientHeight / 2)) * ratio + (anchorY - pageCanvas.clientHeight / 2);
-  renderZoom();
-}
-
-function buildPageSlot(index) {
-  const page = state.issue.pages[index];
-  const slot = document.createElement('div');
-  slot.className = 'page-slot';
-  slot.dataset.page = index;
-  const art = document.createElement('div');
-  art.className = 'page-art';
-  art.style.setProperty('--page-ratio', (page.width || 3) + ' / ' + (page.height || 4));
-  const zoom = document.createElement('div');
-  zoom.className = 'page-zoom';
-  const image = document.createElement('img');
-  image.alt = t('page', index + 1);
-  image.loading = Math.abs(index - state.page) <= 1 ? 'eager' : 'lazy';
-  image.addEventListener('load', () => { if (image.isConnected && !useScroll()) renderZoom(); });
-  const locked = isPageLocked(index);
-  slot.classList.toggle('is-locked', locked);
-  image.src = pageImageSrc(index);
-  const placeholder = document.createElement('span');
-  placeholder.className = 'page-placeholder';
-  placeholder.textContent = t('page', index + 1);
-  zoom.append(image, placeholder);
-  if (locked) {
-    zoom.insertAdjacentHTML('beforeend', lockedPageMarkup(index));
-    art.append(zoom);
-    slot.append(art);
-    return slot;
-  }
-  page.articles.forEach((hotspot) => {
-    const button = document.createElement('button');
-    button.className = 'hotspot';
-    button.type = 'button';
-    button.style.top = parsePercent(hotspot.top) * 100 + '%';
-    button.style.left = parsePercent(hotspot.left) * 100 + '%';
-    button.style.width = parsePercent(hotspot.width) * 100 + '%';
-    button.style.height = parsePercent(hotspot.height) * 100 + '%';
-    button.dataset.article = hotspot.id;
-    button.setAttribute('aria-label', 'Read: ' + (state.issue.articles[String(hotspot.id)]?.title || 'article ' + hotspot.id));
-    zoom.append(button);
-  });
-  state.issue.tocMappings.filter((mapping) => mapping.tocPage === index + 1).forEach((mapping) => {
-    const button = document.createElement('button');
-    button.className = 'hotspot hotspot-toc';
-    button.type = 'button';
-    button.style.top = mapping.y + '%';
-    button.style.left = mapping.x + '%';
-    button.style.width = mapping.width + '%';
-    button.style.height = mapping.height + '%';
-    button.dataset.tocTarget = mapping.targetPage;
-    button.setAttribute('aria-label', 'Go to page ' + mapping.targetPage);
-    zoom.append(button);
-  });
-  art.append(zoom);
-  slot.append(art);
-  return slot;
-}
-
-function renderPageCanvas() {
-  if (state.view === 'home') return;
-  if (useScroll()) { renderScrollCanvas(); return; }
-  pageCanvas.classList.remove('is-scroll', 'is-snap');
-  delete pageSpread.dataset.scrollIssue;
-  pageCanvas.scrollTop = 0;
-  const indices = spreadIndices();
-  pageSpread.classList.toggle('is-spread', indices.length > 1);
-  pageSpread.replaceChildren(...indices.map((index) => buildPageSlot(index)));
-  fitPageZoom();
-  resetZoom();
-  preloadNearbyPages(state.page);
-}
-
-function renderScrollCanvas() {
-  const snap = useSnap();
-  const key = state.issue.key + (snap ? ':snap' : ':flow') + ':' + lockedPages().join(',');
-  if (pageSpread.dataset.scrollIssue !== key) {
-    pageCanvas.classList.add('is-scroll');
-    pageCanvas.classList.toggle('is-snap', snap);
-    pageSpread.classList.remove('is-spread');
-    pageSpread.replaceChildren(...state.issue.pages.map((page, index) => buildPageSlot(index)));
-    pageSpread.dataset.scrollIssue = key;
-    resetZoom();
-  }
-  if (snap) fitPageZoom();
-  scrollToPage(state.page);
-  preloadNearbyPages(state.page);
-}
-
-function scrollToPage(index) {
-  const slot = pageSpread.querySelector('.page-slot[data-page="' + index + '"]');
-  if (slot) pageCanvas.scrollTo({ top: slot.offsetTop - (useSnap() ? 0 : 8), behavior: 'instant' });
-}
-
-// In scroll layouts the current page is the one crossing 40% down the canvas.
-function syncScrollPage() {
-  scrollSyncFrame = 0;
-  if (!useScroll() || state.view !== 'page' || !pageSpread.dataset.scrollIssue) return;
-  const line = pageCanvas.scrollTop + pageCanvas.clientHeight * .4;
-  let page = 0;
-  for (const slot of pageSpread.children) {
-    if (slot.offsetTop > line) break;
-    page = Number(slot.dataset.page);
-  }
-  if (page === state.page) return;
-  state.page = page;
-  savePosition();
-  updateUrl(false);
-  renderPageControls();
-  preloadNearbyPages(page);
-}
-pageCanvas.addEventListener('scroll', () => { if (!scrollSyncFrame) scrollSyncFrame = requestAnimationFrame(syncScrollPage); }, { passive: true });
-
-function setLayout(layout) {
-  if (state.layout === layout) return;
-  state.layout = layout;
-  localStorage.setItem('reader-page-layout', layout);
-  state.page = spreadStart(state.page);
-  renderPageCanvas();
-  renderPageControls();
-  pageCanvas.focus({ preventScroll: true });
-}
-
-function animatePageChange(direction) {
-  if (!direction || prefersReducedMotion.matches || useScroll()) return;
-  pageSpread.classList.remove('page-transition-next', 'page-transition-previous');
-  void pageSpread.offsetWidth;
-  pageSpread.classList.add('page-transition-' + direction);
-  pageSpread.addEventListener('animationend', () => pageSpread.classList.remove('page-transition-' + direction), { once: true });
-}
-
-function setPage(pageIndex, { push = false, keepControls = true } = {}) {
-  const previousPage = state.page;
-  stopSpeech();
-  state.view = 'page';
-  state.articleId = null;
-  state.page = Math.max(0, Math.min(pageIndex, state.issue.pages.length - 1));
-  state.page = spreadStart(state.page);
-  savePosition();
-  updateUrl(push);
-  renderViewState();
-  renderPageCanvas();
-  renderPageControls();
-  renderHeader();
-  animatePageChange(state.page > previousPage ? 'next' : state.page < previousPage ? 'previous' : '');
-  if (!keepControls) setControlsVisible(false);
-}
-
-async function openArticle(articleId, { push = true } = {}) {
-  const article = state.issue.articles[String(articleId)];
-  if (!article) return;
-  closeLightbox({ restore: false });
-  stopSpeech();
-  resetZoom();
-  await loadArticleMeta([article.id, article.previous, article.next].filter(Boolean));
-  state.articleId = String(article.id);
-  state.page = article.pageIndex;
-  state.view = 'text';
-  state.issue.lastOpened ||= {};
-  state.issue.lastOpened[state.page] = state.articleId;
-  savePosition();
-  updateUrl(push);
-  renderViewState();
-  renderHeader();
-  $('#article-content').innerHTML = '<p class="loading">Loading article…</p>';
-  $('#article-scroll').scrollTop = 0;
-  try {
-    const response = await fetch(issuePath('articles/' + article.id + '.html'));
-    if (!response.ok) throw new Error('Article unavailable');
-    const html = await response.text();
-    // ponytail: normalize word-count access classification once full metadata is available
-    if (!article.plainText) {
-      try { Object.assign(article, renderArticleMetaFromHtml(article.id, html)); } catch { /* keep fallback */ }
-    }
-    const preview = needsPreview(article);
-    $('#article-content').innerHTML = preview ? articlePreviewMarkup(html, article) : articleMarkup(html, article);
-    prepareSpeech();
-    bindImageZoom();
-    renderArticleFooterCards();
-  } catch (error) {
-    $('#article-content').innerHTML = '<p role="alert">Could not load this article.</p>';
-    console.error(error);
-  }
-  renderHeader();
-  renderArticleControls();
-  renderListenPlayer();
-}
-
-function sanitizeArticleRoot(html, article) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  doc.querySelectorAll('script, style, iframe, form, [style*="display:none"], .adPlaceholder').forEach((node) => node.remove());
-  doc.querySelectorAll('*').forEach((node) => {
-    if (node.getAttribute('style')?.includes('background')) node.classList.add('article-recipe');
-    node.removeAttribute('style');
-    [...node.attributes].forEach((attribute) => {
-      if (attribute.name.toLowerCase().startsWith('on')) node.removeAttribute(attribute.name);
-    });
-  });
-  doc.querySelectorAll('img').forEach((image) => {
-    const filename = image.getAttribute('src')?.split('/').pop();
-    if (filename) image.src = issuePath('media/' + filename);
-    image.removeAttribute('style');
-    image.loading = 'lazy';
-    image.classList.add('zoomable');
-  });
-  doc.querySelectorAll('a').forEach((link) => {
-    const href = link.getAttribute('href') || '';
-    if (href && !/^(https?:|mailto:|#)/i.test(href)) link.removeAttribute('href');
-  });
-  return doc;
-}
-
-function articlePreviewMarkup(html, article) {
-  // ponytail: build preview from sanitized text + lead figure only; never render full root and hide it
-  const doc = sanitizeArticleRoot(html, article);
-  const root = doc.querySelector('.articleDetail') || doc.body;
-  const extractedTitle = doc.querySelector('h1 p, h1')?.textContent.trim();
-  const pictures = [...root.querySelectorAll('.pictures > .picture')];
-  const hero = pictures[0] || null;
-  // ponytail: count bodytext only when present; unclassed paragraphs are fallback, never captions/bylines/siblings
-  const body = root.querySelector('.bodytext');
-  const scope = body || root;
-  const paras = [...scope.querySelectorAll(body ? 'p' : 'p:not([class])')]
-    .filter((p) => !p.closest('.pictures') && !p.classList.contains('byline') && !p.classList.contains('caption'))
-    .map((p) => p.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean);
-  const words = paras.join(' ').split(/\s+/).filter(Boolean).slice(0, 100);
-  const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
-  const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
-  let figure = '';
-  if (hero) {
-    const image = hero.querySelector('img');
-    const caption = hero.querySelector('.caption');
-    if (image) {
-      image.tabIndex = 0;
-      image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', t('openArticleImageAria'));
-      figure = '<figure class="article-figure article-hero">' + image.outerHTML + (caption?.textContent.trim() ? '<figcaption class="article-caption">' + caption.innerHTML + '</figcaption>' : '') + '</figure>';
-    }
-  }
-  const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
-  const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
-  const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
-  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + figure + '<p class="paywall-preview">' + escapeHtml(words.join(' ')) + '…</p>' + paywallMarkup() + footer;
-}
-
-function paywallCopy() {
-  return publication(state.issue.key) === 'MY'
-    ? { title: 'ಮಯೂರ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ತಿಂಗಳು ಕಥೆ, ಕವನ, ಪ್ರಬಂಧಗಳ ಪೂರ್ಣ ಸಂಚಿಕೆ ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಮಯೂರ ಮಾಸಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' }
-    : { title: 'ಸುಧಾ ಚಂದಾದಾರರಿಗೆ ಪ್ರತಿ ವಾರ ಕಥೆ, ಧಾರಾವಾಹಿ, ಲೇಖನಗಳ ಪೂರ್ಣ ಓದು ಈಗ ಪ್ರೀಮಿಯಂನಲ್ಲಿ!', lede: 'ಒಂದು ಚಂದಾದಾರಿಕೆ → ಸುಧಾ ವಾರಪತ್ರಿಕೆಯ ಪ್ರತಿ ಸಂಚಿಕೆಗೆ ಅನಿಯಮಿತ ಪ್ರವೇಶ.' };
-}
-
-function paywallActionsMarkup() {
-  return '<button class="paywall-cta" type="button"><span class="premium-icon" aria-hidden="true"></span><span>ಈಗ ಚಂದಾದಾರರಾಗಿ</span></button>'
-    + '<p class="paywall-login">ಈಗಾಗಲೇ ಸದಸ್ಯರೇ? <button class="paywall-login-button" type="button"><span>ಲಾಗಿನ್ ಮಾಡಿ</span><img src="' + appPath('Assets/icon-login-arrow.svg') + '" alt=""></button></p>';
-}
-
-function paywallMarkup() {
-  const benefit = (file, text) => '<li><img src="' + appPath('Assets/' + file) + '" alt=""><span>' + text + '</span></li>';
-  const copy = paywallCopy();
-  return '<section class="paywall" aria-label="Subscribe to continue reading">'
-    + '<img class="paywall-watermark" src="' + appPath('Assets/pv-nandi-watermark.svg') + '" alt="" aria-hidden="true">'
-    + '<h2 class="paywall-title">' + copy.title + '</h2>'
-    + '<p class="paywall-lede">' + copy.lede + '</p>'
-    + '<ul class="paywall-benefits">'
-    + benefit('icon-premium-stories.svg', 'ಎಲ್ಲಾ ಪ್ರೀಮಿಯಂ ಲೇಖನಗಳ ಪೂರ್ಣ ಓದು')
-    + benefit('icon-epaper.svg', 'ಹಿಂದಿನ ಎಲ್ಲಾ ಸಂಚಿಕೆಗಳ ಇ-ಆವೃತ್ತಿ')
-    + benefit('icon-ad-lite.svg', 'ಜಾಹೀರಾತು - ಲೈಟ್ ಅನುಭವ')
-    + '</ul>'
-    + paywallActionsMarkup()
-    + '</section>';
-}
-
-function lockedPageMarkup(index) {
-  const copy = paywallCopy();
-  const free = articlesForPage(index).filter((article) => !isPaidArticle(article));
-  const freeList = free.length
-    ? '<div class="locked-free"><span>ಉಚಿತವಾಗಿ ಓದಿ:</span>' + free.map((article) => '<button class="locked-free-article" type="button" data-article="' + article.id + '">' + escapeHtml(article.title || 'Article ' + article.id) + '</button>').join('') + '</div>'
-    : '';
-  return '<div class="locked-page"><section class="locked-page-card" aria-label="Page ' + (index + 1) + ' is for subscribers">'
-    + '<span class="locked-chip">' + icon('lock') + 'ಪ್ರೀಮಿಯಂ ಪುಟ</span>'
-    + '<h2 class="locked-title">' + copy.title + '</h2>'
-    + '<p class="locked-lede">' + copy.lede + '</p>'
-    + paywallActionsMarkup() + freeList
-    + '</section></div>';
-}
-
-function articleMarkup(html, article) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  doc.querySelectorAll('script, style, iframe, form, [style*="display:none"], .adPlaceholder').forEach((node) => node.remove());
-  doc.querySelectorAll('*').forEach((node) => {
-    if (node.getAttribute('style')?.includes('background')) node.classList.add('article-recipe');
-    node.removeAttribute('style');
-    [...node.attributes].forEach((attribute) => {
-      if (attribute.name.toLowerCase().startsWith('on')) node.removeAttribute(attribute.name);
-    });
-  });
-  doc.querySelectorAll('img').forEach((image) => {
-    const filename = image.getAttribute('src')?.split('/').pop();
-    if (filename) image.src = issuePath('media/' + filename);
-    image.removeAttribute('style');
-    image.loading = 'lazy';
-    image.classList.add('zoomable');
-  });
-  doc.querySelectorAll('a').forEach((link) => {
-    const href = link.getAttribute('href') || '';
-    if (href && !/^(https?:|mailto:|#)/i.test(href)) link.removeAttribute('href');
-  });
-  const root = doc.querySelector('.articleDetail') || doc.body;
-  const extractedTitle = doc.querySelector('h1 p, h1')?.textContent.trim();
-  root.querySelector('h1')?.remove();
-  root.querySelector('.byline')?.remove();
-  root.querySelectorAll('p').forEach((paragraph) => {
-    if (paragraph.querySelector('i')) paragraph.remove();
-  });
-  root.querySelectorAll('p').forEach((paragraph) => {
-    if (!paragraph.textContent.trim() && !paragraph.querySelector('img')) paragraph.remove();
-  });
-  const pictures = [...root.querySelectorAll('.pictures > .picture')];
-  root.querySelector('.pictures')?.remove();
-  const loosePictures = [...root.querySelectorAll('img')].map((image) => {
-    const picture = doc.createElement('div');
-    picture.append(image);
-    return picture;
-  });
-  root.querySelectorAll('p').forEach((paragraph) => {
-    if (!paragraph.textContent.trim() && !paragraph.querySelector('img')) paragraph.remove();
-  });
-  const makeFigure = (picture, className, side = '') => {
-    const figure = doc.createElement('figure');
-    figure.className = className;
-    if (side) figure.dataset.side = side;
-    const image = picture.querySelector('img');
-    const caption = picture.querySelector('.caption');
-    const credit = picture.querySelector('.credit');
-    if (image) {
-      image.tabIndex = 0;
-      image.setAttribute('role', 'button');
-      image.setAttribute('aria-label', t('openArticleImageAria'));
-      figure.append(image);
-    }
-    if (caption?.textContent.trim()) {
-      const figcaption = doc.createElement('figcaption');
-      figcaption.className = 'article-caption';
-      figcaption.innerHTML = caption.innerHTML;
-      figure.append(figcaption);
-    }
-    if (credit?.textContent.trim()) {
-      const small = doc.createElement('small');
-      small.className = 'article-credit';
-      small.innerHTML = credit.innerHTML;
-      figure.append(small);
-    }
-    return figure;
-  };
-  const hero = pictures.shift();
-  const galleryPictures = pictures.concat(loosePictures);
-  let gallery = null;
-  if (galleryPictures.length) {
-    gallery = doc.createElement('section');
-    gallery.className = 'article-gallery';
-    gallery.setAttribute('aria-labelledby', 'article-gallery-title');
-    const title = doc.createElement('h2');
-    title.id = 'article-gallery-title';
-    title.textContent = t('gallery');
-    const track = doc.createElement('div');
-    track.className = 'article-gallery-track';
-    track.setAttribute('role', 'list');
-    track.setAttribute('aria-label', t('galleryImagesAria'));
-    gallery.append(title, track);
-    galleryPictures.forEach((picture) => {
-      const figure = makeFigure(picture, 'article-figure article-gallery-item');
-      figure.setAttribute('role', 'listitem');
-      track.append(figure);
-    });
-  }
-  if (hero) {
-    const figure = makeFigure(hero, 'article-figure article-hero');
-    const first = root.firstElementChild;
-    if (first) root.insertBefore(figure, first);
-    else root.append(figure);
-    if (gallery) figure.after(gallery);
-  } else if (gallery) {
-    const first = root.firstElementChild;
-    if (first) root.insertBefore(gallery, first);
-    else root.append(gallery);
-  }
-  root.querySelectorAll('p').forEach((paragraph) => {
-    if (!/^\s*l\s+/i.test(paragraph.textContent)) return;
-    paragraph.classList.add('article-bullet');
-    const firstText = [...paragraph.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
-    if (firstText) firstText.nodeValue = firstText.nodeValue.replace(/^\s*l\s+/i, '');
-  });
-  const title = '<h1>' + escapeHtml(article.title || extractedTitle || 'Article ' + article.id) + '</h1>';
-  const meta = [article.byline, article.section].filter(Boolean).map(escapeHtml).join(' · ');
-  const previous = article.previous ? '<a href="' + articleHref(article.previous) + '" data-article-link="' + article.previous + '">' + icon('back') + 'Previous article</a>' : '<span></span>';
-  const next = article.next ? '<a href="' + articleHref(article.next) + '" data-article-link="' + article.next + '">Next article' + icon('forward') + '</a>' : '<span></span>';
-  const footer = '<footer class="article-footer">' + previous + '<a class="original-page" href="' + pageHref(article.pageIndex) + '" data-page-link="' + article.pageIndex + '">View original page · Page ' + (article.pageIndex + 1) + '</a>' + next + '</footer>';
-  return '<p class="access-status access-' + accessClass(article) + '">' + articleAccess(article) + '</p>' + title + (meta ? '<p class="byline">' + meta + '</p>' : '') + root.innerHTML + footer;
-}
-
-function prepareSpeech() {
-  state.speech.sentences = [];
-  state.speech.index = 0;
-  const excluded = 'h1, .byline, .access-status, .article-footer, .article-figure, .paywall';
-  const blocks = [...document.querySelectorAll('#article-content p, #article-content li, #article-content blockquote, #article-content h2, #article-content h3')]
-    .filter((block) => !block.closest(excluded) && block.textContent.trim());
-  blocks.forEach((block) => {
-    const text = block.textContent.replace(/\s+/g, ' ').trim();
-    const speechIndex = state.speech.sentences.length;
-    state.speech.sentences.push(text);
-    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) { return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
-    });
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach((node) => {
-      const span = document.createElement('span');
-      span.className = 'speech-sentence';
-      span.dataset.speechIndex = speechIndex;
-      span.textContent = node.nodeValue;
-      node.replaceWith(span);
-    });
-  });
-  loadVoices();
-}
-
-function loadVoices() {
-  if (!('speechSynthesis' in window)) { state.speech.voices = []; renderListenPlayer(); return; }
-  state.speech.voices = speechSynthesis.getVoices().filter((voice) => /^kn[-_]/i.test(voice.lang));
-  renderListenPlayer();
-}
-
-function clearSpeechHighlight() { document.querySelectorAll('.speech-current').forEach((node) => node.classList.remove('speech-current')); }
-
-function speakCurrentSentence({ restart = false } = {}) {
-  if (!state.speech.sentences.length || !state.speech.voices.length) return;
-  if (restart) { state.speech.run += 1; speechSynthesis.cancel(); }
-  const run = state.speech.run;
-  clearSpeechHighlight();
-  const sentences = [...document.querySelectorAll('[data-speech-index="' + state.speech.index + '"]')];
-  sentences.forEach((sentence) => sentence.classList.add('speech-current'));
-  sentences[0]?.scrollIntoView({ behavior: prefersReducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
-  const utterance = new SpeechSynthesisUtterance(state.speech.sentences[state.speech.index]);
-  utterance.lang = 'kn-IN';
-  utterance.rate = Number($('#listen-rate').value || 1);
-  utterance.voice = state.speech.voices[0];
-  utterance.onend = () => {
-    if (run !== state.speech.run || state.speech.status !== 'playing') return;
-    state.speech.index += 1;
-    if (state.speech.index >= state.speech.sentences.length) { state.speech.status = 'idle'; state.speech.index = 0; clearSpeechHighlight(); }
-    else speakCurrentSentence();
-    renderArticleControls();
-    renderListenPlayer();
-  };
-  utterance.onerror = (event) => {
-    if (run !== state.speech.run || event.error === 'canceled' || event.error === 'interrupted') return;
-    state.speech.status = 'idle';
-    renderArticleControls();
-    renderListenPlayer();
-  };
-  state.speech.utterance = utterance;
-  speechSynthesis.speak(utterance);
-  renderArticleControls();
-  renderListenPlayer();
-}
-
-function toggleSpeech() {
-  if (!('speechSynthesis' in window) || !state.speech.voices.length) return;
-  if (state.speech.status === 'playing') {
-    state.speech.run += 1;
-    speechSynthesis.cancel();
-    state.speech.status = 'paused';
-  }
-  else if (state.speech.status === 'paused') { state.speech.status = 'playing'; speakCurrentSentence({ restart: true }); return; }
-  else { state.speech.status = 'playing'; speakCurrentSentence({ restart: true }); return; }
-  renderArticleControls();
-  renderListenPlayer();
-}
-
-function stopSpeech() {
-  state.speech.run += 1;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-  state.speech.status = 'idle';
-  state.speech.index = 0;
-  state.speech.utterance = null;
-  clearSpeechHighlight();
-  if ($('#article-controls')) renderArticleControls();
-  if ($('#listen-player')) renderListenPlayer();
-}
-
-function renderListenPlayer() {
-  if (!$('#listen-player')) return;
-  $('#listen-player').hidden = state.view !== 'text' || state.speech.status === 'idle';
-  const supported = 'speechSynthesis' in window && state.speech.voices.length > 0;
-  $('#listen-play').disabled = !supported;
-  $('#listen-play').innerHTML = icon(state.speech.status === 'playing' ? 'pause' : 'play');
-  $('#listen-play').setAttribute('aria-label', state.speech.status === 'playing' ? t('pauseArticleAria') : t('playArticleAria'));
-  $('#listen-status').textContent = supported ? (state.speech.status === 'paused' ? t('paused') : t('readingAloud')) : t('noVoice');
-  $('#listen-progress').value = state.speech.sentences.length ? state.speech.index / state.speech.sentences.length : 0;
-}
-
-function clampImageZoom(zoom, image) {
-  const limitX = Math.max(0, (image.clientWidth * (zoom.scale - 1)) / 2);
-  const limitY = Math.max(0, (image.clientHeight * (zoom.scale - 1)) / 2);
-  zoom.x = Math.max(-limitX, Math.min(limitX, zoom.x));
-  zoom.y = Math.max(-limitY, Math.min(limitY, zoom.y));
-}
-
-function bindImageZoom() {
-  document.querySelectorAll('#article-content img.zoomable').forEach((image) => {
-    const zoom = { scale: 1, x: 0, y: 0, pointers: new Map(), pinch: null, moved: false, startX: 0, startY: 0, movedUntil: 0 };
-    const apply = () => { image.style.transform = 'translate3d(' + zoom.x + 'px, ' + zoom.y + 'px, 0) scale(' + zoom.scale + ')'; image.classList.toggle('is-image-zoomed', zoom.scale > 1); image.style.touchAction = zoom.scale > 1 ? 'none' : 'pan-y'; };
-    apply();
-    image.addEventListener('pointerdown', (event) => {
-      zoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      zoom.moved = false;
-      zoom.startX = event.clientX;
-      zoom.startY = event.clientY;
-      if (zoom.pointers.size === 1 && zoom.scale <= 1) {
-        try { if (image.hasPointerCapture(event.pointerId)) image.releasePointerCapture(event.pointerId); } catch { /* no capture held */ }
-        return;
-      }
-      if (zoom.pointers.size === 2) {
-        const points = [...zoom.pointers.values()];
-        zoom.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) || 1, scale: zoom.scale };
-      }
-    });
-    image.addEventListener('pointermove', (event) => {
-      if (!zoom.pointers.has(event.pointerId)) return;
-      zoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      if (Math.hypot(event.clientX - zoom.startX, event.clientY - zoom.startY) > 8) zoom.moved = true;
-      if (zoom.pointers.size === 2 && zoom.pinch) {
-        event.preventDefault();
-        const points = [...zoom.pointers.values()];
-        zoom.scale = Math.max(1, Math.min(4, zoom.pinch.scale * Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) / zoom.pinch.distance));
-        clampImageZoom(zoom, image);
-        apply();
-      } else if (zoom.pointers.size === 1 && zoom.scale > 1) {
-        event.preventDefault();
-        zoom.x += event.movementX || 0;
-        zoom.y += event.movementY || 0;
-        clampImageZoom(zoom, image);
-        apply();
-      }
-    });
-    const end = (event) => {
-      zoom.pointers.delete(event.pointerId);
-      if (zoom.pointers.size < 2) zoom.pinch = null;
-      try { if (image.hasPointerCapture(event.pointerId)) image.releasePointerCapture(event.pointerId); } catch { /* no capture held */ }
-      if (zoom.moved) zoom.movedUntil = performance.now() + 300;
-      if (!zoom.pointers.size) { zoom.moved = false; }
-    };
-    image.addEventListener('pointerup', end);
-    image.addEventListener('pointercancel', end);
-    image.addEventListener('pointerleave', () => { zoom.pointers.clear(); zoom.pinch = null; });
-    image.addEventListener('blur', () => { zoom.pointers.clear(); zoom.pinch = null; });
-    image._imageZoom = zoom;
-  });
-}
-
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value || '';
-  return div.innerHTML;
-}
-
-function renderArticleFooterCards() {
-  const article = currentArticle();
-  if (!article) return;
-  document.querySelectorAll('#article-content .article-footer').forEach((footer) => {
-    footer.querySelector('.original-page')?.remove();
-    footer.querySelectorAll(':scope > span').forEach((placeholder) => placeholder.remove());
-    footer.hidden = !footer.querySelector('a[data-article-link]');
-  });
-  document.querySelectorAll('#article-content .article-footer a[data-article-link]').forEach((link) => {
-    const id = link.dataset.articleLink;
-    const target = state.issue.articles[String(id)];
-    const previous = String(id) === String(article.previous);
-    link.className = 'article-nav article-nav-' + (previous ? 'previous' : 'next');
-    link.innerHTML = '<span class="article-nav-direction">' + (previous ? icon('back') + t('previousArticle') : t('nextArticle') + icon('forward')) + '</span><strong>' + escapeHtml(target?.title || t('article', '')) + '</strong>' + (target?.byline ? '<small>' + escapeHtml(target.byline) + '</small>' : '');
-  });
-  document.querySelectorAll('#article-content .article-footer').forEach((footer) => {
-    const next = footer.querySelector('.article-nav-next');
-    if (next) footer.prepend(next);
-  });
-}
-
-function renderLightbox() {
-  const item = state.lightbox.images[state.lightbox.index];
-  if (!item) return;
-  $('#lightbox-image').src = item.src;
-  $('#lightbox-image').alt = item.alt;
-  $('#lightbox-caption').textContent = item.caption;
-  $('#lightbox-counter').textContent = (state.lightbox.index + 1) + ' / ' + state.lightbox.images.length;
-  $('#lightbox-prev').disabled = state.lightbox.images.length < 2;
-  $('#lightbox-next').disabled = state.lightbox.images.length < 2;
-  resetLightboxZoom();
-}
-
-function renderLightboxZoom() {
-  $('#lightbox-image').style.transform = 'translate3d(' + lightboxZoom.x + 'px, ' + lightboxZoom.y + 'px, 0) scale(' + lightboxZoom.scale + ')';
-  $('#lightbox-image').classList.toggle('is-zoomed', lightboxZoom.scale > 1);
-}
-
-function resetLightboxZoom() {
-  lightboxZoom.scale = 1;
-  lightboxZoom.x = 0;
-  lightboxZoom.y = 0;
-  lightboxZoom.pointers.clear();
-  lightboxZoom.pinch = null;
-  renderLightboxZoom();
-}
-
-function setLightboxInert(inert) {
-  document.querySelectorAll('#app-header, main, #article-controls, #listen-player').forEach((element) => { element.inert = inert; });
-}
-
-function openLightbox(index) {
-  const images = [...document.querySelectorAll('#article-content .article-figure img')].map((image) => ({
-    src: image.currentSrc || image.src,
-    alt: image.alt || '',
-    caption: image.closest('figure')?.querySelector('.article-caption')?.textContent.trim() || ''
-  }));
-  if (!images.length) return;
-  state.lightbox = { open: true, index: Math.max(0, Math.min(index, images.length - 1)), images, returnFocus: document.activeElement };
-  renderLightbox();
-  $('#image-lightbox').hidden = false;
-  document.body.classList.add('lightbox-open');
-  setLightboxInert(true);
-  $('#lightbox-close').focus();
-}
-
-function closeLightbox({ restore = true } = {}) {
-  if (!state.lightbox.open) return;
-  const trigger = state.lightbox.returnFocus;
-  state.lightbox = { open: false, index: 0, images: [], returnFocus: null };
-  $('#image-lightbox').hidden = true;
-  document.body.classList.remove('lightbox-open');
-  setLightboxInert(false);
-  if (restore && trigger && document.contains(trigger)) trigger.focus();
-}
-
-function moveLightbox(delta) {
-  if (!state.lightbox.open || state.lightbox.images.length < 2) return;
-  state.lightbox.index = (state.lightbox.index + delta + state.lightbox.images.length) % state.lightbox.images.length;
-  renderLightbox();
-}
-
-function renderPanel() {
-  const host = $('#panel-host');
-  host.hidden = !state.panel;
-  if (state.panel) host.dataset.panel = state.panel;
-  else delete host.dataset.panel;
-  const inert = Boolean(state.panel);
-  document.querySelectorAll('#app-header, main, #page-controls, #article-controls, #listen-player').forEach((element) => { element.inert = inert; });
-  if (!state.panel) return;
-  $('#panel-title').textContent = T[state.lang].panelTitles[state.panel] || t('panelTitles').default;
-  const body = $('#panel-body');
-  if (state.panel === 'menu') body.innerHTML = menuMarkup();
-  if (state.panel === 'publication') body.innerHTML = publicationMarkup();
-  if (state.panel === 'contents') body.innerHTML = contentsMarkup();
-  if (state.panel === 'pages') body.innerHTML = pagesMarkup();
-  if (state.panel === 'stories') body.innerHTML = storiesMarkup();
-  if (state.panel === 'saved') body.innerHTML = savedMarkup();
-  if (state.panel === 'search') body.innerHTML = searchMarkup();
-  if (state.panel === 'editions') body.innerHTML = editionsMarkup();
-  if (state.panel === 'profile') body.innerHTML = profileMarkup();
-  if (state.panel === 'faqs') body.innerHTML = '<div class="panel-section"><h3>' + t('faqs') + '</h3><p class="panel-row">' + t('faqsBody') + '</p></div>';
-  renderArticleRows();
-  if (state.panel === 'pages') requestAnimationFrame(() => body.querySelector('.is-current')?.scrollIntoView({ block: 'nearest' }));
-}
-
-function renderArticleRows() {
-  document.querySelectorAll('#panel-body .panel-row[data-article-link]').forEach((row) => {
-    const article = state.issue.articles[row.dataset.articleLink];
-    const copy = row.querySelector(':scope > span');
-    if (!article || !copy) return;
-    const firstDetail = [...copy.children].find((element) => element.tagName === 'SMALL');
-    if (article.byline) firstDetail && (firstDetail.textContent = article.byline);
-    else firstDetail?.remove();
-    const status = copy.querySelector('.status-pill');
-    status?.parentElement.remove();
-    const meta = document.createElement('span');
-    meta.className = 'panel-row-meta';
-    const page = document.createElement('small');
-    page.textContent = t('page', article.pageIndex + 1);
-    meta.append(page);
-    if (status) meta.append(status);
-    copy.className = 'panel-row-copy';
-    row.classList.add('article-list-row');
-    row.append(meta);
-  });
-}
-
-function openPanel(panel, trigger = document.activeElement) {
-  state.panel = panel;
-  state.panelReturnFocus = trigger;
-  setControlsVisible(true);
-  renderPanel();
-  requestAnimationFrame(() => $('#panel-body')?.querySelector('button, a[href], input, select')?.focus());
-}
-
-function closePanel() {
-  const returnFocus = state.panelReturnFocus;
-  state.panel = null;
-  state.panelReturnFocus = null;
-  renderPanel();
-  if (returnFocus && document.contains(returnFocus)) returnFocus.focus();
-}
-
-function articleRow(article, excerpt = '') {
-  const saved = isSaved(article.id) ? ' · ★' : '';
-  const premium = accessClass(article) === 'premium';
-  const tagGlyph = premium ? icon('lock') : '<span aria-hidden="true">○</span>';
-  return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || t('article', article.id)) + '</strong><small>' + escapeHtml(article.byline || t('bylineUnavailable')) + ' · ' + t('page', article.pageIndex + 1) + saved + '</small>' + (excerpt ? '<small class="row-meta">' + escapeHtml(excerpt) + '</small>' : '') + '<small><span class="status-pill access-' + accessClass(article) + '">' + tagGlyph + accessLabel(article) + '</span></small></span></button>';
-}
-
-function contentsMarkup() {
-  const articles = articleIds().map((id) => state.issue.articles[id]).sort(articleOrder);
-  return articles.length ? articles.map((article) => articleRow(article)).join('') : pageListMarkup();
-}
-
-function pageListMarkup() {
-  return state.issue.pages.map((page, index) => '<button class="panel-row" type="button" data-page-link="' + index + '"><span><strong>' + t('page', index + 1) + '</strong><small>' + accessComposition(page) + '</small></span></button>').join('');
-}
-
-function scrubLabel(index) {
-  return t('page', '') + '<output id="scrub-value">' + (index + 1) + '</output> / ' + state.issue.pages.length + (isPageLocked(index) ? ' <span class="page-scrub-lock">' + icon('lock') + t('premium') + '</span>' : '');
-}
-
-// Slider only picks a page: sync the label and grid, and wait for Go (or Enter) to navigate.
-function previewScrubPage(value) {
-  const index = Number(value) - 1;
-  $('.page-scrub-label').innerHTML = scrubLabel(index);
-  document.querySelectorAll('.page-thumb.is-target').forEach((thumb) => thumb.classList.remove('is-target'));
-  const thumb = document.querySelector('.page-thumb[data-page-link="' + index + '"]');
-  if (thumb) { thumb.classList.add('is-target'); thumb.scrollIntoView({ block: 'nearest' }); }
-}
-
-function goToScrubPage() {
-  const input = $('#page-scrub');
-  if (!input) return;
-  closePanel();
-  setPage(Number(input.value) - 1, { push: true });
-}
-
-function pagesMarkup() {
-  const scrub = state.issue.pages.length > 80
-    ? '<div class="page-scrub"><label for="page-scrub"><span class="page-scrub-label">' + scrubLabel(state.page) + '</span><input id="page-scrub" type="range" min="1" max="' + state.issue.pages.length + '" value="' + (state.page + 1) + '" aria-label="' + t('choosePageAria') + '"></label><button class="page-scrub-go" id="page-scrub-go" type="button">' + t('go') + '</button></div>'
-    : '';
-  const grid = state.issue.pages.map((page, index) => {
-    const locked = isPageLocked(index);
-    return '<button class="page-thumb' + (index === state.page ? ' is-current' : '') + (locked ? ' is-locked' : '') + '" type="button" data-page-link="' + index + '" aria-label="' + t('goToPageAria', index + 1) + (locked ? t('premiumLockedSuffix') : '') + '"><img loading="lazy" src="' + imagePath(page, true) + '" alt=""><span class="page-number-label">' + (index + 1) + '</span>'
-      + (locked ? '<span class="page-lock-badge" aria-hidden="true">' + icon('lock') + '</span>' : '')
-      + '<strong>' + t('page', index + 1) + '</strong><small>' + (locked ? '<span class="page-locked-label">' + icon('lock') + t('premium') + '</span>' : accessComposition(page)) + '</small></button>';
-  }).join('');
-  return scrub + '<div class="page-grid">' + grid + '</div>';
-}
-
-function storiesMarkup() {
-  return articlesForPage(state.page).map((article) => articleRow(article)).join('') || '<p class="panel-row">' + t('noStoriesOnPage') + '</p>';
-}
-
-function savedMarkup() {
-  const entries = Object.entries(state.saved);
-  if (!entries.length) return '<p class="panel-row">' + t('noSavedYet') + '</p>';
-  return entries.map(([key, saved]) => {
-    // ponytail: edition-scoped composite keys; legacy global IDs stay unavailable, never reattached
-    const separator = key.indexOf(':');
-    const entryIssue = separator > 0 ? key.slice(0, separator) : null;
-    const id = separator > 0 ? key.slice(separator + 1) : key;
-    const article = entryIssue === state.issue.key ? state.issue.articles[id] : null;
-    if (!article) return '<div class="panel-row"><span><strong>' + escapeHtml(saved.title || t('article', id)) + '</strong><small>' + escapeHtml(saved.publication || t('savedArticleFallback')) + ' · ' + t('unavailableInEdition') + '</small></span></div>';
-    return '<button class="panel-row" type="button" data-article-link="' + article.id + '"><span><strong>' + escapeHtml(article.title || saved.title || t('article', id)) + '</strong><small>' + escapeHtml(saved.publication || publicationLabel(publication(state.issue.key))) + ' · ' + escapeHtml(saved.edition || issueDate(state.issue.key)) + ' · ' + t('page', saved.page || article.pageIndex + 1) + '</small><small><span class="status-pill access-' + accessClass(article) + '">' + accessLabel(article) + '</span></small></span></button>';
-  }).join('');
-}
-
-function menuMarkup() {
-  const dark = state.theme === 'dark';
-  const enUi = state.lang === 'en';
-  return '<div class="menu-top"><a class="panel-row" href="https://www.prajavani.net/" data-home-link><span class="menu-row-icon">' + icon('home') + '</span><span><strong>ಪ್ರಜಾವಾಣಿ ಮುಖ್ಯಪುಟಕ್ಕೆ</strong><small>' + t('prajavaniHome') + '</small></span></a><button class="panel-row" type="button" data-action="search"><span class="menu-row-icon">' + icon('search') + '</span><span><strong>' + t('search') + '</strong><small>' + t('searchThisEdition') + '</small></span></button></div><div class="menu-divider"></div><button class="panel-row" type="button" data-action="profile"><span class="menu-row-icon">' + icon('profile') + '</span><span><strong>' + t('signIn') + '</strong><small>' + t('myProfile') + '</small></span></button><button class="panel-row" type="button" data-action="saved"><span class="menu-row-icon">' + icon('saved') + '</span><span><strong>' + t('savedArticles') + '</strong><small>' + t('bookmarkedArticles') + '</small></span></button><button class="panel-row" type="button" data-action="faqs"><span class="menu-row-icon">' + icon('faq') + '</span><span><strong>' + t('faqs') + '</strong><small>' + t('supportInfo') + '</small></span></button><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + dark + '" data-action="theme"><span class="menu-row-icon">' + icon(dark ? 'moon' : 'sun') + '</span><span class="theme-toggle-copy"><strong>' + t('darkMode') + '</strong><small>' + t('useDarkColors') + '</small></span><span class="theme-switch" aria-hidden="true"></span></button>'
-    + '<div class="menu-divider"></div><label class="panel-row account-state-control" for="account-state-menu"><span class="menu-row-icon">' + icon('settings') + '</span><span><strong>' + t('readerMode') + '</strong><small>' + t('prototypeSetting') + '</small></span><select id="account-state-menu" name="account-state-menu"><option value="free"' + (state.account === 'free' ? ' selected' : '') + '>' + t('freeReader') + '</option><option value="subscriber"' + (state.account === 'subscriber' ? ' selected' : '') + '>' + t('subscriber') + '</option></select></label>'
-    + '<div class="menu-divider"></div><button class="panel-row theme-toggle" type="button" role="switch" aria-checked="' + enUi + '" data-action="lang"><span class="menu-row-icon">' + icon('globe') + '</span><span class="theme-toggle-copy"><strong>' + t('language') + '</strong><small>' + t('languageCurrent') + '</small></span><span class="theme-switch" aria-hidden="true"></span></button>';
-}
-
-function searchMarkup() {
-  return '<form class="search-form" id="search-form"><input id="search-input" type="search" placeholder="' + t('searchThisIssue') + '" aria-label="' + t('searchThisIssue') + '"><button type="submit">' + t('search') + '</button></form><div id="search-results"></div>';
-}
-
-function searchExcerpt(article, query) {
-  // ponytail: never leak paid body text to free readers via search snippets
-  if (needsPreview(article)) {
-    const haystack = (article.title || '');
-    const index = haystack.toLowerCase().indexOf(query.toLowerCase());
-    if (index >= 0) return '…' + haystack.slice(Math.max(0, index - 45), index + query.length + 75) + '…';
-    return t('premiumSearchNote');
-  }
-  const text = article.plainText || article.title || '';
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  return index < 0 ? text.slice(0, 120) : '…' + text.slice(Math.max(0, index - 45), index + query.length + 75) + '…';
-}
-
-function searchableText(article) {
-  if (!needsPreview(article)) return (article.title + ' ' + article.byline + ' ' + (article.plainText || ''));
-  const previewWords = String(article.plainText || '').trim().split(/\s+/).filter(Boolean).slice(0, 100).join(' ');
-  return (article.title + ' ' + article.byline + ' ' + previewWords);
-}
-
-function runSearch(query) {
-  if (!query) { $('#search-results').innerHTML = ''; return; }
-  const result = articleIds().map((id) => state.issue.articles[id]).filter((article) => searchableText(article).toLowerCase().includes(query.toLowerCase()));
-  $('#search-results').innerHTML = result.length ? result.map((article) => articleRow(article, searchExcerpt(article, query))).join('') : '<p class="panel-row">' + t('noMatches') + '</p>';
-}
-
-function editionsMarkup() {
-  const issues = allIssues();
-  const cards = issues.map((issue) => {
-    const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0) + 1;
-    const current = issue.key === state.issue.key;
-    const currentInfo = current && state.view !== 'home' ? t('currentEdition') : resume > 1 ? t('continueFromPage', resume) : t('open');
-    const pageOnly = current && !articleIds().length ? '<small>' + t('pageOnlyEdition') + '</small>' : '';
-    return '<button class="edition-card' + (current ? ' is-current' : '') + '" type="button" data-edition-link="' + issue.key + '"><img src="' + appPath('data/' + issue.key + '/' + escapeHtml(issue.cover)) + '" alt=""><strong>' + escapeHtml(issue.label) + '</strong><span>' + currentInfo + '</span>' + pageOnly + '</button>';
-  }).join('');
-  return '<p class="panel-note">' + t('chooseAnEdition') + '</p><div class="edition-grid">' + cards + '</div>';
-}
-
-function profileMarkup() {
-  return '<div class="panel-section"><h3>' + t('myProfile') + '</h3><p class="panel-row">' + t('signInToManage') + '</p></div>';
-}
-
-function publicationMarkup() {
-  const selected = publication(state.issue.key);
-  return '<div class="publication-options"><button class="edition-tab' + (selected === 'SU' ? ' is-active' : '') + '" type="button" aria-label="Sudha" aria-pressed="' + (selected === 'SU') + '" data-publication-switch="SU"><img src="' + appPath('Assets/Sudha_Mast_GOLD-New Nandi.svg') + '" alt="Sudha"></button><button class="edition-tab' + (selected === 'MY' ? ' is-active' : '') + '" type="button" aria-label="Mayura" aria-pressed="' + (selected === 'MY') + '" data-publication-switch="MY"><img src="' + appPath('Assets/MAYURA-MAST.svg') + '" alt="Mayura"></button></div>';
-}
-
-function renderArticleMetaFromHtml(id, html) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const title = doc.querySelector('h1 p, h1')?.textContent.trim() || 'Article ' + id;
-  const byline = state.issue.bylines[id]?.byline || '';
-  const section = state.issue.bylines[id]?.section || '';
-  const plainText = (doc.querySelector('.bodytext') || doc.querySelector('.articleDetail'))?.textContent.replace(/\s+/g, ' ').trim() || '';
-  return { title, byline, section, plainText };
-}
-
-async function loadArticleMeta(ids = articleIds()) {
-  await Promise.all(ids.map(async (id) => {
-    if (state.issue.articles[id]?.title) return;
-    try {
-      const response = await fetch(issuePath('articles/' + id + '.html'));
-      if (response.ok) Object.assign(state.issue.articles[id], renderArticleMetaFromHtml(id, await response.text()));
-    } catch { /* an incomplete article should not block the edition */ }
-  }));
-}
-
-function normalizeIssue(key, coords, bylines, tocMappings = []) {
-  const articles = {};
-  const pages = (coords.pages || []).map((page, index) => ({ ...page, index, articles: page.articles || [] }));
-  pages.forEach((page) => page.articles.forEach((hotspot) => {
-    const id = String(hotspot.id);
-    const existing = articles[id] || { id, pageIndex: page.index, ...bylines[id], ...hotspot };
-    existing.pageIndex = Math.min(existing.pageIndex, page.index);
-    articles[id] = existing;
-  }));
-  const ordered = Object.values(articles).sort(articleOrder);
-  ordered.forEach((article, index) => { article.previous = ordered[index - 1]?.id; article.next = ordered[index + 1]?.id; });
-  return { key, pages, articles, bylines, tocMappings, lastOpened: {} };
-}
-
-function validTocMappings(data, key, pageCount) {
-  if (data?.issue !== key || !Array.isArray(data.mappings)) return [];
-  return data.mappings.filter((mapping) => {
-    const { tocPage, targetPage, x, y, width, height } = mapping || {};
-    return Number.isInteger(tocPage) && tocPage >= 1 && tocPage <= pageCount
-      && Number.isInteger(targetPage) && targetPage >= 1 && targetPage <= pageCount
-      && [x, y, width, height].every((value) => Number.isFinite(value) && value >= 0 && value <= 100)
-      && width > 0 && height > 0 && x + width <= 100 && y + height <= 100;
-  });
-}
-
-async function loadCatalog() {
-  if (state.catalog) return;
-  const response = await fetch(appPath('generated/catalog.json'));
-  if (!response.ok) throw new Error(t('catalogLoadError'));
-  state.catalog = await response.json();
-}
-
-async function loadIssue(key, { home = false } = {}) {
-  stopSpeech();
-  await loadCatalog();
-  key ||= state.catalog.publications[0].issues[0].key;
-  state.issueKey = key;
-  const responses = await Promise.all([fetch(appPath('data/' + key + '/coords.json')), fetch(appPath('data/' + key + '/bylines.json')).catch(() => null), key === 'SU-2026-09-24' ? fetch(appPath('data/' + key + '/toc-mappings-SU-2026-09-24.json')).catch(() => null) : null]);
-  if (!responses[0].ok) throw new Error(t('issueLoadError', key));
-  const coords = await responses[0].json();
-  let tocMappings = [];
-  try {
-    if (responses[2]?.ok) tocMappings = validTocMappings(await responses[2].json(), key, coords.pages?.length || 0);
-  } catch { /* mappings are optional and must not block the edition */ }
-  state.issue = normalizeIssue(key, coords, responses[1]?.ok ? await responses[1].json() : {}, tocMappings);
-  const params = new URLSearchParams(location.search);
-  const requested = home ? 0 : params.has('p') ? readPageNumber(params.get('p')) - 1 : Number(localStorage.getItem('reader-resume:' + key) || 0);
-  state.page = Math.max(0, Math.min(requested, state.issue.pages.length - 1));
-  state.articleId = !home && params.get('article') && state.issue.articles[params.get('article')] ? params.get('article') : null;
-  state.view = home ? 'home' : params.get('view') === 'text' && state.articleId ? 'text' : 'page';
-  if (useSpread()) state.page = spreadStart(state.page);
-  renderHeader();
-  renderViewState();
-  if (home) renderHome();
-  renderPageCanvas();
-  renderPageControls();
-  if (state.view === 'text') await openArticle(state.articleId, { push: false });
-  renderArticleControls();
-  renderListenPlayer();
-  loadArticleMeta().then(() => {
-    state.issue.metaLoaded = true;
-    if (state.view === 'home') renderHome();
-    renderPageCanvas();
-    renderHeader();
-    if (state.panel) renderPanel();
-  });
-}
-
-function toggleSaved() {
-  if (!state.articleId) return;
-  const key = savedKey(state.articleId);
-  if (state.saved[key]) delete state.saved[key];
-  else state.saved[key] = { title: currentArticle()?.title, publication: publicationLabel(publication(state.issue.key)), edition: issueDate(state.issue.key), page: state.page + 1, issue: state.issue.key, article: String(state.articleId) };
-  localStorage.setItem('reader-saved', JSON.stringify(state.saved));
-  renderHeader();
-}
-
-async function shareCurrent() {
-  const article = currentArticle();
-  const url = new URL(articleHref(article.id), location.href).href;
-  try {
-    if (navigator.share) await navigator.share({ title: article.title, url });
-    else if (navigator.clipboard) await navigator.clipboard.writeText(url);
-    showPanelNote(t('shareSuccess'));
-  } catch (error) {
-    if (error.name !== 'AbortError') showPanelNote(t('shareFail'));
-  }
-}
-
-function showPanelNote(message) {
-  if ($('#panel-body')) $('#panel-body').insertAdjacentHTML('afterbegin', '<p class="panel-note" role="status">' + escapeHtml(message) + '</p>');
-}
-
-function latestIssueKey() {
-  const code = publication(state.issue.key);
-  return newestIssueKey(code) || state.issue.key;
-}
-
-// Header logo: open the cover of the newest edition of the current publication.
-function goHome() {
-  const key = latestIssueKey();
-  stopSpeech();
-  savePosition();
-  closePanel();
-  history.pushState({}, '', readerUrl(key, 1));
-  loadIssue(key).catch(console.error);
-}
-
-function newestIssueKey(code) { return allIssues().find((item) => item.publication === code)?.key; }
-
-// Non-subscribers land on home unless the URL points into an edition.
-function shouldShowHome() {
-  const params = new URLSearchParams(location.search);
-  if (params.has('home')) return true;
-  if (params.has('issue') || issueFromPath()) return false;
-  return !isSubscriber();
-}
-
-function route() {
-  if (!shouldShowHome()) return loadIssue(currentIssueFromUrl() || state.issueKey);
-  const requested = new URLSearchParams(location.search).get('home');
-  const last = localStorage.getItem('reader-last-issue');
-  const code = requested === 'MY' || requested === 'SU' ? requested : last ? publication(last) : 'SU';
-  return showHome(code);
-}
-
-async function showHome(code, { push = false } = {}) {
-  stopSpeech();
-  savePosition();
-  closePanel();
-  await loadCatalog();
-  const url = appBase.pathname + '?home=' + code;
-  if (location.pathname + location.search !== url) history[push ? 'pushState' : 'replaceState']({}, '', url);
-  await loadIssue(newestIssueKey(code), { home: true });
-  window.scrollTo(0, 0);
-}
-
-function openFromHome(key, page) {
-  history.pushState({}, '', readerUrl(key, page));
-  loadIssue(key).catch(console.error);
-}
-
-function renderHome() {
-  const issue = state.issue;
-  const code = publication(issue.key);
-  const summary = issueSummary(issue.key) || {};
-  const coverOf = (item) => appPath('data/' + item.key + '/' + escapeHtml(item.cover || 'cover.jpg'));
-  const resume = Number(localStorage.getItem('reader-resume:' + issue.key) || 0);
-  const older = allIssues().filter((item) => item.publication === code && item.key !== issue.key).map((item) => {
-    const page = Number(localStorage.getItem('reader-resume:' + item.key) || 0);
-    const date = code === 'MY' ? item.label : shortIssueDate(item.key);
-    return '<button class="home-edition" type="button" data-home-edition="' + item.key + '" aria-label="' + escapeHtml(publicationLabel(code) + ' ' + item.label) + '">'
-      + '<span class="home-edition-cover"><img loading="lazy" src="' + coverOf(item) + '" alt="">' + (page > 0 ? '<span class="home-edition-tag">p.' + (page + 1) + '</span>' : '') + '</span>'
-      + '<span class="home-edition-date">' + escapeHtml(date) + '</span></button>';
-  }).join('');
-  $('#home-view').innerHTML = '<section class="home-hero" aria-label="Current edition">'
-    + '<button class="home-hero-cover" type="button" data-home-read="1" aria-label="Read ' + escapeHtml(publicationLabel(code) + ' ' + (summary.label || '')) + '"><img src="' + coverOf(summary.key ? summary : { key: issue.key }) + '" alt=""></button>'
-    + '<div class="home-hero-copy">'
-    + '<p class="home-eyebrow">' + (code === 'MY' ? 'ಈ ತಿಂಗಳ ಸಂಚಿಕೆ' : 'ಈ ವಾರದ ಸಂಚಿಕೆ') + '</p>'
-    + '<h1 class="home-title">' + publicationLabel(code) + '<span>' + escapeHtml(summary.label || '') + '</span></h1>'
-    + '<button class="home-read" type="button" data-home-read="1">ಈಗ ಓದಿ ' + icon('forward') + '</button>'
-    + (resume > 0 ? '<button class="home-continue" type="button" data-home-read="' + (resume + 1) + '">ಪುಟ ' + (resume + 1) + ' ರಿಂದ ಮುಂದುವರಿಸಿ</button>' : '')
-    + '</div></section>'
-    + (older ? '<section class="home-shelf" aria-label="Older editions"><div class="home-shelf-head"><h2>ಹಿಂದಿನ ಸಂಚಿಕೆಗಳು</h2><button type="button" data-home-all>ಎಲ್ಲಾ ›</button></div><div class="home-carousel">' + older + '</div></section>' : '')
-    + paywallMarkup();
-}
-
-function switchEdition(key) {
-  savePosition();
-  closePanel();
-  const resume = Number(localStorage.getItem('reader-resume:' + key) || 0) + 1;
-  history.pushState({}, '', readerUrl(key, resume));
-  loadIssue(key).catch(console.error);
-}
-
-function returnToPage() {
-  stopSpeech();
-  state.view = 'page';
-  state.articleId = null;
-  updateUrl();
-  renderViewState();
-  renderPageCanvas();
-  renderPageControls();
-  renderHeader();
-}
-
-function setupPageGestures() {
-  const clearSwipePreview = () => {
-    if (!state.gesture.swipe) return;
-    pageSpread.classList.remove('page-dragging', 'page-settling');
-    pageSpread.querySelector('.page-swipe-preview')?.remove();
-    const current = pageSpread.querySelector('.page-slot');
-    if (current) current.style.transform = '';
-    state.gesture.swipe = null;
-  };
-  const settleSwipe = (commit) => {
-    const swipe = state.gesture.swipe;
-    if (!swipe) return false;
-    if (commit) { clearSwipePreview(); setPage(swipe.page); return true; }
-    pageSpread.classList.remove('page-dragging');
-    pageSpread.classList.add('page-settling');
-    const current = pageSpread.querySelector('.page-slot');
-    const preview = pageSpread.querySelector('.page-swipe-preview');
-    if (current) current.style.transform = 'translate3d(0, 0, 0)';
-    if (preview) preview.style.transform = 'translate3d(' + (swipe.direction * pageCanvas.clientWidth) + 'px, 0, 0)';
-    const finish = () => { pageSpread.removeEventListener('transitionend', finish); clearSwipePreview(); };
-    if (prefersReducedMotion.matches) finish();
-    else pageSpread.addEventListener('transitionend', finish, { once: true });
-    return false;
-  };
-  const beginSwipe = (direction) => {
-    if (useSpread() || state.zoom.scale > 1.01 || state.gesture.swipe) return;
-    const page = direction < 0 ? nextPageIndex() : previousPageIndex();
-    if (page < 0 || page >= state.issue.pages.length) return;
-    const current = pageSpread.querySelector('.page-slot');
-    if (!current) return;
-    const preview = current.cloneNode(true);
-    preview.classList.add('page-swipe-preview');
-    preview.querySelectorAll('.hotspot').forEach((hotspot) => hotspot.remove());
-    const image = preview.querySelector('img');
-    image.alt = t('page', page + 1);
-    preview.querySelector('.locked-page')?.remove();
-    preview.classList.toggle('is-locked', isPageLocked(page));
-    image.src = pageImageSrc(page);
-    pageSpread.append(preview);
-    state.gesture.swipe = { direction, page };
-    pageSpread.classList.add('page-dragging');
-    preview.style.transform = 'translate3d(' + (-direction * pageCanvas.clientWidth) + 'px, 0, 0)';
-  };
-  const updateSwipe = (distance) => {
-    const swipe = state.gesture.swipe;
-    if (!swipe) return;
-    const width = pageCanvas.clientWidth;
-    const travel = Math.max(-width, Math.min(width, distance));
-    const current = pageSpread.querySelector('.page-slot:not(.page-swipe-preview)');
-    const preview = pageSpread.querySelector('.page-swipe-preview');
-    if (current) current.style.transform = 'translate3d(' + travel + 'px, 0, 0)';
-    if (preview) preview.style.transform = 'translate3d(' + (travel - swipe.direction * width) + 'px, 0, 0)';
-  };
-  pageCanvas.addEventListener('pointerdown', (event) => {
-    if (state.view !== 'page' || useScroll() || event.target.closest('.zoom-controls, .swipe-hint, .canvas-nav, .locked-page-card')) return;
-    state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    state.gesture.startX = event.clientX;
-    state.gesture.startY = event.clientY;
-    state.gesture.lastX = event.clientX;
-    state.gesture.lastY = event.clientY;
-    state.gesture.velocityX = 0;
-    state.gesture.lastTime = event.timeStamp || performance.now();
-    state.gesture.moved = false;
-    state.gesture.hotspot = event.target.closest('.hotspot');
-    pageCanvas.setPointerCapture(event.pointerId);
-    if (state.gesture.pointers.size === 2) {
-      clearSwipePreview();
-      const points = [...state.gesture.pointers.values()];
-      const bounds = pageCanvas.getBoundingClientRect();
-      state.gesture.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) || 1, scale: state.zoom.scale, x: state.zoom.x, y: state.zoom.y, center: { x: (points[0].x + points[1].x) / 2 - bounds.left, y: (points[0].y + points[1].y) / 2 - bounds.top } };
-    }
-  });
-  pageCanvas.addEventListener('pointermove', (event) => {
-    if (!state.gesture.pointers.has(event.pointerId)) return;
-    event.preventDefault();
-    state.gesture.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    const dx = event.clientX - state.gesture.lastX;
-    const dy = event.clientY - state.gesture.lastY;
-    const now = event.timeStamp || performance.now();
-    state.gesture.lastX = event.clientX;
-    state.gesture.lastY = event.clientY;
-    state.gesture.velocityX = dx / Math.max(1, now - state.gesture.lastTime);
-    state.gesture.lastTime = now;
-    if (state.gesture.pointers.size === 2 && state.gesture.pinch) {
-      const points = [...state.gesture.pointers.values()];
-      const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-      const bounds = pageCanvas.getBoundingClientRect();
-      const center = { x: (points[0].x + points[1].x) / 2 - bounds.left, y: (points[0].y + points[1].y) / 2 - bounds.top };
-      const pinch = state.gesture.pinch;
-      state.zoom.scale = Math.max(1, Math.min(maxPageZoom(), pinch.scale * distance / pinch.distance));
-      const ratio = state.zoom.scale / pinch.scale;
-      state.zoom.x = (pinch.x - (pinch.center.x - bounds.width / 2)) * ratio + (pinch.center.x - bounds.width / 2) + center.x - pinch.center.x;
-      state.zoom.y = (pinch.y - (pinch.center.y - bounds.height / 2)) * ratio + (pinch.center.y - bounds.height / 2) + center.y - pinch.center.y;
-      renderZoom();
-      state.gesture.moved = true;
-    } else if (state.zoom.scale > 1) {
-      state.zoom.x += dx;
-      state.zoom.y += dy;
-      state.gesture.moved = true;
-      renderZoom();
-    } else {
-      const distance = event.clientX - state.gesture.startX;
-      const vertical = event.clientY - state.gesture.startY;
-      if (Math.hypot(distance, vertical) > 8) state.gesture.moved = true;
-      if (Math.abs(distance) > 8 && Math.abs(distance) > Math.abs(vertical) * 1.15) {
-        if (!state.gesture.swipe) beginSwipe(distance < 0 ? -1 : 1);
-        if (state.gesture.swipe) updateSwipe(distance);
-      }
-    }
-  });
-  const end = (event) => {
-    if (!state.gesture.pointers.has(event.pointerId)) return;
-    const delta = event.clientX - state.gesture.startX;
-    const wasPinching = state.gesture.pointers.size > 1;
-    const hotspot = state.gesture.hotspot;
-    state.gesture.pointers.delete(event.pointerId);
-    state.gesture.hotspot = null;
-    if (state.gesture.pointers.size < 2) state.gesture.pinch = null;
-    if (wasPinching || state.gesture.pointers.size) return;
-    if (!state.gesture.moved && hotspot && state.zoom.scale <= 1.01) {
-      state.gesture.movedUntil = performance.now() + 180;
-      if (hotspot.dataset.tocTarget) setPage(Number(hotspot.dataset.tocTarget) - 1, { push: true });
-      else openArticle(hotspot.dataset.article);
-      return;
-    }
-    state.gesture.movedUntil = state.gesture.moved ? performance.now() + 180 : 0;
-    if (state.zoom.scale <= 1.01 && state.gesture.swipe) {
-      const threshold = Math.max(50, pageCanvas.clientWidth * .2);
-      if (settleSwipe(Math.abs(delta) > threshold || Math.abs(state.gesture.velocityX) > .7)) return;
-    } else if (state.zoom.scale <= 1.01 && Math.abs(delta) > 50) {
-      setPage(state.page + (delta < 0 ? (useSpread() ? (state.page === 0 ? 1 : 2) : 1) : -(useSpread() ? (state.page === 1 ? 1 : 2) : 1)));
-      return;
-    }
-    if (!state.gesture.moved && !event.target.closest('.hotspot, .canvas-nav, .zoom-controls')) setControlsVisible(document.body.classList.contains('chrome-hidden'));
-  };
-  pageCanvas.addEventListener('pointerup', end);
-  const cancel = (event) => {
-    if (!state.gesture.pointers.has(event.pointerId)) return;
-    state.gesture.pointers.clear();
-    state.gesture.pinch = null;
-    state.gesture.hotspot = null;
-    state.gesture.moved = true;
-    state.gesture.movedUntil = performance.now() + 180;
-    if (state.gesture.swipe) clearSwipePreview();
-    pageSpread.classList.remove('page-dragging', 'page-settling');
-    pageSpread.querySelector('.page-swipe-preview')?.remove();
-    const current = pageSpread.querySelector('.page-slot');
-    if (current) current.style.transform = '';
-  };
-  pageCanvas.addEventListener('pointercancel', cancel);
-  pageCanvas.addEventListener('lostpointercapture', cancel);
-  pageCanvas.addEventListener('click', (event) => {
-    if (!useSnap() || state.view !== 'page' || event.target.closest('.hotspot, .canvas-nav, .zoom-controls, .locked-page-card')) return;
-    setControlsVisible(document.body.classList.contains('chrome-hidden'));
-  });
-  pageCanvas.addEventListener('wheel', (event) => {
-    if (useScroll() || !(event.ctrlKey || event.metaKey)) return;
-    event.preventDefault();
-    const bounds = pageCanvas.getBoundingClientRect();
-    setZoom(state.zoom.scale + (event.deltaY < 0 ? .25 : -.25), event.clientX - bounds.left, event.clientY - bounds.top);
-  }, { passive: false });
-}
-
-function previousPageIndex() { return !useSpread() ? state.page - 1 : state.page === 1 ? 0 : state.page - 2; }
-function nextPageIndex() { return !useSpread() ? state.page + 1 : state.page === 0 ? 1 : state.page + 2; }
+import { openArticle } from './js/article.js';
+import { renderHeader, renderPageControls, setControlsVisible, spreadStart, useScroll, useSnap } from './js/chrome.js';
+import { $, escapeHtml, lightboxZoom, pageSpread, state } from './js/core.js';
+import { wasGalleryDragged } from './js/gallery.js';
+import { nextPageIndex, previousPageIndex, setupPageGestures } from './js/gestures.js';
+import { goHome, openFromHome, returnToPage, route, shareCurrent, showHome, switchEdition, toggleSaved } from './js/home.js';
+import { applyChrome, setLang } from './js/i18n.js';
+import { allIssues, articlesForPage, isSubscriber, publication } from './js/issue.js';
+import { closeLightbox, moveLightbox, openLightbox, renderLightboxZoom } from './js/lightbox.js';
+import { renderPageCanvas, resetZoom, setLayout, setPage, setZoom } from './js/pages.js';
+import { closePanel, goToScrubPage, openPanel, previewScrubPage, renderPanel } from './js/panels.js';
+import { applyTheme, savePosition, setAccountState } from './js/prefs.js';
+import { runSearch } from './js/search.js';
+import { loadVoices, speakCurrentSentence, stopSpeech, toggleSpeech } from './js/speech.js';
 
 $('#previous-page').addEventListener('click', () => setPage(previousPageIndex()));
+
 $('#view-mode-toggle').addEventListener('click', (event) => {
   const option = event.target.closest('[data-view-mode]');
   if (option) setLayout(option.dataset.viewMode);
 });
+
 $('#page-layout-toggle').addEventListener('click', () => setLayout(useScroll() ? 'single' : 'scroll'));
+
 $('#next-page').addEventListener('click', () => setPage(nextPageIndex()));
+
 $('#page-contents').addEventListener('click', (event) => openPanel('contents', event.currentTarget));
+
 $('#page-number').addEventListener('click', (event) => openPanel('pages', event.currentTarget));
+
 $('#page-article-action').addEventListener('click', (event) => {
   if (state.zoom.scale > 1.01) { resetZoom(); return; }
   const articles = articlesForPage(state.page);
   if (articles.length === 1) openArticle(articles[0].id);
   else if (articles.length > 1) openPanel('stories', event.currentTarget);
 });
+
 $('#edition-button').addEventListener('click', (event) => openPanel('editions', event.currentTarget));
+
 $('#publication-button').addEventListener('click', (event) => openPanel('publication', event.currentTarget));
+
 $('#menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
+
 $('#text-menu-button').addEventListener('click', (event) => openPanel('menu', event.currentTarget));
+
 $('#subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+
 $('#text-subscribe-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+
 $('#account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+
 $('#text-account-button').addEventListener('click', (event) => openPanel('profile', event.currentTarget));
+
 $('#back-button').addEventListener('click', returnToPage);
+
 document.querySelectorAll('.publication-home').forEach((link) => link.addEventListener('click', (event) => {
   event.preventDefault();
   if (isSubscriber()) goHome();
   else showHome(publication(state.issue.key), { push: true }).catch(console.error);
 }));
+
 $('#home-view').addEventListener('click', (event) => {
   const read = event.target.closest('[data-home-read]');
   if (read) { openFromHome(state.issue.key, Number(read.dataset.homeRead)); return; }
@@ -1886,26 +67,42 @@ $('#home-view').addEventListener('click', (event) => {
   const all = event.target.closest('[data-home-all]');
   if (all) openPanel('editions', all);
 });
+
 $('#save-button').addEventListener('click', toggleSaved);
+
 document.addEventListener('change', (event) => {
   if (event.target.id === 'account-state-menu') setAccountState(event.target.value);
 });
+
 document.addEventListener('click', (event) => {
   const signIn = event.target.closest('.paywall-cta, .paywall-login-button');
   if (signIn) openPanel('profile', signIn);
 });
+
 $('#article-font-smaller').addEventListener('click', () => { state.textSize = Math.max(0, state.textSize - 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
+
 $('#article-font-larger').addEventListener('click', () => { state.textSize = Math.min(3, state.textSize + 1); localStorage.setItem('reader-text-size', state.textSize); renderHeader(); });
+
 $('#article-listen').addEventListener('click', toggleSpeech);
+
 $('#article-share').addEventListener('click', shareCurrent);
+
 $('#listen-play').addEventListener('click', toggleSpeech);
+
 $('#listen-stop').addEventListener('click', stopSpeech);
+
 $('#listen-rate').addEventListener('change', () => { if (state.speech.status === 'playing') speakCurrentSentence({ restart: true }); });
+
 $('#close-panel').addEventListener('click', closePanel);
+
 $('#panel-host').addEventListener('submit', (event) => { if (event.target.id === 'search-form') { event.preventDefault(); runSearch($('#search-input').value.trim()); } });
+
 $('#panel-host').addEventListener('input', (event) => { if (event.target.id === 'page-scrub') previewScrubPage(event.target.value); });
+
 $('#panel-host').addEventListener('click', (event) => { if (event.target.closest('#page-scrub-go')) goToScrubPage(); });
+
 $('#panel-host').addEventListener('keydown', (event) => { if (event.target.id === 'page-scrub' && event.key === 'Enter') { event.preventDefault(); goToScrubPage(); } });
+
 $('#panel-host').addEventListener('click', (event) => {
   if (event.target.matches('[data-close-panel]')) { closePanel(); return; }
   if (event.target.closest('[data-home-link]')) { savePosition(); return; }
@@ -1943,6 +140,7 @@ $('#panel-host').addEventListener('click', (event) => {
   const page = event.target.closest('[data-page-link]');
   if (page) { closePanel(); setPage(Number(page.dataset.pageLink), { push: true }); }
 });
+
 $('#panel-host').addEventListener('keydown', (event) => {
   if (!state.panel) return;
   if (event.key === 'Escape') { event.preventDefault(); closePanel(); return; }
@@ -1954,38 +152,12 @@ $('#panel-host').addEventListener('keydown', (event) => {
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
-let galleryDrag = null;
-let galleryDragUntil = 0;
-$('#article-content').addEventListener('pointerdown', (event) => {
-  const track = event.target.closest('.article-gallery-track');
-  if (!track || event.pointerType !== 'mouse' || event.button !== 0) return;
-  galleryDrag = { track, startX: event.clientX, startScroll: track.scrollLeft, moved: false };
-});
-window.addEventListener('pointermove', (event) => {
-  if (!galleryDrag) return;
-  const dx = event.clientX - galleryDrag.startX;
-  if (!galleryDrag.moved && Math.abs(dx) < 5) return;
-  if (!galleryDrag.moved) { galleryDrag.moved = true; galleryDrag.track.classList.add('is-dragging'); }
-  galleryDrag.track.scrollLeft = galleryDrag.startScroll - dx;
-});
-const endGalleryDrag = () => {
-  if (!galleryDrag) return;
-  const { track, moved } = galleryDrag;
-  galleryDrag = null;
-  if (!moved) return;
-  galleryDragUntil = performance.now() + 250;
-  const before = track.scrollLeft;
-  track.classList.remove('is-dragging');
-  track.scrollTo({ left: before, behavior: 'auto' });
-};
-window.addEventListener('pointerup', endGalleryDrag);
-window.addEventListener('pointercancel', endGalleryDrag);
-$('#article-content').addEventListener('dragstart', (event) => { if (event.target.closest('.article-gallery-track')) event.preventDefault(); });
+
 $('#article-content').addEventListener('click', (event) => {
   const image = event.target.closest('.article-content img');
   if (image) {
     event.preventDefault();
-    if (performance.now() < galleryDragUntil) return;
+    if (wasGalleryDragged()) return;
     if (image._imageZoom && performance.now() < image._imageZoom.movedUntil) return;
     openLightbox([...document.querySelectorAll('#article-content .article-figure img')].indexOf(image));
     return;
@@ -1995,6 +167,7 @@ $('#article-content').addEventListener('click', (event) => {
   const page = event.target.closest('[data-page-link]');
   if (page) { event.preventDefault(); returnToPage(); setPage(Number(page.dataset.pageLink), { push: true }); }
 });
+
 $('#article-content').addEventListener('keydown', (event) => {
   const image = event.target.closest('.article-content img');
   if (image && (event.key === 'Enter' || event.key === ' ')) {
@@ -2002,6 +175,7 @@ $('#article-content').addEventListener('keydown', (event) => {
     openLightbox([...document.querySelectorAll('#article-content .article-figure img')].indexOf(image));
   }
 });
+
 pageSpread.addEventListener('click', (event) => {
   const freeArticle = event.target.closest('.locked-free-article');
   if (freeArticle) { openArticle(freeArticle.dataset.article); return; }
@@ -2010,10 +184,15 @@ pageSpread.addEventListener('click', (event) => {
   if (hotspot.dataset.tocTarget) setPage(Number(hotspot.dataset.tocTarget) - 1, { push: true });
   else openArticle(hotspot.dataset.article);
 });
+
 $('#lightbox-close').addEventListener('click', () => closeLightbox());
+
 $('#lightbox-prev').addEventListener('click', () => moveLightbox(-1));
+
 $('#lightbox-next').addEventListener('click', () => moveLightbox(1));
+
 $('#image-lightbox').addEventListener('click', (event) => { if (event.target.matches('[data-close-lightbox]')) closeLightbox(); });
+
 $('#image-lightbox').addEventListener('keydown', (event) => {
   if (event.key !== 'Tab') return;
   const focusable = [...$('#image-lightbox').querySelectorAll('button')].filter((element) => !element.disabled);
@@ -2023,7 +202,9 @@ $('#image-lightbox').addEventListener('keydown', (event) => {
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
+
 let lightboxSwipeStart = null;
+
 $('#lightbox-image').addEventListener('pointerdown', (event) => {
   lightboxZoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
   $('#lightbox-image').setPointerCapture(event.pointerId);
@@ -2032,6 +213,7 @@ $('#lightbox-image').addEventListener('pointerdown', (event) => {
     lightboxZoom.pinch = { distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y), scale: lightboxZoom.scale };
   }
 });
+
 $('#lightbox-image').addEventListener('pointermove', (event) => {
   if (!lightboxZoom.pointers.has(event.pointerId)) return;
   lightboxZoom.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
@@ -2046,14 +228,19 @@ $('#lightbox-image').addEventListener('pointermove', (event) => {
     renderLightboxZoom();
   }
 });
+
 const endLightboxPointer = (event) => { lightboxZoom.pointers.delete(event.pointerId); if (lightboxZoom.pointers.size < 2) lightboxZoom.pinch = null; };
+
 $('#lightbox-image').addEventListener('pointerup', endLightboxPointer);
+
 $('#lightbox-image').addEventListener('pointercancel', endLightboxPointer);
+
 $('#image-lightbox').addEventListener('pointerdown', (event) => {
   if (event.target.closest('button, [data-close-lightbox]')) return;
   if (lightboxZoom.pointers.size > 1 || lightboxZoom.scale > 1) { lightboxSwipeStart = null; return; }
   lightboxSwipeStart = { x: event.clientX, y: event.clientY };
 });
+
 $('#image-lightbox').addEventListener('pointerup', (event) => {
   if (!lightboxSwipeStart) return;
   const deltaX = event.clientX - lightboxSwipeStart.x;
@@ -2061,11 +248,17 @@ $('#image-lightbox').addEventListener('pointerup', (event) => {
   lightboxSwipeStart = null;
   if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) moveLightbox(deltaX < 0 ? 1 : -1);
 });
+
 $('#image-lightbox').addEventListener('pointercancel', () => { lightboxSwipeStart = null; });
+
 $('#swipe-hint').addEventListener('click', (event) => { event.currentTarget.hidden = true; localStorage.setItem('reader-swipe-hint', 'seen'); });
+
 $('#zoom-in').addEventListener('click', () => setZoom(state.zoom.scale + .5));
+
 $('#zoom-out').addEventListener('click', () => setZoom(state.zoom.scale - .5));
+
 $('#zoom-reset').addEventListener('click', resetZoom);
+
 $('#article-scroll').addEventListener('scroll', () => {
   const element = $('#article-scroll');
   const max = element.scrollHeight - element.clientHeight;
@@ -2080,8 +273,11 @@ $('#article-scroll').addEventListener('scroll', () => {
   const scrollingUp = element.scrollTop < last;
   if (state.view === 'text') setControlsVisible(nearTop || nearBottom || scrollingUp);
 });
+
 $('#article-scroll').addEventListener('click', () => { if (state.view === 'text') setControlsVisible(true); });
+
 document.addEventListener('focusin', (event) => { if (event.target.closest('#app-header, #article-controls, #listen-player')) setControlsVisible(true); });
+
 window.addEventListener('keydown', (event) => {
   if (state.lightbox.open) {
     if (event.key === 'Escape') { event.preventDefault(); closeLightbox(); }
@@ -2098,21 +294,30 @@ window.addEventListener('keydown', (event) => {
   if (state.view === 'page' && !useScroll() && event.key === '-') setZoom(state.zoom.scale - .5);
   if (event.key === 'Escape' && state.panel) closePanel();
 });
+
 window.addEventListener('popstate', () => route().catch(console.error));
+
 window.addEventListener('resize', () => {
   const continuousScroll = useScroll() && !useSnap() && pageSpread.dataset.scrollIssue?.startsWith(state.issue?.key + ':flow');
   if (state.issue && !continuousScroll) { state.page = spreadStart(state.page); renderPageCanvas(); renderPageControls(); }
   if (state.panel) renderPanel();
 });
+
 if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', loadVoices);
 
 document.querySelectorAll('.canvas-nav').forEach((button) => {
   const path = button.id === 'previous-page' ? 'M14.5 5.5 8.5 12l6 6.5' : 'M9.5 5.5 15.5 12l-6 6.5';
   button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${path}" /></svg>`;
 });
+
 applyTheme();
+
 applyChrome();
+
 document.body.dataset.account = state.account;
+
 setupPageGestures();
+
 if (!localStorage.getItem('reader-swipe-hint')) $('#swipe-hint').hidden = false;
+
 route().catch((error) => { $('main').innerHTML = '<p class="panel-row" role="alert">' + escapeHtml(error.message) + '</p>'; console.error(error); });
